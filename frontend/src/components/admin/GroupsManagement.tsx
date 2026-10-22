@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { fetchGroups } from '../../api/groups';
 import { Plus, Search, Edit, Trash2, Users, Building2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -138,17 +139,6 @@ interface GroupsManagementProps {
   language: 'en' | 'hy' | 'ru';
 }
 
-const initialGroups: Group[] = [
-  { id: 1, code: 'CS-1A', name: 'Computer Science 1A', studentCount: 25, year: 1 },
-  { id: 2, code: 'CS-1B', name: 'Computer Science 1B', studentCount: 28, year: 1 },
-  { id: 3, code: 'CS-2A', name: 'Computer Science 2A', studentCount: 22, year: 2 },
-  { id: 4, code: 'CS-2B', name: 'Computer Science 2B', studentCount: 24, year: 2 },
-  { id: 5, code: 'CS-3A', name: 'Computer Science 3A', studentCount: 20, year: 3 },
-  { id: 6, code: 'CS-3B', name: 'Computer Science 3B', studentCount: 23, year: 3 },
-  { id: 7, code: 'CS-4A', name: 'Computer Science 4A', studentCount: 18, year: 4 },
-  { id: 8, code: 'CS-4B', name: 'Computer Science 4B', studentCount: 19, year: 4 },
-];
-
 const initialClassrooms: Classroom[] = [
   { id: 1, number: '3201', campus: 3, floor: 2, room: 1, capacity: 30 },
   { id: 2, number: '5308', campus: 5, floor: 3, room: 8, capacity: 40 },
@@ -164,7 +154,39 @@ const initialClassrooms: Classroom[] = [
 
 export function GroupsManagement({ language }: GroupsManagementProps) {
   const t = translations[language];
-  const [groups, setGroups] = useState<Group[]>(initialGroups);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState(false);
+  const [reloadGroups, setReloadGroups] = useState(0);
+  const groupMessages = {
+    en: { loading: 'Loading groups…', error: 'Unable to load groups. Check that the API and database are available.', retry: 'Retry', empty: 'No groups found.', readonly: 'Groups are read-only for now. Classroom changes are demo-only.', major: 'Major', year: 'Admission year', capacity: 'Capacity' },
+    hy: { loading: 'Խմբերը բեռնվում են…', error: 'Չհաջողվեց բեռնել խմբերը։ Ստուգեք API-ի և տվյալների բազայի հասանելիությունը։', retry: 'Կրկնել', empty: 'Խմբեր չեն գտնվել։', readonly: 'Խմբերն առայժմ միայն դիտելու համար են։ Լսարանների փոփոխությունները ցուցադրական են։', major: 'Մասնագիտություն', year: 'Ընդունման տարի', capacity: 'Տարողություն' },
+    ru: { loading: 'Загрузка групп…', error: 'Не удалось загрузить группы. Проверьте доступность API и базы данных.', retry: 'Повторить', empty: 'Группы не найдены.', readonly: 'Группы пока доступны только для чтения. Изменения аудиторий демонстрационные.', major: 'Специальность', year: 'Год поступления', capacity: 'Вместимость' },
+  }[language];
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15000);
+    setGroupsLoading(true);
+    setGroupsError(false);
+    fetchGroups(controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) {
+          setGroups(data.map((group) => ({
+            id: group.id, code: group.code, name: group.major_name,
+            year: group.admission_year, studentCount: group.capacity,
+          })));
+        }
+      })
+      .catch(() => { if (active) setGroupsError(true); })
+      .finally(() => {
+        window.clearTimeout(timeout);
+        if (active) setGroupsLoading(false);
+      });
+    return () => { active = false; window.clearTimeout(timeout); controller.abort(); };
+  }, [reloadGroups]);
+
   const [classrooms, setClassrooms] = useState<Classroom[]>(initialClassrooms);
   const [searchTerm, setSearchTerm] = useState('');
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
@@ -280,6 +302,16 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
 
           {/* Groups Tab */}
           <TabsContent value="groups" className="space-y-6">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{groupMessages.readonly}</p>
+            {groupsLoading && <p role="status">{groupMessages.loading}</p>}
+            {groupsError && (
+              <div role="alert">
+                <p>{groupMessages.error}</p>
+                <Button onClick={() => setReloadGroups((value) => value + 1)}>{groupMessages.retry}</Button>
+              </div>
+            )}
+            {!groupsLoading && !groupsError && filteredGroups.length === 0 && <p>{groupMessages.empty}</p>}
+
             <div className="flex items-center justify-between">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -290,7 +322,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                   className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 />
               </div>
-              <Button onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-blue-600 dark:hover:bg-blue-700">
+              <Button disabled title={groupMessages.readonly} onClick={handleAddGroup} className="bg-[#225b73] hover:bg-[#1a4659] dark:bg-blue-600 dark:hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 {t.addGroup}
               </Button>
@@ -305,13 +337,13 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                         {t.groupCode}
                       </th>
                       <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {t.groupName}
+                        {groupMessages.major}
                       </th>
                       <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {t.year}
+                        {groupMessages.year}
                       </th>
                       <th className="px-6 py-4 text-left text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        {t.students}
+                        {groupMessages.capacity}
                       </th>
                       <th className="px-6 py-4 text-right text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         {t.actions}
@@ -319,7 +351,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredGroups.map((group) => (
+                    {!groupsLoading && !groupsError && filteredGroups.map((group) => (
                       <tr key={group.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge className="bg-[#225b73] text-white">{group.code}</Badge>
@@ -333,15 +365,16 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600 dark:text-gray-400">Year {group.year}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{group.year}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-gray-600 dark:text-gray-400">{group.studentCount} students</span>
+                          <span className="text-gray-600 dark:text-gray-400">{group.studentCount}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <Button
                             variant="ghost"
                             size="sm"
+                            disabled title={groupMessages.readonly}
                             onClick={() => handleEditGroup(group)}
                             className="mr-2"
                           >
@@ -350,6 +383,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                           <Button
                             variant="ghost"
                             size="sm"
+                            disabled title={groupMessages.readonly}
                             onClick={() => handleDeleteClick('group', group)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
@@ -477,7 +511,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="groupName">{t.groupName}</Label>
+                <Label htmlFor="groupName">{groupMessages.major}</Label>
                 <Input
                   id="groupName"
                   value={groupFormData.name}
@@ -487,7 +521,7 @@ export function GroupsManagement({ language }: GroupsManagementProps) {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="year">{t.year}</Label>
+                  <Label htmlFor="year">{groupMessages.year}</Label>
                   <Input
                     id="year"
                     type="number"
