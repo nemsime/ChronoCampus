@@ -14,8 +14,29 @@ Groups are read-only. Group writes, real authentication/permissions, and other s
 - Node.js 20.19+ or 22.12+ and npm.
 - A reachable SQL Server with the ChronoCampus schema.
 - Microsoft **ODBC Driver 18 for SQL Server**, installed on the machine running Python. Linux also needs unixODBC; compiling pyodbc from source may require its development headers.
+- Alternatively, use Docker Compose for a consistent frontend/backend development environment; Docker Desktop or Docker Engine with the Compose plugin is required.
 
 Driver installation is platform-specific: follow [Microsoft's installation instructions](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server). Installing the Python package alone does not install the system driver or SQL Server.
+
+## Docker development
+
+Docker Compose runs the frontend with Node.js 22 and the API with Python 3.11 and ODBC Driver 18. It does not start SQL Server; configure access to your existing SQL Server separately.
+
+First, create the backend environment file:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` and set a valid `SQLSERVER_CONNECTION_STRING`. If SQL Server is running directly on your computer, use `SERVER=host.docker.internal,1433` rather than `SERVER=localhost,1433`; inside the API container, `localhost` refers to the container itself. On Linux, Compose maps `host.docker.internal` to the host gateway. For a remote SQL Server, use its reachable server address instead.
+
+Start both development services from the repository root:
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:3000 for the frontend, http://localhost:8000/docs for API documentation, and http://localhost:8000/api/health for the API health check. Source directories are mounted into the containers for live reload. Stop the services with `Ctrl+C`; use `docker compose down` to remove the containers. Keep `backend/.env` private and never commit it.
 
 ## Database setup
 
