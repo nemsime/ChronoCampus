@@ -1,8 +1,0 @@
-.vscode/
-node_modules/
-package-lock.json
-.env
-.log
-guidelines/
-Attributions.md
-*.txt
