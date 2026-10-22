@@ -1,0 +1,70 @@
+# Local configuration and credentials (keep shareable examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+/.aws/
+
+# JavaScript dependencies, build output, and caches
+node_modules/
+/frontend/build/
+dist/
+.vite/
+.npm/
+.eslintcache
+*.tsbuildinfo
+
+# Python environments, bytecode, packaging, and tool caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+/backend/build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# Test and coverage output
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+test-results/
+playwright-report/
+
+# Logs and temporary files
+.log
+*.log
+logs/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Local database files and SQL Server backups
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite3-journal
+*.mdf
+*.ndf
+*.ldf
+*.bak
+*.trn
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Generated repository exports and existing personal notes
+repomix-output.*
+/member_chores.md
