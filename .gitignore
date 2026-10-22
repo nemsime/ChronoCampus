@@ -5,6 +5,18 @@
 !.env.*.example
 !.env.sample
 /.aws/
+.envrc
+.npmrc
+.pypirc
+.netrc
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_ed25519
 
 # JavaScript dependencies, build output, and caches
 node_modules/
@@ -12,15 +24,19 @@ node_modules/
 dist/
 .vite/
 .npm/
+.pnpm-store/
+.yarn/cache/
 .eslintcache
 *.tsbuildinfo
 
 # Python environments, bytecode, packaging, and tool caches
 .venv/
 venv/
+env/
 __pycache__/
 *.py[cod]
 *.egg-info/
+.eggs/
 /backend/build/
 .pytest_cache/
 .mypy_cache/
@@ -51,11 +67,19 @@ logs/
 *.sqlite3
 *.sqlite-journal
 *.sqlite3-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
 *.mdf
 *.ndf
 *.ldf
 *.bak
 *.trn
+*.dump
+/db/backups/
+/db/dumps/
+/db/private/
 
 # Editor and operating-system files
 .vscode/
