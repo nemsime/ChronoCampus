@@ -4,6 +4,20 @@ University timetable generation with manual corrections and explicit publication
 
 Includes local accounts and roles, administrative catalogs, configurable calendars, semester workloads, automatic generation, pins, conflict checking, publication, personal dated notes, and private feedback. Interface languages: Russian, Armenian, English. Full-time and part-time calendars are independent.
 
+## Documentation for the team
+
+| Document | Start here when you need to… |
+| --- | --- |
+| [Developer guide / Руководство разработчика](docs/developer-guide.md) | Find the active code, understand the data flow, and safely extend or test a feature. |
+| [nemsime contribution / Вклад в этот этап](docs/contributions.md) | Distinguish the starting project from this delivery and find the corresponding commits. |
+| [University rules](docs/requirements.md) | Check confirmed requirements and facts still awaiting university confirmation. |
+| [Architecture](docs/architecture.md) | Understand generation, persistence, security, and operational boundaries. |
+| [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
+| [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
+| [Contribution workflow](skills/repo-workflow/SKILL.md) | Work on a branch, verify integration, and prepare authorized remote publication. |
+
+[Preview.md](docs/Preview.md) is the historical review from 22 October 2026, before the modular implementation; use the documents above for the current system.
+
 ## Run locally on Windows
 
 Requirements: Python 3.11+, Node.js 20.19+ or 22.12+, SQL Server, and [Microsoft ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
