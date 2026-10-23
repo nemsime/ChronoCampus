@@ -10,6 +10,10 @@ Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 1
 - Skill validator: `skills/repo-workflow/SKILL.md` valid.
 - Migrations 0001/0002 applied successfully to a restored legacy development database and an empty isolated SQL Server test database (33 tables). Legacy catalogs remained intact.
 
+The closing readiness review repeated all 32 tests, Ruff, typecheck, and the production build successfully. Alembic reports `0002_exceptions (head)`. Ordinary tests now explicitly isolate startup database recovery, so running legacy health/API tests cannot interrupt generation jobs in the developer's configured database. A rendered-component check confirms that an empty issue list produces no error banner while a real room-capacity error remains visible and translated. Both local HTTP endpoints returned 200 after the final changes.
+
+The delivered entry point uses the modular API and SQL Server data throughout. It builds on the existing repository and preserved catalogs; the old frontend prototype remains reference code outside the active application. Local diploma functionality is implemented across all three layers. University mail delivery and unconfirmed real-world calendar/workload parameters remain configuration/acceptance items listed below, not claimed as verified production operation.
+
 Coverage includes dynamic fifth/sixth slots, partial first-week parity, forbidden extra slots, closure enforcement, nested student conflicts, capacity/type/equipment, external published occupancy, pins, exact hours, holiday exemptions, emergency makeup, missing teaching periods, partial publication rejection, stale generation results, stable note identity after a move, role/privacy enforcement, temporary passwords, CSRF, one-use reset tokens, and private feedback statuses. A real SQL Server concurrency test sends two conflicting publish requests: one succeeds and the other is rejected with teacher/room conflicts.
 
 ## Live API and browser

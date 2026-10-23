@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
@@ -12,6 +13,16 @@ from app.main import app
 
 PASSWORD = "Test-password-2026!"
 HASH = password_hash(PASSWORD)
+
+
+@pytest.fixture(autouse=True)
+def isolate_startup_database(monkeypatch):
+    """Tests opt into a fixture database; never recover jobs in the developer's DB."""
+
+    def unavailable():
+        raise HTTPException(503, "test_database_not_selected")
+
+    monkeypatch.setattr("app.main.get_engine", unavailable)
 
 
 @pytest.fixture

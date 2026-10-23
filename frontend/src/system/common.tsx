@@ -22,9 +22,11 @@ export function ErrorBox({ error }: { error: unknown }) {
               ...(value.report?.issues ? values(value.report.issues) : []),
             ].filter(Boolean)
           : [];
+  const codes = [...new Set(values(detail))];
+  if (!codes.length) return null;
   return (
     <div className="notice error" role="alert">
-      {[...new Set(values(detail))].map((code, i) => (
+      {codes.map((code, i) => (
         <div key={i}>{t(code) === code ? t("request_failed") : t(code)}</div>
       ))}
     </div>
