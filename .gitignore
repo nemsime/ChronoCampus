@@ -80,6 +80,8 @@ logs/
 /db/backups/
 /db/dumps/
 /db/private/
+/backend/.mail/
+/backend/.demo-credentials.json
 
 # Editor and operating-system files
 .vscode/

@@ -15,9 +15,21 @@ class Settings(BaseSettings):
     sqlserver_connection_string: SecretStr = SecretStr("")
     db_timeout_seconds: int = Field(default=5, ge=1, le=60)
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    database_url: SecretStr = SecretStr("")
+    session_hours: int = Field(default=12, ge=1, le=168)
+    cookie_secure: bool = True
+    public_url: str = "http://localhost:3000"
+    reset_minutes: int = Field(default=30, ge=5, le=120)
+    university_email_domains: list[str] = []
+    mail_mode: str = "disabled"
+    mail_directory: Path = Path(__file__).resolve().parents[2] / ".mail"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_from: str = ""
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
