@@ -4,7 +4,7 @@ Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 1
 
 ## CI and main integration
 
-The current integration combines observability with the manual-correction and room-deletion fixes already merged into remote `main` through PR #16. The deletion conflict was resolved by recording the room's audit snapshot before removing its equipment links; both remain in the same transaction.
+The current integration adds CI after PR #16 (manual-correction/room-deletion fixes) and PR #15 (observability) were merged into remote `main`. PR #15's conflict resolution dropped the room-equipment cleanup. This integration restores it after recording the room's audit snapshot; both remain in the same transaction.
 
 - Full local backend suite, including the opt-in SQL Server concurrency test: **47 passed**, one upstream Starlette/httpx deprecation warning.
 - Both new repair/deletion regression scenarios also passed through the API against two separately created and migrated SQL Server databases. Invalid manual moves and incomplete publication were rejected; valid individual repairs succeeded. A failed room deletion retained its equipment and wrote no false success audit. A successful deletion removed links, retained the equipment catalog, and audited the original equipment IDs.
