@@ -191,7 +191,7 @@ def versions(db: Session = Depends(get_db)):
     "/admin/schedule/versions", status_code=201, dependencies=[Depends(administrator)]
 )
 def create_draft(body: DraftInput, db: Session = Depends(get_db), actor: m.Account = Depends(administrator)):
-    lock_revision(db)
+    lock_revision(db, changed=False)
     if not db.get(m.Term, body.term_id):
         raise HTTPException(422, "invalid_reference")
     groups = sorted(set(body.cohort_ids))
@@ -408,7 +408,6 @@ def execute_run(engine, identifier):
                     "calendar": run.snapshot["calendar"],
                 }
                 version.revision += 1
-                db.get(m.DataRevision, 1).revision += 1
                 run.status = "complete" if result["report"]["complete"] else "partial"
             run.updated_at = run.finished_at
             run.progress = {**progress.state, "stage": run.status}
@@ -465,7 +464,7 @@ def move_assignment(
     identifier: int, occurrence_id: int, body: MoveInput, db: Session = Depends(get_db),
     actor: m.Account = Depends(administrator),
 ):
-    lock_revision(db)
+    lock_revision(db, changed=False)
     version = require_draft(db, identifier, body.revision)
     snapshot = build_snapshot(db, version)
     if occurrence_id not in {o["id"] for o in snapshot["occurrences"]}:
@@ -576,7 +575,7 @@ def emergency_cancellation(
     db: Session = Depends(get_db),
     actor: m.Account = Depends(administrator),
 ):
-    lock_revision(db)
+    lock_revision(db, changed=False)
     version = require_draft(db, identifier, body.revision)
     assignment = db.scalar(
         select(m.Assignment).where(

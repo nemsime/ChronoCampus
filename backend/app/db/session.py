@@ -51,7 +51,12 @@ def get_db() -> Iterator[Session]:
 
 
 def lock_revision(db: Session, *, changed: bool = True) -> int:
-    """Take a database write lock until commit; never hold it while solving."""
+    """Lock until commit; never hold while solving.
+
+    Only shared inputs (catalogs and publication) advance the global revision.
+    Draft-only writes take the same lock with changed=False and use their own
+    ScheduleVersion.revision to reject stale generation results.
+    """
     db.execute(
         update(DataRevision)
         .where(DataRevision.id == 1)

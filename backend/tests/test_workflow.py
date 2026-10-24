@@ -268,6 +268,136 @@ def test_stale_job_does_not_overwrite_draft(admin_client, campus):
     assert detail(client, v)["assignments"] == []
 
 
+def test_queued_generations_for_different_drafts_both_apply(admin_client, campus):
+    client = admin_client
+    versions = [draft(client, campus), draft(client, campus)]
+    for version in versions:
+        response = client.post(
+            f"/api/admin/schedule/versions/{version['id']}/generate",
+            json={"revision": version["revision"]},
+        )
+        assert response.status_code == 202, response.text
+
+    for version in versions:
+        engine, identifier = campus["pending"].pop(0)
+        execute_run(engine, identifier)
+        campus["db"].expire_all()
+        run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
+        assert run["status"] == "complete", run
+        result = detail(client, version)
+        assert result["report"]["complete"]
+        assert len(result["assignments"]) == 4
+        assert result["version"]["revision"] == version["revision"] + 1
+
+
+@pytest.mark.parametrize("change", ["create", "pin", "emergency"])
+def test_other_draft_changes_preserve_queued_generation(admin_client, campus, change):
+    client = admin_client
+    version = draft(client, campus)
+    if change != "create":
+        other = draft(client, campus)
+        assert generate(client, other, campus)["status"] == "complete"
+        other_detail = detail(client, other)
+        lesson = other_detail["assignments"][0]
+
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": version["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    if change == "create":
+        draft(client, campus)
+    elif change == "pin":
+        response = client.put(
+            f"/api/admin/schedule/versions/{other['id']}/assignments/{lesson['occurrence_id']}",
+            json={
+                "revision": other_detail["version"]["revision"],
+                "day": lesson["day"],
+                "slot": lesson["slot"],
+                "room_id": lesson["room_id"],
+                "pinned": True,
+            },
+        )
+        assert response.status_code == 200, response.text
+    else:
+        response = client.post(
+            f"/api/admin/schedule/versions/{other['id']}/assignments/{lesson['occurrence_id']}/emergency",
+            json={"revision": other_detail["version"]["revision"], "reason": "Emergency"},
+        )
+        assert response.status_code == 200, response.text
+
+    engine, identifier = campus["pending"].pop()
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
+    assert run["status"] == "complete", run
+    result = detail(client, version)
+    assert result["report"]["complete"]
+    assert len(result["assignments"]) == 4
+
+
+@pytest.mark.parametrize("change", ["pin", "emergency"])
+def test_own_draft_changes_reject_queued_generation(admin_client, campus, change):
+    client = admin_client
+    version = draft(client, campus)
+    assert generate(client, version, campus)["status"] == "complete"
+    original = detail(client, version)
+    lesson = original["assignments"][0]
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": original["version"]["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    if change == "pin":
+        response = client.put(
+            f"/api/admin/schedule/versions/{version['id']}/assignments/{lesson['occurrence_id']}",
+            json={
+                "revision": original["version"]["revision"],
+                "day": lesson["day"],
+                "slot": lesson["slot"],
+                "room_id": lesson["room_id"],
+                "pinned": True,
+            },
+        )
+    else:
+        response = client.post(
+            f"/api/admin/schedule/versions/{version['id']}/assignments/{lesson['occurrence_id']}/emergency",
+            json={"revision": original["version"]["revision"], "reason": "Emergency"},
+        )
+    assert response.status_code == 200, response.text
+    edited = detail(client, version)
+    assert edited["assignments"] != original["assignments"]
+    assert edited["version"]["revision"] == original["version"]["revision"] + 1
+
+    engine, identifier = campus["pending"].pop()
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "stale"
+    result = detail(client, version)
+    assert result["assignments"] == edited["assignments"]
+    assert result["disruptions"] == edited["disruptions"]
+    assert result["version"]["revision"] == edited["version"]["revision"]
+
+
+def test_publication_invalidates_other_queued_generation(admin_client, campus):
+    client = admin_client
+    version = draft(client, campus)
+    other = draft(client, campus)
+    assert generate(client, other, campus)["status"] == "complete"
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": version["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    publish(client, detail(client, other)["version"])
+
+    engine, identifier = campus["pending"].pop()
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "stale"
+    assert detail(client, version)["assignments"] == []
+
+
 def test_emergency_requires_explicit_extra_permission(admin_client, campus):
     client = admin_client
     v = draft(client, campus)

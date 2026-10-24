@@ -1,6 +1,6 @@
 # Architecture and operational boundaries
 
-A modular monolith: one FastAPI process, one solver worker, one SQL Server database, and a React client. Domain rules are separated from HTTP and presentation.
+A modular monolith: one FastAPI process with one in-process generation thread, one SQL Server database, and a React client. Domain rules are separated from HTTP and presentation.
 
 ## Generation
 
@@ -19,7 +19,7 @@ The stored seed, snapshot, dependency versions, single solver worker, and hash s
 
 SQLAlchemy maps retained legacy catalogs and new tables. Alembic 0001 is additive with frozen table definitions; 0002 adds emergency disruptions and quality settings and removes the legacy fixed degree-duration constraint. Migrations were exercised against a restored legacy database and an empty SQL Server database. Destructive downgrade is refused; restore a backup instead.
 
-Catalog writes and publication share a revision row lock. Authentication, notes, and feedback do not invalidate generation inputs. Draft revisions prevent lost updates. Published assignments are immutable; corrections require a new draft.
+Catalog writes, publication, and draft writes share a revision row lock. Catalog changes and publication advance the global data revision and invalidate older generation snapshots. Creating a draft, applying a generation result, moving/pinning a lesson, and recording an emergency cancellation do not advance that global revision: unpublished drafts do not change other drafts' constraints. Updates to an existing draft advance its own revision, preventing an older generation from overwriting manual edits. Authentication, notes, and feedback do not invalidate generation inputs. Published assignments are immutable; corrections require a new draft.
 
 Workload changes are rejected once occurrences exist, preserving note and historical identity. Editing an already materialized curriculum requires a future revision/mapping workflow; the current version supports new semesters and their workloads. Catalog availability changes can expose conflicts in an existing publication: the administrator must create a corrected draft. The old publication stays visible until replacement, and the planner reports validity against current rules.
 

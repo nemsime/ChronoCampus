@@ -2,6 +2,18 @@
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 
+## Draft revision isolation
+
+Draft-only writes previously advanced the shared data revision: completing one queued generation, creating another draft, pinning its lesson, or cancelling its lesson made unrelated queued results stale. These writes now keep the database revision lock without changing shared inputs. The edited draft still advances its own revision; catalog changes and publication still invalidate older snapshots.
+
+- Four regression scenarios failed on the original implementation and passed after the fix. Seven new cases cover independent queued generations, other-draft edits, protection of edits in the same draft, and publication invalidation. All **15 workflow tests passed**.
+- Full backend suite with `CHRONOCAMPUS_TEST_DATABASE=ChronoCampus_MigrationTest_20261024`: **54 passed**, including concurrent conflicting publications on SQL Server. One upstream Starlette/httpx deprecation warning remains.
+- The seven new scenarios and the existing catalog-staleness scenario also passed through the API using a newly created, Alembic-migrated SQL Server database, `ChronoCampus_RevisionTest_20261024_145812_032cc5`. All eight assertions/report entries passed; these small fixtures do not constitute a performance benchmark.
+- Ruff 0.17.2 correctness checks (`E4,E7,E9,F`), Python compilation, frontend TypeScript, production build, and Git whitespace checks passed.
+- The local development API was restarted after confirming zero queued/running jobs. API liveness/readiness, the frontend, and readiness through the Vite proxy returned HTTP 200.
+
+No schema migration or dependency was added. This fix retains the single API process and in-process executor; durable jobs, a separate generator process, and multi-process recovery remain future work.
+
 ## CI and main integration
 
 The current integration adds CI after PR #16 (manual-correction/room-deletion fixes) and PR #15 (observability) were merged into remote `main`. PR #15's conflict resolution dropped the room-equipment cleanup. This integration restores it after recording the room's audit snapshot; both remain in the same transaction.
