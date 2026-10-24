@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, Row } from "./api";
-import { ErrorBox } from "./common";
+import { ErrorBox, LoadingState } from "./common";
+import { RefreshCw } from "lucide-react";
 import { useLanguage } from "./i18n";
 
 function useMonitor(url: string | null, automatic = true) {
@@ -110,9 +111,9 @@ function RunAttempts({ run }: { run: Row }) {
       </div>
       <ErrorBox error={monitor.error} />
       {!!monitor.error && monitor.data && <p>{t("staleData")}</p>}
-      {!monitor.data && !monitor.error && <p role="status">{t("loading")}</p>}
+      {!monitor.data && !monitor.error && <LoadingState />}
       {monitor.data && (
-        <div className="table-scroll">
+        <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
           <table>
             <thead>
               <tr>
@@ -266,7 +267,7 @@ export function RunCard({ run }: { run: Row }) {
         {!!result.phases?.length && (
           <>
             <h3>{t("phases")}</h3>
-            <div className="table-scroll">
+            <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
               <table>
                 <thead>
                   <tr>
@@ -396,10 +397,10 @@ export function RunHistory({ versionId }: { versionId?: number }) {
       </label>
       <ErrorBox error={monitor.error} />
       {!!monitor.error && monitor.data && <p>{t("staleData")}</p>}
-      {!monitor.data && !monitor.error && <p role="status">{t("loading")}</p>}
+      {!monitor.data && !monitor.error && <LoadingState />}
       {monitor.data && (
         <>
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
             <table>
               <thead>
                 <tr>
@@ -510,7 +511,6 @@ export function Diagnostics() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">CHRONOCAMPUS / OPERATIONS</p>
           <h1>{t("diagnostics")}</h1>
           <p>{t("diagnosticsHelp")}</p>
         </div>
@@ -522,6 +522,7 @@ export function Diagnostics() {
             feed.refresh();
           }}
         >
+          <RefreshCw size={16} aria-hidden="true" />
           {t("refresh")}
         </button>
       </div>
@@ -543,6 +544,7 @@ export function Diagnostics() {
             {t("updated")}: {system.updated?.toLocaleTimeString() || "—"}
           </small>
         </div>
+        {!data && !system.error && <LoadingState />}
         {data && (
           <div className="diagnostic-cards">
             <div className={data.database.ready ? "health-ok" : "health-error"}>
@@ -693,6 +695,7 @@ export function Diagnostics() {
               </form>
             )}
             <ErrorBox error={feed.error} />
+            {!feed.data && !feed.error && <LoadingState />}
             {!!feed.error && feed.data && <p>{t("staleData")}</p>}
             {tab === "audit" && <p>{t("privateFieldsOmitted")}</p>}
             {feed.data && (
@@ -703,7 +706,7 @@ export function Diagnostics() {
                     {feed.data.evicted}
                   </p>
                 )}
-                <div className="table-scroll">
+                <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
                   <table>
                     <thead>
                       <tr>
@@ -817,11 +820,11 @@ function DurableJobs({ monitor }: { monitor: ReturnType<typeof useMonitor> }) {
       {!!monitor.error && monitor.data && (
         <p className="notice warning">{t("staleData")}</p>
       )}
-      {!monitor.data && !monitor.error && <p role="status">{t("loading")}</p>}
+      {!monitor.data && !monitor.error && <LoadingState />}
       {monitor.data && (
         <>
           <h3>{t("workers")}</h3>
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
             <table>
               <thead>
                 <tr>
@@ -859,7 +862,7 @@ function DurableJobs({ monitor }: { monitor: ReturnType<typeof useMonitor> }) {
             )}
           </div>
           <h3>{t("queues")}</h3>
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0} role="region" aria-label={t("details")}>
             <table>
               <thead>
                 <tr>

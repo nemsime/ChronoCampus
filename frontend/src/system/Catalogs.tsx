@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
+import { Database, Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { api, Row } from "./api";
 import { catalogSchema, Field, resourceNames } from "./catalogSchema";
-import { ErrorBox, useAction } from "./common";
+import { EmptyState, ErrorBox, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export type CatalogData = Record<string, Row[]>;
 export const rowLabel = (row: Row) =>
@@ -21,6 +22,11 @@ export async function loadCatalogs(): Promise<CatalogData> {
   return Object.fromEntries(rows);
 }
 const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const resourceGroups = [
+  { title: "catalogAcademic", resources: ["faculties", "majors", "groups", "subgroups", "lab-groups", "subjects", "users"] },
+  { title: "catalogSpaces", resources: ["buildings", "rooms", "equipment"] },
+  { title: "catalogPlanning", resources: ["terms", "calendars", "periods", "holidays", "extra-permissions", "availability", "workloads"] },
+];
 function FieldInput({
   field: f,
   value,
@@ -227,8 +233,13 @@ export function Catalogs() {
   const [editing, setEditing] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [slots, setSlots] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
   const { busy, error, run } = useAction();
-  const refresh = async () => setData(await loadCatalogs());
+  const refresh = async () => {
+    setLoading(true);
+    try { setData(await loadCatalogs()); }
+    finally { setLoading(false); }
+  };
   useEffect(() => {
     void run(refresh);
   }, []);
@@ -287,7 +298,8 @@ export function Catalogs() {
           id: value ?? "—",
         },
       );
-    if (field.type === "boolean") return t(value ? "yes" : "no");
+    if (field.type === "boolean")
+      return <span className={`badge ${value ? "success" : ""}`}>{t(value ? "yes" : "no")}</span>;
     if (field.type === "days")
       return (value || []).map((d: number) => t(days[d])).join(", ");
     if (field.type === "multi")
@@ -327,14 +339,20 @@ export function Catalogs() {
       ? summaryFields[resource].includes(f.key)
       : !["password", "breaks", "weights"].includes(f.type || ""),
   );
+  const query = search.trim().toLocaleLowerCase();
   const rows = (data[resource] || []).filter((row) =>
-    Object.values(row).join(" ").toLowerCase().includes(search.toLowerCase()),
+    [...Object.values(row), ...fields.map((field) => display(field, row)).filter((value) => typeof value === "string")]
+      .join(" ").toLocaleLowerCase().includes(query),
   );
+  function selectResource(name: string) {
+    setResource(name);
+    setDraft(null);
+    setSearch("");
+  }
   return (
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">CHRONOCAMPUS / ADMIN</p>
           <h1>{t("catalogs")}</h1>
           <p>{t("catalogHelp")}</p>
         </div>
@@ -343,45 +361,68 @@ export function Catalogs() {
           onClick={() => void run(refresh)}
           className="secondary"
         >
-          {t("refresh")}
+          <RefreshCw size={16} aria-hidden="true" />{t("refresh")}
         </button>
       </div>
       <div className="catalog-layout">
+        <label className="catalog-mobile-select">
+          {t("catalogResource")}
+          <select value={resource} onChange={(e) => selectResource(e.target.value)}>
+            {resourceGroups.map((group) => (
+              <optgroup key={group.title} label={t(group.title)}>
+                {group.resources.map((name) => <option key={name} value={name}>{t(name)}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
         <nav className="catalog-nav" aria-label={t("catalogs")}>
-          {resourceNames.map((name) => (
-            <button
-              className={name === resource ? "active" : ""}
-              key={name}
-              onClick={() => {
-                setResource(name);
-                setDraft(null);
-                setSearch("");
-              }}
-            >
-              {t(name)}
-              <small>{data[name]?.length ?? "—"}</small>
-            </button>
+          {resourceGroups.map((group) => (
+            <div className="catalog-nav-group" key={group.title}>
+              <h2 className="catalog-nav-heading">{t(group.title)}</h2>
+              {group.resources.map((name) => (
+                <button
+                  className={name === resource ? "active" : ""}
+                  aria-current={name === resource ? "page" : undefined}
+                  key={name}
+                  onClick={() => selectResource(name)}
+                >
+                  {t(name)}
+                  <small>{data[name]?.length ?? "—"}</small>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <section className="panel catalog-content">
-          <div className="toolbar">
+          <div className="section-heading">
             <h2>{t(resource)}</h2>
-            <input
-              aria-label={t("search")}
-              placeholder={t("search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
             <button onClick={() => open()} disabled={busy}>
-              {t("add")}
+              <Plus size={16} aria-hidden="true" />{t("add")}
             </button>
+          </div>
+          <div className="toolbar">
+            <label className="toolbar-field">
+              {t("search")}
+              <span className="search-field">
+                <Search size={16} aria-hidden="true" />
+                <input
+                  type="search"
+                  placeholder={t("search")}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </span>
+            </label>
+            {search && <button className="secondary search-clear" onClick={() => setSearch("")}><X size={16} aria-hidden="true" />{t("catalogClearSearch")}</button>}
+            {data[resource] && <span className="count-label" role="status">{t("catalogResults")}: {rows.length} / {data[resource].length}</span>}
           </div>
           <ErrorBox error={error} />
           {draft && (
             <form onSubmit={save} className="editor">
-              <h3>
-                {t(editing ? "edit" : "add")} · {t(resource)}
-              </h3>
+              <div className="section-heading">
+                <h3>{t(editing ? "edit" : "add")} · {t(resource)}{editing ? ` · #${editing}` : ""}</h3>
+                <button className="secondary" type="button" onClick={() => setDraft(null)}><X size={16} aria-hidden="true" />{t("cancel")}</button>
+              </div>
               {resource === "calendars" && (
                 <p className="notice">{t("unavailableCalendar")}</p>
               )}
@@ -419,7 +460,7 @@ export function Catalogs() {
                 </div>
               )}
               <div className="actions">
-                <button disabled={busy}>{t("save")}</button>
+                <button disabled={busy}><Save size={16} aria-hidden="true" />{t("save")}</button>
                 <button
                   className="secondary"
                   type="button"
@@ -430,7 +471,8 @@ export function Catalogs() {
               </div>
             </form>
           )}
-          <div className="table-scroll">
+          {(busy || loading) && <LoadingState compact={rows.length > 0} />}
+          {rows.length > 0 && <div className="table-scroll" aria-busy={busy || loading} tabIndex={0} role="region" aria-label={t(resource)}>
             <table>
               <thead>
                 <tr>
@@ -449,7 +491,7 @@ export function Catalogs() {
                     <td>
                       <div className="inline">
                         <button className="secondary" onClick={() => open(row)}>
-                          {t("edit")}
+                          <Pencil size={16} aria-hidden="true" />{t("edit")}
                         </button>
                         {resource !== "users" && (
                           <button
@@ -466,7 +508,7 @@ export function Catalogs() {
                                 });
                             }}
                           >
-                            {t("delete")}
+                            <Trash2 size={16} aria-hidden="true" />{t("delete")}
                           </button>
                         )}
                       </div>
@@ -475,9 +517,15 @@ export function Catalogs() {
                 ))}
               </tbody>
             </table>
-          </div>
-          {!rows.length && (
-            <p className="empty">{t(busy ? "loading" : "empty")}</p>
+          </div>}
+          {!rows.length && !busy && !loading && !error && (
+            <EmptyState icon={search ? Search : Database} title={t(search ? "catalogSearchEmptyTitle" : "catalogEmptyTitle")} description={t(search ? "catalogSearchEmptyHelp" : "catalogEmptyHelp")}>
+              {search ? (
+                <button className="secondary" onClick={() => setSearch("")}><X size={16} aria-hidden="true" />{t("catalogClearSearch")}</button>
+              ) : !draft ? (
+                <button onClick={() => open()}><Plus size={16} aria-hidden="true" />{t("add")}</button>
+              ) : null}
+            </EmptyState>
           )}
         </section>
       </div>

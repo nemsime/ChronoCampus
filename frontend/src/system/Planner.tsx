@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { CalendarDays, CircleStop, Play, Plus, RefreshCw, Upload } from "lucide-react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
-import { Dialog, ErrorBox, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
 import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
@@ -22,14 +23,18 @@ export function Planner() {
   const selection = useRef<number | null>(null);
   const loadSequence = useRef(0);
   const [pollError, setPollError] = useState<unknown>(null);
+  const [loading, setLoading] = useState(true);
   const { busy, error, run } = useAction();
   const refresh = async () => {
+    setLoading(true);
+    try {
     const [catalogs, rows] = await Promise.all([
       loadCatalogs(),
       api<Row[]>("/admin/schedule/versions"),
     ]);
     setData(catalogs);
     setVersions(rows);
+    } finally { setLoading(false); }
   };
   const open = async (id: number) => {
     selection.current = id;
@@ -102,41 +107,47 @@ export function Planner() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">CHRONOCAMPUS / PLANNING</p>
           <h1>{t("planner")}</h1>
           <p>{t("unpublished")}</p>
         </div>
-        <button onClick={() => setCreate(true)}>{t("createDraft")}</button>
+        <button onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
       </div>
+      <ol className="planner-steps">
+        <li>{t("plannerStepDraft")}</li>
+        <li>{t("plannerStepGenerate")}</li>
+        <li>{t("plannerStepReview")}</li>
+      </ol>
       <ErrorBox error={error} />
       <ErrorBox error={pollError} />
       {!!pollError && <p className="notice warning">{t("staleData")}</p>}
       <section className="panel">
         <div className="toolbar">
-          <select
-            aria-label={t("draft")}
-            disabled={busy}
-            value={version?.id || ""}
-            onChange={(e) => {
-              selection.current = e.target.value
-                ? Number(e.target.value)
-                : null;
-              ++loadSequence.current;
-              launchIntent.current = null;
-              setRunInfo(null);
-              setDetail(null);
-              setPollError(null);
-              if (e.target.value) void run(() => open(Number(e.target.value)));
-              else setDetail(null);
-            }}
-          >
-            <option value="">{t("select")}</option>
-            {versions.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.name} · {t(v.status)} · #{v.id}
-              </option>
-            ))}
-          </select>
+          <label className="toolbar-field">
+            {t("plannerVersion")}
+            <select
+              disabled={busy}
+              value={version?.id || ""}
+              onChange={(e) => {
+                selection.current = e.target.value
+                  ? Number(e.target.value)
+                  : null;
+                ++loadSequence.current;
+                launchIntent.current = null;
+                setRunInfo(null);
+                setDetail(null);
+                setPollError(null);
+                if (e.target.value) void run(() => open(Number(e.target.value)));
+                else setDetail(null);
+              }}
+            >
+              <option value="">{t("select")}</option>
+              {versions.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name} · {t(v.status)} · #{v.id}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             className="secondary"
             disabled={busy}
@@ -147,13 +158,22 @@ export function Planner() {
               })
             }
           >
-            {t("refresh")}
+            <RefreshCw size={16} aria-hidden="true" />{t("refresh")}
           </button>
         </div>
+        {(busy || loading) && <LoadingState compact={!!detail} />}
+        {!detail && !busy && !loading && !error && (
+          <EmptyState icon={CalendarDays} title={t("plannerSelectTitle")} description={t("plannerSelectHelp")}>
+            <button onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
+          </EmptyState>
+        )}
         {detail && (
           <>
-            <div className="toolbar">
-              <h2>{version.name}</h2>
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">{t("plannerVersion")} · #{version.id}</p>
+                <h2>{version.name}</h2>
+              </div>
               <span
                 className={`badge ${detail.report.complete ? "success" : "warn"}`}
               >
@@ -212,7 +232,7 @@ export function Planner() {
                     })
                   }
                 >
-                  {t("generate")}
+                  <Play size={16} aria-hidden="true" />{t("generate")}
                 </button>
                 <button
                   className="secondary"
@@ -230,7 +250,7 @@ export function Planner() {
                       });
                   }}
                 >
-                  {t("publish")}
+                  <Upload size={16} aria-hidden="true" />{t("publish")}
                 </button>
               </div>
             )}
@@ -251,7 +271,7 @@ export function Planner() {
                   }
                 })}
               >
-                {t(runInfo?.job?.cancel_requested_at ? "cancellationPending" : "cancelRun")}
+                <CircleStop size={16} aria-hidden="true" />{t(runInfo?.job?.cancel_requested_at ? "cancellationPending" : "cancelRun")}
               </button>
             )}
             <div

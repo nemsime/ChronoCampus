@@ -1,6 +1,6 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useId, useState } from "react";
 import { Account, api, setCsrf } from "./api";
-import { ErrorBox, useAction } from "./common";
+import { ErrorBox, PasswordInput, useAction } from "./common";
 import { LanguageSwitch, useLanguage } from "./i18n";
 export function PasswordForm({
   onDone,
@@ -10,6 +10,7 @@ export function PasswordForm({
   token?: string;
 }) {
   const { t } = useLanguage();
+  const fieldId = useId();
   const { busy, error, run } = useAction();
   return (
     <form
@@ -34,49 +35,53 @@ export function PasswordForm({
         });
       }}
       className="form-stack"
+      aria-busy={busy}
     >
       {!token && (
-        <label>
-          {t("current_password")}
-          <input
+        <div className="field">
+          <label htmlFor={`${fieldId}-current`}>{t("current_password")}</label>
+          <PasswordInput
+            id={`${fieldId}-current`}
             name="current_password"
-            type="password"
             autoComplete="current-password"
             required
             maxLength={256}
           />
-        </label>
+        </div>
       )}
-      <label>
-        {t("newPassword")}
-        <input
+      <div className="field">
+        <label htmlFor={`${fieldId}-new`}>{t("newPassword")}</label>
+        <PasswordInput
+          id={`${fieldId}-new`}
           name="password"
-          type="password"
           autoComplete="new-password"
           minLength={12}
           maxLength={256}
           required
         />
-      </label>
-      <label>
-        {t("confirmPassword")}
-        <input
+      </div>
+      <div className="field">
+        <label htmlFor={`${fieldId}-confirm`}>{t("confirmPassword")}</label>
+        <PasswordInput
+          id={`${fieldId}-confirm`}
           name="confirmation"
-          type="password"
           autoComplete="new-password"
           minLength={12}
           maxLength={256}
           required
         />
-      </label>
+      </div>
       <ErrorBox error={error} />
-      <button disabled={busy}>{t("changePassword")}</button>
+      <button disabled={busy}>
+        {t(busy ? "authChangingPassword" : "changePassword")}
+      </button>
     </form>
   );
 }
 export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
   const { t } = useLanguage();
-  const { busy, error, run } = useAction();
+  const passwordId = useId();
+  const { busy, error, setError, run } = useAction();
   const [mode, setMode] = useState<"login" | "reset">("login");
   const [message, setMessage] = useState("");
   const [token, setToken] = useState(
@@ -107,21 +112,26 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
         </div>
         <div>
           <p className="eyebrow">{t("schedule")}</p>
-          <h1>{t("welcome")}</h1>
+          <h2>{t("welcome")}</h2>
           <p>{t("welcomeText")}</p>
-          <div className="clock-art" aria-hidden="true">
-            <span>01</span>
-            <i />
-            <span>02</span>
-            <b>✓</b>
-          </div>
         </div>
         <small>ChronoCampus · 2026</small>
       </section>
       <section className="auth-panel">
         <LanguageSwitch />
         <div className="auth-card">
-          <h2>{t(token ? "reset" : mode === "login" ? "login" : "reset")}</h2>
+          <header className="auth-card-header">
+            <h1>{t(token || mode === "reset" ? "reset" : "authSignInTitle")}</h1>
+            <p className="auth-description">
+              {t(
+                token
+                  ? "authNewPasswordDescription"
+                  : mode === "login"
+                    ? "authSignInDescription"
+                    : "authResetDescription",
+              )}
+            </p>
+          </header>
           {message && (
             <p className="notice" role="status">
               {t(message)}
@@ -137,7 +147,7 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
               }}
             />
           ) : (
-            <form onSubmit={submit} className="form-stack">
+            <form onSubmit={submit} className="form-stack" aria-busy={busy}>
               <label>
                 {t("email")}
                 <input
@@ -149,27 +159,33 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
                 />
               </label>
               {mode === "login" && (
-                <label>
-                  {t("password")}
-                  <input
+                <div className="field">
+                  <label htmlFor={passwordId}>{t("password")}</label>
+                  <PasswordInput
+                    id={passwordId}
                     name="password"
-                    type="password"
                     autoComplete="current-password"
                     required
                     maxLength={256}
                   />
-                </label>
+                </div>
               )}
               <ErrorBox error={error} />
               <button disabled={busy}>
-                {t(mode === "login" ? "login" : "reset")}
+                {t(
+                  busy
+                    ? mode === "login" ? "authSigningIn" : "authSendingReset"
+                    : mode === "login" ? "login" : "reset",
+                )}
               </button>
               <button
                 className="link"
                 type="button"
+                disabled={busy}
                 onClick={() => {
                   setMode(mode === "login" ? "reset" : "login");
                   setMessage("");
+                  setError(null);
                 }}
               >
                 {t(mode === "login" ? "forgot" : "login")}
