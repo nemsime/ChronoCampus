@@ -10,6 +10,8 @@ The current integration adds CI after PR #16 (manual-correction/room-deletion fi
 - Both new repair/deletion regression scenarios also passed through the API against two separately created and migrated SQL Server databases. Invalid manual moves and incomplete publication were rejected; valid individual repairs succeeded. A failed room deletion retained its equipment and wrote no false success audit. A successful deletion removed links, retained the equipment catalog, and audited the original equipment IDs.
 - Ruff 0.17.2 correctness rules (`E4,E7,E9,F`), frontend TypeScript, production build, and Git whitespace checks passed.
 - [CI](ci.md) now defines hosted backend/frontend checks and the aggregate `CI` result. The hosted SQL Server test is deliberately skipped; its local run above supplies the SQL Server evidence. Branch protection remains an administrator configuration step, separate from installing this workflow.
+- Workflow syntax and expressions passed actionlint 1.7.12. Local `main` integration matched the tested feature tree; both repair/deletion tests passed again from that checkout.
+- Hosted validation is **blocked**, not passed: [PR #17's first Actions run](https://github.com/qaneee/ChronoCampus/actions/runs/40082282465) ended with `startup_failure` before any jobs or check runs were created. GitHub registered the run under an empty-name `BuildFailed` workflow, exposed no logs, and refused a rerun. The available account cannot read Actions administration settings. The underlying account/service restriction has not been established; billing is not asserted as the cause. PR #17 remains open pending a real successful hosted run.
 
 ## Observability update
 
