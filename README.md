@@ -87,6 +87,8 @@ Docker Compose definitions are supplied, but native Windows is the verified setu
 
 ## Verification
 
+[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis and frontend types/build for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. See [CI setup, required branch protection, and coverage limits](docs/ci.md).
+
 From `backend`:
 
 ```powershell

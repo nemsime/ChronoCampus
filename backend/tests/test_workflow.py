@@ -481,6 +481,9 @@ def test_room_deletion_cleans_equipment_and_rolls_back_if_scheduled(admin_client
     response = client.delete(f"/api/admin/catalog/rooms/{room.id}")
     assert response.status_code == 409, response.text
     campus["db"].expire_all()
+    assert campus["db"].scalar(select(m.AuditEvent).where(
+        m.AuditEvent.request_id == response.headers["x-request-id"]
+    )) is None
     assert campus["db"].get(m.RoomEquipment, (room.id, equipment.id)) is not None
     assert campus["db"].get(m.Equipment, equipment.id) is not None
 
@@ -502,3 +505,10 @@ def test_room_deletion_cleans_equipment_and_rolls_back_if_scheduled(admin_client
     assert campus["db"].get(m.Room, unused_id) is None
     assert campus["db"].get(m.RoomEquipment, (unused_id, equipment_id)) is None
     assert campus["db"].get(m.Equipment, equipment_id) is not None
+    audit = campus["db"].scalars(select(m.AuditEvent).where(
+        m.AuditEvent.request_id == response.headers["x-request-id"]
+    )).one()
+    assert (audit.action, audit.resource, audit.entity_id) == (
+        "catalog.deleted", "rooms", unused_id
+    )
+    assert audit.changes["equipment_ids"]["before"] == [equipment_id]

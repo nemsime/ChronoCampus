@@ -2,6 +2,15 @@
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 
+## CI and main integration
+
+The current integration combines observability with the manual-correction and room-deletion fixes already merged into remote `main` through PR #16. The deletion conflict was resolved by recording the room's audit snapshot before removing its equipment links; both remain in the same transaction.
+
+- Full local backend suite, including the opt-in SQL Server concurrency test: **47 passed**, one upstream Starlette/httpx deprecation warning.
+- Both new repair/deletion regression scenarios also passed through the API against two separately created and migrated SQL Server databases. Invalid manual moves and incomplete publication were rejected; valid individual repairs succeeded. A failed room deletion retained its equipment and wrote no false success audit. A successful deletion removed links, retained the equipment catalog, and audited the original equipment IDs.
+- Ruff 0.17.2 correctness rules (`E4,E7,E9,F`), frontend TypeScript, production build, and Git whitespace checks passed.
+- [CI](ci.md) now defines hosted backend/frontend checks and the aggregate `CI` result. The hosted SQL Server test is deliberately skipped; its local run above supplies the SQL Server evidence. Branch protection remains an administrator configuration step, separate from installing this workflow.
+
 ## Observability update
 
 Implementation and operator instructions: [Диагностика](observability.md). The current schema is **0003_observability**. This section supersedes the earlier schema/test counts below; it does not extend the earlier browser acceptance to the new diagnostics page.
