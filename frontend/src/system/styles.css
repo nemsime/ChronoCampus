@@ -957,6 +957,7 @@ tbody tr:last-child td { border-bottom: none; }
 .auth-description { font-size: 14px; line-height: 1.6; }
 .password-field { position: relative; display: block; width: 100%; }
 .password-field input { width: 100%; padding-right: 46px; }
+.password-field input::-ms-reveal { display: none; }
 .password-toggle { position: absolute; right: 1px; top: 50%; transform: translateY(-50%); min-height: 40px; width: 40px; padding: 7px; }
 .auth-card .form-stack > button:not(.link) { width: 100%; }
 .auth-card .form-stack > .link { align-self: center; }
