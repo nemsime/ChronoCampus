@@ -13,6 +13,17 @@ def test_health_without_database():
         assert client.get('/api/health').json() == {'status': 'ok'}
 
 
+def test_health_starts_when_database_is_not_configured(monkeypatch):
+    from fastapi import HTTPException
+
+    def unavailable():
+        raise HTTPException(503, "database_not_configured")
+
+    monkeypatch.setattr("app.main.get_engine", unavailable)
+    with TestClient(app) as client:
+        assert client.get("/api/health").json() == {"status": "ok"}
+
+
 def test_groups_maps_database_columns_and_closes_cursor():
     connection = MagicMock()
     cursor = connection.cursor.return_value

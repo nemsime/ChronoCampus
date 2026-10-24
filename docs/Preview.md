@@ -1,5 +1,7 @@
 # ChronoCampus: current system and final project specification
 
+> Historical review of the repository on 22 October 2026, before the modular implementation. Statements below about missing features, prototype authentication, and untested SQL describe that earlier state. For the current implementation, start with the [README](../README.md), [confirmed requirements](requirements.md), [architecture](architecture.md), and [verification record](verification.md). The [contribution record](contributions.md) identifies what changed afterward.
+
 Repository review date: 22 October 2026.
 
 ChronoCampus is a university timetable and schedule management web application for students, lecturers, and academic administrators. Its final purpose is to turn the university's document-based timetables into a shared, persistent system for preparing, validating, publishing, and viewing schedules. The intended backend language is **Python**.

@@ -1,123 +1,116 @@
 # ChronoCampus
 
-University timetable management with a React/TypeScript/Vite frontend and a Python/FastAPI API backed by SQL Server.
+University timetable generation with manual corrections and explicit publication. React/TypeScript, FastAPI, SQL Server, SQLAlchemy/Alembic, and OR-Tools CP-SAT.
 
-## Current working slice
+Includes local accounts and roles, administrative catalogs, configurable calendars, semester workloads, automatic generation, pins, conflict checking, publication, personal dated notes, and private feedback. Interface languages: Russian, Armenian, English. Full-time and part-time calendars are independent.
 
-`GET /api/groups` reads `dbo.CourseGroup` joined to `dbo.Major`. The admin **Groups & Classrooms → Groups** screen requests these records, supports search, and shows loading, empty, error, and retry states. It displays capacity (not enrolled-student count), major, and admission year (not current course year).
+## Documentation for the team
 
-Groups are read-only. Group writes, real authentication/permissions, and other screens remain future work; classrooms and other existing features still use prototype data. The API currently exposes only read endpoints without authentication. Run it locally until authorization is implemented.
+| Document | Start here when you need to… |
+| --- | --- |
+| [Developer guide / Руководство разработчика](docs/developer-guide.md) | Find the active code, understand the data flow, and safely extend or test a feature. |
+| [nemsime contribution / Вклад в этот этап](docs/contributions.md) | Distinguish the starting project from this delivery and find the corresponding commits. |
+| [University rules](docs/requirements.md) | Check confirmed requirements and facts still awaiting university confirmation. |
+| [Architecture](docs/architecture.md) | Understand generation, persistence, security, and operational boundaries. |
+| [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
+| [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
+| [Manual merge checklist](docs/manual-merge-check.md) | Recheck the fixes and end-to-end behavior before merging. |
+| [Contribution workflow](skills/repo-workflow/SKILL.md) | Work on a branch, verify integration, and prepare authorized remote publication. |
 
-## Prerequisites
+[Preview.md](docs/Preview.md) is the historical review from 22 October 2026, before the modular implementation; use the documents above for the current system.
 
-- Python 3.11 or newer, with `venv` and pip.
-- Node.js 20.19+ or 22.12+ and npm.
-- A reachable SQL Server with the ChronoCampus schema.
-- Microsoft **ODBC Driver 18 for SQL Server**, installed on the machine running Python. Linux also needs unixODBC; compiling pyodbc from source may require its development headers.
-- Alternatively, use Docker Compose for a consistent frontend/backend development environment; Docker Desktop or Docker Engine with the Compose plugin is required.
+## Run locally on Windows
 
-Driver installation is platform-specific: follow [Microsoft's installation instructions](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server). Installing the Python package alone does not install the system driver or SQL Server.
+Requirements: Python 3.11+, Node.js 20.19+ or 22.12+, SQL Server, and [Microsoft ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
 
-## Docker development
+From the repository root in PowerShell:
 
-Docker Compose runs the frontend with Node.js 22 and the API with Python 3.11 and ODBC Driver 18. It does not start SQL Server; configure access to your existing SQL Server separately.
-
-First, create the backend environment file:
-
-```bash
-cp backend/.env.example backend/.env
+```powershell
+python -m venv backend/.venv
+backend/.venv/Scripts/python.exe -m pip install -e './backend[dev]'
+Copy-Item backend/.env.example backend/.env
+npm --prefix frontend ci
 ```
 
-Edit `backend/.env` and set a valid `SQLSERVER_CONNECTION_STRING`. If SQL Server is running directly on your computer, use `SERVER=host.docker.internal,1433` rather than `SERVER=localhost,1433`; inside the API container, `localhost` refers to the container itself. On Linux, Compose maps `host.docker.internal` to the host gateway. For a remote SQL Server, use its reachable server address instead.
+Configure `backend/.env`. Use an isolated database such as `ChronoCampus_Development`. For an existing database, back it up and restore a development copy before migrations. For a fresh installation, create an empty database. The migration account needs schema modification permissions; the running application needs SELECT/INSERT/UPDATE/DELETE on its tables. Keep credentials out of Git.
 
-Start both development services from the repository root:
+`db/ChronoCampus.sql` is an archived destructive bootstrap script. **Do not use it to upgrade retained data.** Alembic now owns incremental schema changes. Legacy catalogs are preserved; prototype user records do not automatically acquire application roles.
 
-```bash
-docker compose up --build
+```powershell
+Set-Location backend
+.venv/Scripts/python.exe -m alembic upgrade head
+.venv/Scripts/python.exe -m app.manage create-admin admin@your-university.example --name Administrator
+.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open http://localhost:3000 for the frontend, http://localhost:8000/docs for API documentation, and http://localhost:8000/api/health for the API health check. Source directories are mounted into the containers for live reload. Stop the services with `Ctrl+C`; use `docker compose down` to remove the containers. Keep `backend/.env` private and never commit it.
+Enter the administrator password at the hidden prompt; it must be changed at first login. Run **one API process**: generation uses one background worker and restart recovery assumes a single process.
 
-## Database setup
+In a second terminal, from the repository root:
 
-For a new, disposable development database, open `db/ChronoCampus.sql` in a SQL Server client and execute it against your development instance. The file includes `GO` batch separators and sample data.
-
-**The script drops and recreates ChronoCampus. Do not execute it against a database whose contents you need to preserve.** The API never runs this script automatically. Put subsequent incremental SQL changes in `db/migrations/` and repeatable demonstration inserts in `db/seeds/`.
-
-Create a dedicated login/user with SELECT permissions on `dbo.CourseGroup` and `dbo.Major`, or ask the database owner for those credentials. Verify the records in your SQL client:
-
-```sql
-USE ChronoCampus;
-SELECT g.id, g.group_code, m.name, g.admission_year, g.capacity
-FROM dbo.CourseGroup AS g
-JOIN dbo.Major AS m ON m.id = g.major_id
-ORDER BY g.group_code, g.id;
+```powershell
+npm --prefix frontend run dev -- --host 127.0.0.1 --port 3000 --strictPort
 ```
 
-## Backend: first terminal
+Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, not database availability. On Linux/macOS substitute `python3` and `backend/.venv/bin/python` for the Windows paths.
 
-From the repository root, on Linux/WSL/macOS:
+## Demonstration data
 
-```bash
-python3 -m venv backend/.venv
-source backend/.venv/bin/activate
-python -m pip install -e './backend[dev]'
-cp backend/.env.example backend/.env
+After migrations, from `backend`:
+
+```powershell
+.venv/Scripts/python.exe -m app.manage seed-demo
 ```
 
-Edit `backend/.env`: set your server, port, database, username, and password in `SQLSERVER_CONNECTION_STRING`. Never commit this file. ODBC values containing semicolons must be enclosed in braces, with any closing brace escaped as `}}`. For a local self-signed server certificate only, change `TrustServerCertificate=no` to `yes`; retain certificate verification for deployed environments.
+The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`.
 
-Check the driver and start the API:
+Demo teaching dates and academic-hour settings are illustrative. Real university calendars remain unconfirmed until an administrator enters the missing facts. See [data provenance](docs/demo-data.md).
 
-```bash
-python -c "import pyodbc; print(pyodbc.drivers())"
-cd backend
-python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
+## Prepare and publish a semester
 
-The driver list must include `ODBC Driver 18 for SQL Server`. Configuration loads from `backend/.env` regardless of the shell's current directory; environment variables override the file.
+1. In **Data & rules**, configure faculties, majors, cohorts, subgroups, rooms/equipment, and users.
+2. Configure a calendar, semester boundaries, and explicit **teaching periods**. Exam months remain inside semester boundaries but outside teaching periods. Confirm hours per lesson and teaching-week count.
+3. Enter workload components: subject, cohort/subgroup, lecturer, lesson type, semester hours, assessment, equipment. Add holidays, unavailable intervals, preferences, and explicitly allowed extra slots.
+4. In **Planner**, create a draft for a semester and selected cohorts. Generate with a recorded seed. Review completeness, hours, unresolved lessons, and diagnostics.
+5. Move or pin lessons. Each change runs the same hard-constraint validation. Regeneration retains pins; changed inputs invalidate a running result instead of overwriting newer work.
+6. Publish a complete valid draft. Students and lecturers see their latest published schedule. Create a new draft for subsequent changes. Personal notes follow the same lesson occurrence when it moves.
 
-- API documentation: http://localhost:8000/docs
-- Process health: http://localhost:8000/api/health (does not query SQL Server)
-- Database-backed groups: http://localhost:8000/api/groups
+Holiday cancellations count separately from delivered hours and need no makeup. Emergency cancellations require an explicitly permitted extra slot on the original date. Permission never overrides room, teacher, or student conflicts.
 
-Missing configuration or database/driver failures return HTTP 503 without exposing connection details.
+## Recovery and deployment
 
-## Frontend: second terminal
+Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_MODE=file` writes messages to ignored `backend/.mail` and sends no email. To send, configure `MAIL_MODE=smtp`, STARTTLS host/port, sender, and credentials, then verify with the university mail service. Reset links expire, are single-use, and change passwords only after form submission. Administrators can issue a temporary password requiring a change.
 
-From the repository root:
+For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `PUBLIC_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.
 
-```bash
-cd frontend
-npm install
-npm run dev -- --host 127.0.0.1 --port 3000 --strictPort
-```
-
-Open http://localhost:3000. Expand the administrator login and use `admin@example.com` with the prototype password `password123` (complete the simulated password-change dialog if prompted), then open **Groups & Classrooms → Groups**. Login remains simulated; it does not secure the API.
-
-The API URL defaults to `http://localhost:8000/api`. To change it, copy `frontend/.env.example` to `frontend/.env`, edit `VITE_API_BASE_URL`, and restart Vite. If the frontend origin changes, update the JSON array `CORS_ORIGINS` in `backend/.env` and restart the backend. Only variables prefixed `VITE_` go into the browser bundle; never put database credentials there.
+Docker Compose definitions are supplied, but native Windows is the verified setup. Compose uses an existing SQL Server; use `host.docker.internal` for a host server and suitable SQL authentication. Apply migrations explicitly with `docker compose run --rm backend python -m alembic upgrade head`, then `docker compose up --build`.
 
 ## Verification
 
-From the repository root:
+From `backend`:
 
-```bash
-backend/.venv/bin/python -m pytest backend/tests
-npm --prefix frontend run build
-curl --fail http://localhost:8000/api/health
-curl --fail http://localhost:8000/api/groups
+```powershell
+.venv/Scripts/python.exe -m pytest tests -q
 ```
 
-The automated API tests substitute database connections; they verify response mapping, empty results, connection cleanup, and sanitized failures. The final curl command and groups screen require a configured live database and provide the integration check. Compare the response against the SQL query above. Stop the backend and reload the groups screen to verify its error/retry state.
+From the repository root:
 
-## Repository layout
+```powershell
+npm --prefix frontend run typecheck
+npm --prefix frontend run build
+git diff --check
+```
 
-- `frontend/`: existing React interface and API client.
-- `backend/app/api/`: HTTP routes; `schemas/`: response models.
-- `backend/app/core/`: environment configuration; `db/`: connections.
-- `backend/app/services/`: database queries and feature logic.
-- `backend/tests/`: API tests.
-- `db/`: schema, incremental migrations, and seeds.
-- `docs/`: requirements and original university timetable documents.
+Default tests isolate database state with SQLite. The opt-in concurrency test uses real SQL Server: create and migrate an isolated `ChronoCampus_MigrationTest_YYYYMMDD` database and set `CHRONOCAMPUS_TEST_DATABASE` to that name when running pytest. It writes disposable fixtures only there and verifies that concurrent conflicting publications cannot both succeed.
 
-Implementation references: [FastAPI environment settings](https://fastapi.tiangolo.com/advanced/settings/), [FastAPI CORS](https://fastapi.tiangolo.com/tutorial/cors/), and [pyodbc](https://github.com/mkleehammer/pyodbc).
+Live acceptance: administrator login, generation and publication, student/lecturer schedules, note retention after a move, feedback replies/statuses/privacy, all three languages, desktop and mobile. Check partial-publication rejection and prohibited moves. See [verification evidence and limits](docs/verification.md).
+
+## Code map
+
+- `backend/app/accounts`: authentication, sessions, password recovery, permissions.
+- `backend/app/academics`: catalogs and workloads.
+- `backend/app/calendar`: shared date, parity, slot, and audience rules.
+- `backend/app/scheduling`: snapshots, solvers, independent validator, drafts, jobs, publication.
+- `backend/app/notes`, `feedback`: private user data.
+- `backend/app/db`: models, transactions, revision lock; `backend/alembic`: migrations.
+- `frontend/src/system`: active interface through `App.tsx`. Earlier prototype components outside this import graph are retained as reference and are not mounted.
+- [Requirements](docs/requirements.md), [architecture](docs/architecture.md), [Git workflow](skills/repo-workflow/SKILL.md).
