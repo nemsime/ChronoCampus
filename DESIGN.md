@@ -23,7 +23,9 @@
 
 ## Information architecture
 - Preserve existing navigation and role visibility: timetable, planner, data/rules, diagnostics, support, account.
-- Persistent compact desktop sidebar; mobile menu behind a labelled disclosure with keyboard support.
+- Persistent desktop sidebar can collapse to a labelled icon rail; remember the choice locally. Mobile navigation remains a separate full-label disclosure.
+- Keep one page scroll, with a compact sticky header and section links on long planner/diagnostic pages. Do not stack large sticky panels or hide critical generation/error status behind tabs.
+- Paginate catalogs and lesson lists; place page controls above and below results. Open catalog editing in a modal so a row action never opens an unseen form far above it.
 - Page title and short explanation first, then primary action, filters and actual data. Technical detail stays in diagnostics or existing expandable reports.
 
 ## Design principles
@@ -55,6 +57,7 @@
 ## Responsive behavior
 - Desktop above 1000px; compact tablet layout below; mobile navigation and stacked controls at 760px.
 - Tables scroll inside their region; page itself must not scroll sideways. Do not hide essential data to fit.
+- Long report tables and secondary catalog navigation can scroll within a bounded region with sticky table headings. Section targets and keyboard focus must clear the sticky navigation.
 - At least 40px interactive controls, 44px touch targets on mobile. Avoid hover-only actions.
 
 ## Interaction states

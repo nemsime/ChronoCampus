@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CalendarDays, CircleStop, Play, Plus, RefreshCw, Upload } from "lucide-react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
-import { Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, LoadingState, SectionLinks, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
 import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
@@ -120,6 +120,12 @@ export function Planner() {
       <ErrorBox error={error} />
       <ErrorBox error={pollError} />
       {!!pollError && <p className="notice warning">{t("staleData")}</p>}
+      {detail && <SectionLinks items={[
+        { id: "planner-controls", label: t("plannerControls") },
+        { id: "planner-report", label: t("plannerReport") },
+        { id: "planner-lessons", label: t("schedule") },
+        { id: "planner-history", label: t("runHistory") },
+      ]} />}
       <section className="panel">
         <div className="toolbar">
           <label className="toolbar-field">
@@ -169,6 +175,7 @@ export function Planner() {
         )}
         {detail && (
           <>
+            <section id="planner-controls" className="section-target" tabIndex={-1} aria-label={t("plannerControls")}>
             <div className="section-heading">
               <div>
                 <p className="eyebrow">{t("plannerVersion")} · #{version.id}</p>
@@ -280,11 +287,13 @@ export function Planner() {
               {t(detail.report.complete ? "complete" : "partial")}
             </div>
             <ErrorBox error={detail.report.issues} />
+            </section>
+            <section id="planner-report" className="section-target" tabIndex={-1} aria-label={t("plannerReport")}>
             <details className="report" open={!detail.report.complete}>
               <summary>
                 {t("workloads")} · {detail.report.hours.length}
               </summary>
-              <div className="table-scroll">
+              <div className="table-scroll bounded-table" tabIndex={0} role="region" aria-label={t("plannerReport")}>
                 <table>
                   <thead>
                     <tr>
@@ -324,7 +333,7 @@ export function Planner() {
                 </table>
               </div>
               {detail.report.unplaced_occurrences.length > 0 && (
-                <div className="unplaced">
+                <div className="unplaced" tabIndex={0} role="region" aria-label={t("partial")}>
                   {detail.report.unplaced_occurrences.map((id: number) => {
                     const occurrence = detail.occurrences.find(
                       (o: Row) => o.id === id,
@@ -367,6 +376,9 @@ export function Planner() {
                 </div>
               )}
             </details>
+            </section>
+            <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
+            <h2 className="section-title">{t("schedule")}</h2>
             <LessonList
               rows={detail.assignments}
               action={
@@ -383,7 +395,10 @@ export function Planner() {
                   : undefined
               }
             />
+            </section>
+            <section id="planner-history" className="section-target" tabIndex={-1} aria-label={t("runHistory")}>
             <RunHistory key={version.id} versionId={version.id} />
+            </section>
           </>
         )}
       </section>
