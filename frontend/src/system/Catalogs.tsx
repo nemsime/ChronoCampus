@@ -356,16 +356,16 @@ export function Catalogs() {
     results.current?.focus({ preventScroll: true });
     results.current?.scrollIntoView({ block: "start" });
   }} />;
-  function selectResource(name: string) {
+  function selectResource(name: string, focusResults = false) {
     setResource(name);
     setDraft(null);
     setSearch("");
     setPage(0);
     setError(null);
-    requestAnimationFrame(() => {
-      results.current?.focus({ preventScroll: true });
-      results.current?.scrollIntoView({ block: "start" });
-    });
+    if (focusResults) requestAnimationFrame(() => {
+        results.current?.focus({ preventScroll: true });
+        results.current?.scrollIntoView({ block: "start" });
+      });
   }
   return (
     <>
@@ -402,7 +402,7 @@ export function Catalogs() {
                   className={name === resource ? "active" : ""}
                   aria-current={name === resource ? "page" : undefined}
                   key={name}
-                  onClick={() => selectResource(name)}
+                  onClick={() => selectResource(name, true)}
                 >
                   {t(name)}
                   <small>{data[name]?.length ?? "—"}</small>
