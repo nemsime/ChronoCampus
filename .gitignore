@@ -82,6 +82,8 @@ logs/
 /db/private/
 /backend/.mail/
 /backend/.logs/
+/backend/.secrets/
+/.runtime/
 /monitoring/secrets/
 /backend/.demo-credentials.json
 

@@ -76,8 +76,17 @@ def test_temporary_password_is_restricted_until_changed(admin_client, database):
 
 
 def test_reset_only_post_changes_password_and_token_is_single_use(
-    admin_client, database, tmp_path
+    admin_client, database, tmp_path, monkeypatch
 ):
+    from app.accounts.mail import init_keys
+    from app.accounts.router import get_settings
+    from app.jobs.io_worker import process_once
+
+    settings = get_settings()
+    settings.mail_keys_file = tmp_path / "mail-keys.json"
+    init_keys(settings.mail_keys_file)
+    monkeypatch.setattr("app.jobs.io_worker.get_settings", lambda: settings)
+    monkeypatch.setattr("app.jobs.queue.get_settings", lambda: settings)
     original = database.get(Account, 1).password_hash
     unknown = admin_client.post(
         "/api/auth/forgot-password", json={"email": "unknown@example.invalid"}
@@ -87,6 +96,8 @@ def test_reset_only_post_changes_password_and_token_is_single_use(
     )
     assert known.status_code == unknown.status_code == 202
     assert known.json() == unknown.json()
+    assert not list(tmp_path.glob("*.eml"))
+    process_once(database.get_bind(), "account-test-io")
     from email import policy
     from email.parser import BytesParser
 

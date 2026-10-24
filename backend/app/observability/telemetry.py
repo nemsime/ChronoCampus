@@ -27,6 +27,8 @@ _logger = logging.getLogger("chronocampus.events")
 _logger.propagate = False
 _logger.addHandler(logging.NullHandler())
 _APPLICATION_ROOT = Path(__file__).resolve().parents[1]
+_instance_suffix = uuid4().hex[:12]
+_identity = {"role": "api", "instance_id": f"api-{os.getpid()}-{_instance_suffix}"}
 BUCKETS = (0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60)
 FIELDS = {
     "run_id",
@@ -54,6 +56,11 @@ FIELDS = {
     "page",
     "dialect",
     "elapsed_seconds",
+    "job_id",
+    "attempt_number",
+    "lease_generation",
+    "worker_instance",
+    "queue_wait_seconds",
 }
 ERROR_CODES = {
     "authentication_required",
@@ -121,6 +128,8 @@ def configure(settings):
     """Idempotent configuration; file failures leave the application usable."""
     global _write_failures
     with _lock:
+        _identity.update(role=settings.worker_role,
+                         instance_id=settings.worker_instance_id or f"{settings.worker_role}-{os.getpid()}-{_instance_suffix}")
         for handler in _logger.handlers[:]:
             _logger.removeHandler(handler)
             handler.close()
@@ -132,7 +141,7 @@ def configure(settings):
             directory = settings.diagnostic_log_directory
             directory.mkdir(parents=True, exist_ok=True)
             handler = SafeFileHandler(
-                directory / "events.jsonl",
+                directory / f"events.jsonl-{_identity['instance_id']}",
                 maxBytes=settings.diagnostic_log_max_bytes,
                 backupCount=settings.diagnostic_log_backups,
                 encoding="utf-8",
@@ -150,7 +159,7 @@ def emit(event, level="INFO", **fields):
     global _sequence, _dropped_events, _write_failures
     try:
         row = {k: v for k, v in fields.items() if k in FIELDS and v is not None}
-        row.update(timestamp=utc_now(), event=event, level=level)
+        row.update(timestamp=utc_now(), event=event, level=level, **_identity)
         row.setdefault("request_id", request_id_var.get())
         with _lock:
             _sequence += 1
@@ -370,7 +379,20 @@ def prometheus():
                 f"chronocampus_database_queries_{suffix} {value}",
             ]
         )
+    identity_labels = ",".join(f"{key}={json.dumps(value)}" for key, value in _identity.items())
+    for index, line in enumerate(lines):
+        if line.startswith("#"):
+            continue
+        if "}" in line:
+            lines[index] = line.replace("}", "," + identity_labels + "}", 1)
+        else:
+            name, value = line.split(" ", 1)
+            lines[index] = f"{name}{{{identity_labels}}} {value}"
     return "\n".join(lines) + "\n"
+
+
+def runtime_identity():
+    return dict(_identity)
 
 
 class RequestTelemetry:
@@ -394,6 +416,8 @@ class RequestTelemetry:
                     for k, v in message.get("headers", [])
                     if k.lower() != b"x-request-id"
                 ]
+                if scope["path"].startswith("/api/") and not any(k.lower() == b"cache-control" for k, _ in headers):
+                    headers.append((b"cache-control", b"no-store"))
                 message = {
                     **message,
                     "headers": headers + [(b"x-request-id", identifier.encode())],

@@ -1,34 +1,33 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.exception_handlers import http_exception_handler
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.exc import DBAPIError, IntegrityError
 
-from app.api.groups import router as groups_router
-from app.core.config import get_settings
-from app.accounts.router import router as accounts_router
-from app.academics.router import router as academics_router
-from app.scheduling.router import router as scheduling_router, recover_runs
-from app.db.session import get_engine
-from app.notes.router import router as notes_router
-from app.feedback.router import router as feedback_router
-from app.observability import telemetry
-from app.observability.router import router as diagnostics_router, client_router, database_probe
+from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.academics.router import router as academics_router
+from app.accounts.router import router as accounts_router
+from app.api.groups import router as groups_router
+from app.core.config import get_settings
+from app.db.session import get_engine
+from app.feedback.router import router as feedback_router
+from app.notes.router import router as notes_router
+from app.observability import telemetry
+from app.observability.router import client_router, database_probe
+from app.observability.router import router as diagnostics_router
+from app.scheduling.router import router as scheduling_router
+from app.scheduling.queries import router as schedule_queries_router
 
 
 @asynccontextmanager
 async def lifespan(app):
     telemetry.configure(get_settings())
     telemetry.emit("application.started")
-    try:
-        recover_runs(get_engine())
-    except (DBAPIError, HTTPException) as error:
-        telemetry.exception_event("application.recovery_unavailable", error)
     yield
     telemetry.emit("application.stopped")
 
@@ -46,6 +45,7 @@ app.add_middleware(telemetry.RequestTelemetry)
 app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")
+app.include_router(schedule_queries_router, prefix="/api")
 app.include_router(scheduling_router, prefix="/api")
 app.include_router(notes_router, prefix="/api")
 app.include_router(feedback_router, prefix="/api")

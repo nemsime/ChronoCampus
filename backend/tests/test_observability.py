@@ -1,13 +1,14 @@
 import json
 
 from app.db import models as m
+from app.jobs.queue import recover_expired
 from app.observability import telemetry as t
-from app.scheduling.router import execute_run, recover_runs
+from app.scheduling.router import execute_run
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from test_workflow import campus as campus
-from test_workflow import detail, draft, generate, login
+from test_workflow import detail, draft, generate, login, queued_run
 
 
 def test_unhandled_exception_is_correlated_and_secret_free():
@@ -115,7 +116,7 @@ def test_run_history_progress_correlation_and_failed_run(
     )
     identifier = response.json()["id"]
     request_id = response.headers["x-request-id"]
-    execute_run(*campus["pending"].pop())
+    execute_run(*queued_run(campus))
     campus["db"].expire_all()
     result = admin_client.get(f"/api/admin/schedule/runs/{identifier}").json()
     assert result["status"] == "complete"
@@ -135,9 +136,10 @@ def test_run_history_progress_correlation_and_failed_run(
     assert "assignments" not in history["items"][0]["result"]
 
     def broken(*args, **kwargs):
-        raise RuntimeError("PRIVATE-SECRET")
+        from app.jobs.process import SolverFailure
+        raise SolverFailure("PRIVATE-SECRET")
 
-    monkeypatch.setattr("app.scheduling.router.generate", broken)
+    monkeypatch.setattr("app.jobs.generation.run_solver", broken)
     result = generate(admin_client, detail(admin_client, v)["version"], campus)
     assert result["status"] == "failed" and result["progress"]["stage"] == "failed"
     assert result["summary"]["placed"] is None and result["summary"]["total"] == 4
@@ -148,16 +150,16 @@ def test_run_history_progress_correlation_and_failed_run(
     )
 
 
-def test_interrupted_run_retains_history(admin_client, campus):
+def test_worker_recovery_leaves_queued_runs_intact(admin_client, campus):
     v = draft(admin_client, campus)
     response = admin_client.post(
         f"/api/admin/schedule/versions/{v['id']}/generate",
         json={"revision": v["revision"]},
     )
-    recover_runs(campus["db"].get_bind())
+    recover_expired(campus["db"].get_bind(), "generation")
     campus["db"].expire_all()
     run = admin_client.get(f"/api/admin/schedule/runs/{response.json()['id']}").json()
-    assert run["status"] == "interrupted" and run["progress"]["stage"] == "interrupted"
+    assert run["status"] == "queued" and run["progress"]["stage"] == "queued"
     assert run["request_id"] == response.headers["x-request-id"]
 
 

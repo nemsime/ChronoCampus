@@ -1,15 +1,15 @@
 import pytest
+from app.core.config import Settings
+from app.core.security import password_hash
+from app.db.models import Account, Base, DataRevision
+from app.db.session import get_db
+from app.jobs.models import QueueAdmission
+from app.main import app
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
-
-from app.core.config import Settings
-from app.core.security import password_hash
-from app.db.models import Account, Base, DataRevision
-from app.db.session import get_db
-from app.main import app
 
 PASSWORD = "Test-password-2026!"
 HASH = password_hash(PASSWORD)
@@ -38,6 +38,7 @@ def database():
     Base.metadata.create_all(engine)
     with Session(engine, expire_on_commit=False) as db:
         db.add(DataRevision(id=1, revision=0))
+        db.add(QueueAdmission(id=1, name="generation"))
         db.add(
             Account(
                 email="admin@example.invalid",
@@ -61,14 +62,19 @@ def client(database, monkeypatch, tmp_path):
         cookie_secure=False,
         mail_mode="file",
         mail_directory=tmp_path,
+        mail_keys_file=tmp_path / "mail-keys.json",
         university_email_domains=["example.invalid"],
         diagnostic_log_directory=tmp_path / "logs",
     )
+    from app.accounts.mail import init_keys
+    init_keys(settings.mail_keys_file)
     monkeypatch.setattr("app.main.get_settings", lambda: settings)
     monkeypatch.setattr("app.observability.router.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.router.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.dependencies.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.mail.get_settings", lambda: settings)
+    monkeypatch.setattr("app.jobs.io_worker.get_settings", lambda: settings)
+    monkeypatch.setattr("app.jobs.queue.get_settings", lambda: settings)
 
     def override():
         try:

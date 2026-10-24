@@ -2,9 +2,10 @@ import time
 from collections import Counter
 from datetime import datetime
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
-from app.db.models import GenerationRun
+from app.db.models import DataRevision, GenerationRun
+from app.jobs.models import BackgroundJob
 from app.observability import telemetry as t
 
 
@@ -34,6 +35,15 @@ def run_view(run, detailed=True):
             "progress",
         )
     }
+    db = object_session(run)
+    job = db.get(BackgroundJob, run.job_id, populate_existing=True) if db and run.job_id else None
+    view["job"] = {key: getattr(job, key) for key in (
+        "id", "state", "attempt_count", "max_attempts", "available_at", "cancel_requested_at", "error_code"
+    )} if job else None
+    view["snapshot_created_at"] = run.snapshot_created_at
+    revision = db.get(DataRevision, 1, populate_existing=True) if db and job else None
+    view["inputs_updated_since_enqueue"] = bool(job and revision and
+        revision.revision != job.payload.get("enqueue_data_revision"))
     finish = run.finished_at or datetime.utcnow()
     if run.status not in {"queued", "running"}:
         view["progress"] = {**(run.progress or {}), "stage": run.status}
@@ -86,8 +96,9 @@ def run_view(run, detailed=True):
 class Progress:
     """At most one DB update per second per stage; no domain revision changes."""
 
-    def __init__(self, engine, run_id, version_id):
+    def __init__(self, engine, run_id, version_id, *, claim=None):
         self.engine, self.run_id, self.version_id = engine, run_id, version_id
+        self.claim = claim
         self.begin, self.last = time.perf_counter(), 0.0
         self.state = {"events": []}
         self.disabled = False
@@ -131,6 +142,10 @@ class Progress:
         self.last = now
         try:
             with Session(self.engine) as db:
+                if self.claim:
+                    from app.jobs.queue import lock_owned
+                    if lock_owned(db, self.claim) is None:
+                        return
                 row = db.get(GenerationRun, self.run_id)
                 if row is None or row.status not in {"queued", "running"}:
                     return

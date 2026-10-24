@@ -86,10 +86,69 @@ function Pager({
   );
 }
 
+export function isRunActive(run: Row) {
+  return (
+    ["queued", "running", "retry_wait"].includes(run.status) ||
+    (!!run.job?.cancel_requested_at &&
+      !["succeeded", "failed", "cancelled"].includes(run.job.state))
+  );
+}
+
+function RunAttempts({ run }: { run: Row }) {
+  const { t, lang } = useLanguage();
+  const monitor = useMonitor(
+    `/admin/schedule/runs/${run.id}/attempts`,
+    isRunActive(run),
+  );
+  return (
+    <section>
+      <div className="toolbar">
+        <h3>{t("attempts")}</h3>
+        <button className="secondary" onClick={monitor.refresh}>
+          {t("refresh")}
+        </button>
+      </div>
+      <ErrorBox error={monitor.error} />
+      {!!monitor.error && monitor.data && <p>{t("staleData")}</p>}
+      {!monitor.data && !monitor.error && <p role="status">{t("loading")}</p>}
+      {monitor.data && (
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                {["attempts", "workerInstance", "attemptStarted", "attemptDeadline",
+                  "attemptFinished", "status", "errorCode"].map(key => (
+                  <th key={key}>{t(key)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {monitor.data.items.map((attempt: Row) => (
+                <tr key={attempt.id ?? attempt.attempt_number}>
+                  <td>{attempt.attempt_number}</td>
+                  <td><code>{attempt.worker_instance}</code></td>
+                  <td>{timestamp(attempt.started_at, lang)}</td>
+                  <td>{timestamp(attempt.deadline_at, lang)}</td>
+                  <td>{timestamp(attempt.finished_at, lang)}</td>
+                  <td>{t(attempt.outcome || "running")}</td>
+                  <td><code>{attempt.error_code || "—"}</code></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!monitor.data.items.length && <p className="empty">{t("empty")}</p>}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function RunCard({ run }: { run: Row }) {
   const { t, lang } = useLanguage();
   const [now, setNow] = useState(Date.now());
-  const active = ["queued", "running"].includes(run.status);
+  const active = isRunActive(run);
+  const cancelling = active && !!run.job?.cancel_requested_at;
+  const [showAttempts, setShowAttempts] = useState(false);
   useEffect(() => {
     if (!active) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -122,7 +181,7 @@ export function RunCard({ run }: { run: Row }) {
         <span
           className={`badge ${run.status === "complete" ? "success" : "warn"}`}
         >
-          {t(run.status)}
+          {t(cancelling ? "cancellationPending" : run.status)}
         </span>
         <span>
           {t(run.algorithm)} · {t("seed")}: {run.seed}
@@ -131,7 +190,7 @@ export function RunCard({ run }: { run: Row }) {
       <div className="diagnostic-cards">
         <div>
           <small>{t("stage")}</small>
-          <strong>{t(progress.stage || run.status)}</strong>
+          <strong>{t(cancelling ? "cancellationPending" : run.status === "running" ? progress.stage || run.status : run.status)}</strong>
         </div>
         <div>
           <small>{t("duration")}</small>
@@ -158,7 +217,17 @@ export function RunCard({ run }: { run: Row }) {
         {t("requestId")}:{" "}
         <code className="break-code">{run.request_id || "—"}</code>
       </p>
+      {run.job && <p>{t("attempts")}: {run.job.attempt_count} / {run.job.max_attempts}</p>}
+      {run.status === "retry_wait" && <p className="notice warning">{t("retryScheduled")}: {timestamp(run.job?.available_at, lang)}</p>}
+      {cancelling && <p className="notice warning" role="status">{t("cancellationHelp")}</p>}
+      {run.job && <p>{t(run.snapshot_created_at ? "snapshotAtStart" : "snapshotPending")}{run.snapshot_created_at ? `: ${timestamp(run.snapshot_created_at, lang)}` : ""}</p>}
+      {run.inputs_updated_since_enqueue && <p className="notice warning">{t("inputsUpdatedSinceEnqueue")}</p>}
       {result.error && <p className="notice error">{t(result.error)}</p>}
+      {run.job?.error_code && <p className="notice error">{t("errorCode")}: <code>{run.job.error_code}</code></p>}
+      {run.job && <details onToggle={e => setShowAttempts(e.currentTarget.open)}>
+        <summary>{t("attempts")}</summary>
+        {showAttempts && <RunAttempts key={run.id} run={run} />}
+      </details>}
       <details>
         <summary>{t("details")}</summary>
         <p>
@@ -310,6 +379,8 @@ export function RunHistory({ versionId }: { versionId?: number }) {
           {[
             "queued",
             "running",
+            "retry_wait",
+            "cancelled",
             "complete",
             "partial",
             "failed",
@@ -350,7 +421,7 @@ export function RunHistory({ versionId }: { versionId?: number }) {
                         aria-label={`${t("compare")} #${row.id}`}
                         checked={comparison.some((r) => r.id === row.id)}
                         disabled={
-                          ["queued", "running"].includes(row.status) ||
+                          isRunActive(row) ||
                           (comparison.length === 2 &&
                             !comparison.some((r) => r.id === row.id))
                         }
@@ -375,9 +446,9 @@ export function RunHistory({ versionId }: { versionId?: number }) {
                     <td>
                       {t(row.algorithm)} · {row.seed}
                     </td>
-                    <td>{t(row.status)}</td>
+                    <td>{t(isRunActive(row) && row.job?.cancel_requested_at ? "cancellationPending" : row.status)}{row.job && <small className="block">{t("attempts")}: {row.job.attempt_count} / {row.job.max_attempts}</small>}</td>
                     <td>
-                      {["queued", "running"].includes(row.status)
+                      {isRunActive(row)
                         ? `${row.progress?.placed ?? "—"} / ${row.progress?.total ?? "—"}`
                         : `${row.summary.placed ?? "—"} / ${row.summary.total ?? "—"}`}
                     </td>
@@ -421,6 +492,7 @@ export function Diagnostics() {
   const [automatic, setAutomatic] = useState(true);
   const [offset, setOffset] = useState(0);
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const jobs = useMonitor("/admin/diagnostics/jobs", automatic);
   const system = useMonitor("/admin/diagnostics/system", automatic);
   const params = new URLSearchParams({
     limit: "50",
@@ -445,6 +517,7 @@ export function Diagnostics() {
         <button
           className="secondary"
           onClick={() => {
+            jobs.refresh();
             system.refresh();
             feed.refresh();
           }}
@@ -484,7 +557,7 @@ export function Diagnostics() {
             <div>
               <small>{t("uptime")}</small>
               <strong>{seconds(data.process.uptime_seconds)}</strong>
-              <small>PID {data.process.pid}</small>
+              <small>{t("servingApi")} · PID {data.process.pid}</small>
             </div>
             <div>
               <small>{t("memoryUsage")}</small>
@@ -539,6 +612,7 @@ export function Diagnostics() {
         )}
         <p>{t("processScope")}</p>
       </section>
+      <DurableJobs monitor={jobs} />
       <section className="panel diagnostic-panel">
         <div
           className="diagnostic-tabs"
@@ -724,5 +798,91 @@ export function Diagnostics() {
         )}
       </section>
     </>
+  );
+}
+
+function DurableJobs({ monitor }: { monitor: ReturnType<typeof useMonitor> }) {
+  const { t, lang } = useLanguage();
+  return (
+    <section className="panel diagnostic-panel">
+      <div className="toolbar">
+        <h2>{t("durableJobs")}</h2>
+        <button className="secondary" onClick={monitor.refresh}>
+          {t("refresh")}
+        </button>
+      </div>
+      <p>{t("durableJobsScope")}</p>
+      <small>{t("updated")}: {monitor.updated?.toLocaleTimeString() || "—"}</small>
+      <ErrorBox error={monitor.error} />
+      {!!monitor.error && monitor.data && (
+        <p className="notice warning">{t("staleData")}</p>
+      )}
+      {!monitor.data && !monitor.error && <p role="status">{t("loading")}</p>}
+      {monitor.data && (
+        <>
+          <h3>{t("workers")}</h3>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  {["workerInstance", "workerRole", "status", "heartbeat", "currentJob"].map(key => (
+                    <th key={key}>{t(key)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {monitor.data.workers.map((worker: Row) => (
+                  <tr key={worker.instance_id}>
+                    <td>
+                      <code>{worker.instance_id}</code>
+                      <small className="block">PID {worker.pid}</small>
+                    </td>
+                    <td>{t(worker.role)}</td>
+                    <td>
+                      <span className={`badge ${worker.stale || worker.status === "offline" ? "warn" : "success"}`}>
+                        {t(worker.stale ? "workerStale" : worker.status)}
+                      </span>
+                    </td>
+                    <td>
+                      {timestamp(worker.last_seen_at, lang)}
+                      <small className="block">
+                        {t("heartbeatAge")}: {seconds(worker.age_seconds)}
+                      </small>
+                    </td>
+                    <td><code>{worker.current_job_id || "—"}</code></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!monitor.data.workers.length && (
+              <p className="notice warning">{t("noWorkers")}</p>
+            )}
+          </div>
+          <h3>{t("queues")}</h3>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  {["queues", "queued", "running", "retry_wait", "failed", "cancelled", "oldestWait"].map(key => (
+                    <th key={key}>{t(key)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(monitor.data.queues as Record<string, Row>).map(([kind, queue]) => (
+                  <tr key={kind}>
+                    <td>{t(kind)}</td>
+                    {["queued", "running", "retry_wait", "failed", "cancelled"].map(state => (
+                      <td key={state}>{queue[state] ?? 0}</td>
+                    ))}
+                    <td>{seconds(queue.oldest_wait_seconds)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </section>
   );
 }

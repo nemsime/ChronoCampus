@@ -289,5 +289,7 @@ def delete_record(resource: str, identifier: int, db: Session = Depends(get_db),
     lock_revision(db)
     row = require_record(db, model, identifier)
     record_audit(db, actor, "catalog.deleted", resource, identifier, before=serialize(row, db))
+    if resource == "rooms":
+        db.execute(delete(m.RoomEquipment).where(m.RoomEquipment.room_id == identifier))
     db.delete(row)
     db.commit()

@@ -39,10 +39,18 @@ def database_probe(db):
             ).limit(1)
         )
         db.execute(select(m.AuditEvent).limit(1))
+        from app.jobs.models import BackgroundJob, JobAttempt, MailOutbox, WorkerHeartbeat, QueueAdmission
+
+        db.execute(select(m.GenerationRun.job_id).limit(1))
+        db.execute(select(BackgroundJob.protocol_version, BackgroundJob.lease_generation).limit(1))
+        db.execute(select(JobAttempt.attempt_number).limit(1))
+        db.execute(select(MailOutbox.key_id).limit(1))
+        db.execute(select(WorkerHeartbeat.last_seen_at).limit(1))
         revision = db.get(m.DataRevision, 1)
+        admission = db.scalar(select(QueueAdmission.id).where(QueueAdmission.name == "generation"))
         return {
-            "ready": revision is not None,
-            "schema": "0003_observability",
+            "ready": revision is not None and admission is not None,
+            "schema": "0004_jobs",
             "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
         }
     except Exception as error:
@@ -84,6 +92,7 @@ def system(db: Session = Depends(get_db)):
             "pid": os.getpid(),
             "uptime_seconds": metrics["uptime_seconds"],
             "scope": "single_process",
+            **t.runtime_identity(),
             "log_write_failures": metrics["write_failures"],
         },
         "generation": {
@@ -107,6 +116,39 @@ def system(db: Session = Depends(get_db)):
             "audit": "database",
         },
     }
+
+
+@router.get("/jobs", dependencies=[Depends(administrator)])
+def jobs(db: Session = Depends(get_db)):
+    """Durable fleet state; never expose payloads, mail content or reset secrets."""
+    from app.jobs.models import BackgroundJob, WorkerHeartbeat
+    from app.jobs.queue import database_now
+
+    now = database_now(db)
+    rows = db.execute(
+        select(BackgroundJob.kind, BackgroundJob.state, func.count())
+        .group_by(BackgroundJob.kind, BackgroundJob.state)
+    ).all()
+    queues = {kind: {state: 0 for state in ("queued", "running", "retry_wait", "succeeded", "failed", "cancelled")}
+              for kind in ("generation", "mail", "maintenance")}
+    for kind, state, count in rows:
+        if kind in queues and state in queues[kind]:
+            queues[kind][state] = count
+    waiting = dict(db.execute(
+        select(BackgroundJob.kind, func.min(BackgroundJob.created_at))
+        .where(BackgroundJob.state.in_(["queued", "retry_wait"]))
+        .group_by(BackgroundJob.kind)
+    ).all())
+    for kind, counts in queues.items():
+        counts["oldest_wait_seconds"] = max(0, (now - waiting[kind]).total_seconds()) if waiting.get(kind) else 0
+    workers = []
+    for row in db.scalars(select(WorkerHeartbeat).order_by(WorkerHeartbeat.last_seen_at.desc()).limit(100)):
+        age = max(0, (now - row.last_seen_at).total_seconds())
+        workers.append({"instance_id": row.instance_id, "role": row.role, "pid": row.pid,
+                        "status": row.status, "current_job_id": row.current_job_id,
+                        "last_seen_at": row.last_seen_at, "age_seconds": age,
+                        "stale": age > get_settings().job_lease_seconds})
+    return {"workers": workers, "queues": queues, "sampled_at": now, "scope": "database"}
 
 
 @router.get("/events", dependencies=[Depends(administrator)])
@@ -205,8 +247,25 @@ def metrics(db: Session = Depends(get_db)):
             "rejected",
             "stale",
             "interrupted",
+            "retry_wait",
+            "cancelled",
         ):
             output += f'chronocampus_generation_runs{{status="{status}"}} {counts.get(status, 0)}\n'
+        runtime = jobs(db)
+        output += "# HELP chronocampus_jobs Durable jobs by kind and state (database scope).\n# TYPE chronocampus_jobs gauge\n"
+        output += "# HELP chronocampus_queue_oldest_wait_seconds Age of the oldest waiting job.\n# TYPE chronocampus_queue_oldest_wait_seconds gauge\n"
+        for kind, states in runtime["queues"].items():
+            for state, count in states.items():
+                if state != "oldest_wait_seconds":
+                    output += f'chronocampus_jobs{{kind="{kind}",state="{state}"}} {count}\n'
+            output += f'chronocampus_queue_oldest_wait_seconds{{kind="{kind}"}} {states["oldest_wait_seconds"]}\n'
+        output += "# HELP chronocampus_worker_heartbeat_age_seconds Time since durable worker heartbeat.\n# TYPE chronocampus_worker_heartbeat_age_seconds gauge\n"
+        for worker in runtime["workers"]:
+            # Worker IDs and roles come from bounded, code-owned runtime identifiers.
+            import json
+
+            labels = f'role={json.dumps(worker["role"])},instance_id={json.dumps(worker["instance_id"])}'
+            output += f'chronocampus_worker_heartbeat_age_seconds{{{labels}}} {worker["age_seconds"]}\n'
     return PlainTextResponse(output, media_type="text/plain; version=0.0.4")
 
 

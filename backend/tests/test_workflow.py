@@ -1,10 +1,10 @@
 from datetime import date, time
-import pytest
-from sqlalchemy import select
 
+import pytest
 from app.db import models as m
 from app.scheduling.router import execute_run
 from conftest import HASH, PASSWORD
+from sqlalchemy import select
 
 
 @pytest.fixture
@@ -125,11 +125,6 @@ def campus(database, monkeypatch):
             equipment_ids=[],
         )
     db.commit()
-    pending = []
-    monkeypatch.setattr(
-        "app.scheduling.router.executor.submit",
-        lambda function, engine, identifier: pending.append((engine, identifier)),
-    )
     return locals()
 
 
@@ -154,13 +149,21 @@ def draft(client, campus):
     return response.json()
 
 
+def queued_run(campus, *, first=False):
+    db = campus["db"]
+    db.expire_all()
+    ids = list(db.scalars(select(m.GenerationRun.id).where(m.GenerationRun.status == "queued")
+                          .order_by(m.GenerationRun.id)))
+    return db.get_bind(), ids[0 if first else -1]
+
+
 def generate(client, version, campus):
     response = client.post(
         f"/api/admin/schedule/versions/{version['id']}/generate",
         json={"revision": version["revision"]},
     )
     assert response.status_code == 202, response.text
-    engine, identifier = campus["pending"].pop()
+    engine, identifier = queued_run(campus)
     execute_run(engine, identifier)
     campus["db"].expire_all()
     return client.get(f"/api/admin/schedule/runs/{identifier}").json()
@@ -245,7 +248,7 @@ def test_generation_publication_note_survives_move_and_privacy(admin_client, cam
     assert client.get("/api/notes").json()[0]["id"] == note["id"]
 
 
-def test_stale_job_does_not_overwrite_draft(admin_client, campus):
+def test_catalog_edits_before_claim_are_included_in_snapshot(admin_client, campus):
     client = admin_client
     v = draft(client, campus)
     response = client.post(
@@ -259,13 +262,145 @@ def test_stale_job_does_not_overwrite_draft(admin_client, campus):
         ).status_code
         == 201
     )
-    execute_run(*campus["pending"].pop())
+    execute_run(*queued_run(campus))
     campus["db"].expire_all()
     assert (
         client.get(f"/api/admin/schedule/runs/{response.json()['id']}").json()["status"]
-        == "stale"
+        == "complete"
     )
-    assert detail(client, v)["assignments"] == []
+    assert len(detail(client, v)["assignments"]) == 4
+    run = client.get(f"/api/admin/schedule/runs/{response.json()['id']}").json()
+    assert run["inputs_updated_since_enqueue"] and run["snapshot_created_at"]
+
+
+def test_queued_generations_for_different_drafts_both_apply(admin_client, campus):
+    client = admin_client
+    versions = [draft(client, campus), draft(client, campus)]
+    for version in versions:
+        response = client.post(
+            f"/api/admin/schedule/versions/{version['id']}/generate",
+            json={"revision": version["revision"]},
+        )
+        assert response.status_code == 202, response.text
+
+    for version in versions:
+        engine, identifier = queued_run(campus, first=True)
+        execute_run(engine, identifier)
+        campus["db"].expire_all()
+        run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
+        assert run["status"] == "complete", run
+        result = detail(client, version)
+        assert result["report"]["complete"]
+        assert len(result["assignments"]) == 4
+        assert result["version"]["revision"] == version["revision"] + 1
+
+
+@pytest.mark.parametrize("change", ["create", "pin", "emergency"])
+def test_other_draft_changes_preserve_queued_generation(admin_client, campus, change):
+    client = admin_client
+    version = draft(client, campus)
+    if change != "create":
+        other = draft(client, campus)
+        assert generate(client, other, campus)["status"] == "complete"
+        other_detail = detail(client, other)
+        lesson = other_detail["assignments"][0]
+
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": version["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    if change == "create":
+        draft(client, campus)
+    elif change == "pin":
+        response = client.put(
+            f"/api/admin/schedule/versions/{other['id']}/assignments/{lesson['occurrence_id']}",
+            json={
+                "revision": other_detail["version"]["revision"],
+                "day": lesson["day"],
+                "slot": lesson["slot"],
+                "room_id": lesson["room_id"],
+                "pinned": True,
+            },
+        )
+        assert response.status_code == 200, response.text
+    else:
+        response = client.post(
+            f"/api/admin/schedule/versions/{other['id']}/assignments/{lesson['occurrence_id']}/emergency",
+            json={"revision": other_detail["version"]["revision"], "reason": "Emergency"},
+        )
+        assert response.status_code == 200, response.text
+
+    engine, identifier = queued_run(campus)
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
+    assert run["status"] == "complete", run
+    result = detail(client, version)
+    assert result["report"]["complete"]
+    assert len(result["assignments"]) == 4
+
+
+@pytest.mark.parametrize("change", ["pin", "emergency"])
+def test_own_draft_changes_reject_queued_generation(admin_client, campus, change):
+    client = admin_client
+    version = draft(client, campus)
+    assert generate(client, version, campus)["status"] == "complete"
+    original = detail(client, version)
+    lesson = original["assignments"][0]
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": original["version"]["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    if change == "pin":
+        response = client.put(
+            f"/api/admin/schedule/versions/{version['id']}/assignments/{lesson['occurrence_id']}",
+            json={
+                "revision": original["version"]["revision"],
+                "day": lesson["day"],
+                "slot": lesson["slot"],
+                "room_id": lesson["room_id"],
+                "pinned": True,
+            },
+        )
+    else:
+        response = client.post(
+            f"/api/admin/schedule/versions/{version['id']}/assignments/{lesson['occurrence_id']}/emergency",
+            json={"revision": original["version"]["revision"], "reason": "Emergency"},
+        )
+    assert response.status_code == 200, response.text
+    edited = detail(client, version)
+    assert edited["assignments"] != original["assignments"]
+    assert edited["version"]["revision"] == original["version"]["revision"] + 1
+
+    engine, identifier = queued_run(campus)
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "stale"
+    result = detail(client, version)
+    assert result["assignments"] == edited["assignments"]
+    assert result["disruptions"] == edited["disruptions"]
+    assert result["version"]["revision"] == edited["version"]["revision"]
+
+
+def test_publication_before_claim_is_included_in_snapshot(admin_client, campus):
+    client = admin_client
+    version = draft(client, campus)
+    other = draft(client, campus)
+    assert generate(client, other, campus)["status"] == "complete"
+    response = client.post(
+        f"/api/admin/schedule/versions/{version['id']}/generate",
+        json={"revision": version["revision"]},
+    )
+    assert response.status_code == 202, response.text
+    publish(client, detail(client, other)["version"])
+
+    engine, identifier = queued_run(campus)
+    execute_run(engine, identifier)
+    campus["db"].expire_all()
+    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "complete"
+    assert len(detail(client, version)["assignments"]) == 4
 
 
 def test_emergency_requires_explicit_extra_permission(admin_client, campus):
@@ -481,6 +616,9 @@ def test_room_deletion_cleans_equipment_and_rolls_back_if_scheduled(admin_client
     response = client.delete(f"/api/admin/catalog/rooms/{room.id}")
     assert response.status_code == 409, response.text
     campus["db"].expire_all()
+    assert campus["db"].scalar(select(m.AuditEvent).where(
+        m.AuditEvent.request_id == response.headers["x-request-id"]
+    )) is None
     assert campus["db"].get(m.RoomEquipment, (room.id, equipment.id)) is not None
     assert campus["db"].get(m.Equipment, equipment.id) is not None
 
@@ -502,3 +640,10 @@ def test_room_deletion_cleans_equipment_and_rolls_back_if_scheduled(admin_client
     assert campus["db"].get(m.Room, unused_id) is None
     assert campus["db"].get(m.RoomEquipment, (unused_id, equipment_id)) is None
     assert campus["db"].get(m.Equipment, equipment_id) is not None
+    audit = campus["db"].scalars(select(m.AuditEvent).where(
+        m.AuditEvent.request_id == response.headers["x-request-id"]
+    )).one()
+    assert (audit.action, audit.resource, audit.entity_id) == (
+        "catalog.deleted", "rooms", unused_id
+    )
+    assert audit.changes["equipment_ids"]["before"] == [equipment_id]

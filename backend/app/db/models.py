@@ -330,6 +330,8 @@ class GenerationRun(Base):
     __tablename__ = "GenerationRun"
     id: Mapped[int] = mapped_column(primary_key=True)
     version_id: Mapped[int] = mapped_column(ForeignKey("ScheduleVersion.id"))
+    job_id: Mapped[int | None] = mapped_column(ForeignKey("BackgroundJob.id"))
+    snapshot_created_at: Mapped[datetime | None] = mapped_column(DateTime)
     source_revision: Mapped[int]
     status: Mapped[str] = mapped_column(String(30))
     seed: Mapped[int]
@@ -393,3 +395,7 @@ class DataRevision(Base):
     __tablename__ = "ApplicationRevision"
     id: Mapped[int] = mapped_column(primary_key=True)
     revision: Mapped[int]
+
+
+# Register queue tables after the domain classes to avoid circular metadata imports.
+from app.jobs import models as _job_models  # noqa

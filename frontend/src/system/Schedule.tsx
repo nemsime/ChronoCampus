@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { api, Row } from "./api";
+import { api, ApiError, Row } from "./api";
 import { dateLabel, Dialog, ErrorBox, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export function LessonList({
   rows,
   action,
+  serverPage = false,
 }: {
   rows: Row[];
   action?: (row: Row) => React.ReactNode;
+  serverPage?: boolean;
 }) {
   const { t, lang } = useLanguage();
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -28,7 +30,7 @@ export function LessonList({
   };
   const visible = useMemo(
     () =>
-      rows
+      serverPage ? rows : rows
         .filter((row) =>
           Object.entries(filters).every(
             ([key, value]) =>
@@ -41,13 +43,13 @@ export function LessonList({
           ),
         )
         .sort((a, b) => a.day.localeCompare(b.day) || a.slot - b.slot),
-    [rows, filters],
+    [rows, filters, serverPage],
   );
   const [page, setPage] = useState(0);
   useEffect(() => setPage(0), [filters, rows]);
   return (
     <>
-      <div className="filters">
+      {!serverPage && <div className="filters">
         <label>
           {t("starts_on")}
           <input
@@ -89,9 +91,9 @@ export function LessonList({
             </select>
           </label>
         ))}
-      </div>
+      </div>}
       <div className="lesson-list">
-        {visible.slice(page * 40, (page + 1) * 40).map((row) => (
+        {(serverPage ? visible : visible.slice(page * 40, (page + 1) * 40)).map((row) => (
           <article
             className={`lesson ${row.cancelled ? "cancelled" : ""}`}
             key={row.occurrence_id}
@@ -135,7 +137,7 @@ export function LessonList({
         ))}
       </div>
       {!visible.length && <p className="empty">{t("empty")}</p>}
-      {visible.length > 40 && (
+      {!serverPage && visible.length > 40 && (
         <div className="pagination">
           <button
             className="secondary"
@@ -168,17 +170,74 @@ export function PersonalSchedule() {
   const [selected, setSelected] = useState<Row | null>(null);
   const [content, setContent] = useState("");
   const { busy, error, run } = useAction();
-  const refresh = async () => {
-    const [lessons, memos] = await Promise.all([
-      api<Row[]>("/schedule"),
-      api<Row[]>("/notes"),
-    ]);
-    setRows(lessons);
-    setNotes(memos);
-  };
+  const [facets, setFacets] = useState<ScheduleFacets | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [range, setRange] = useState({ start: "", end: "" });
+  const [cursors, setCursors] = useState<(string | null)[]>([null]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [readError, setReadError] = useState<unknown>(null);
+  const refresh = async () => { setReload((value) => value + 1); };
+  const rangeDays = (Date.parse(range.end) - Date.parse(range.start)) / 86400000;
+  const validRange = Number.isFinite(rangeDays) && rangeDays >= 0 && rangeDays <= 30;
+  const cursor = cursors[cursors.length - 1];
   useEffect(() => {
-    void run(refresh);
-  }, []);
+    let active = true;
+    let inFlight = false;
+    const load = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      setLoading(true);
+      setReadError(null);
+      try {
+        const choices = await api<ScheduleFacets>("/schedule/facets");
+        if (!active) return;
+        setFacets(choices);
+        if (!range.start) {
+          const bounds = choices.date_bounds;
+          if (bounds.start && bounds.end) {
+            const today = new Date().toISOString().slice(0, 10);
+            const start = today < bounds.start ? bounds.start : today > bounds.end ? bounds.end : today;
+            setRange({ start, end: addDays(start, Math.min(30, (Date.parse(bounds.end) - Date.parse(start)) / 86400000)) });
+          }
+          setRows([]);
+          return;
+        }
+        if (!validRange) { setRows([]); return; }
+        const params = new URLSearchParams({ ...range, limit: "100" });
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) params.set(key, value);
+        });
+        if (cursor) params.set("cursor", cursor);
+        const [page, memos] = await Promise.all([
+          api<{ items: Row[]; next_cursor: string | null }>(`/schedule/page?${params}`),
+          api<Row[]>("/notes"),
+        ]);
+        if (!active) return;
+        setRows(page.items);
+        setNextCursor(page.next_cursor);
+        setNotes(memos);
+      } catch (failure) {
+        if (!active) return;
+        setRows([]);
+        setNextCursor(null);
+        if (failure instanceof ApiError && failure.status === 409 && cursor) {
+          setCursors([null]);
+        } else setReadError(failure);
+      } finally {
+        inFlight = false;
+        if (active) setLoading(false);
+      }
+    };
+    setRows([]);
+    setNextCursor(null);
+    void load();
+    const timer = window.setInterval(() => void load(), 30000);
+    const focus = () => void load();
+    window.addEventListener("focus", focus);
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", focus); };
+  }, [filters, range, cursor, reload, validRange]);
   const note = selected
     ? notes.find((n) => n.occurrence_id === selected.occurrence_id)
     : undefined;
@@ -192,15 +251,37 @@ export function PersonalSchedule() {
         </div>
         <button
           className="secondary"
-          disabled={busy}
-          onClick={() => void run(refresh)}
+          disabled={busy || loading}
+          onClick={() => void refresh()}
         >
           {t("refresh")}
         </button>
       </div>
       <ErrorBox error={error} />
+      <ErrorBox error={readError} />
       <section className="panel">
+        <p>{t("scheduleRangeHint")}</p>
+        <div className="filters">
+          {(["start", "end"] as const).map((key) => <label key={key}>
+            {t(key === "start" ? "starts_on" : "ends_on")}
+            <input type="date" value={range[key]} min={facets?.date_bounds.start || undefined}
+              max={key === "end" && range.start ? addDays(range.start, 30) : facets?.date_bounds.end || undefined}
+              onChange={(event) => { setRange({ ...range, [key]: event.target.value }); setCursors([null]); }} />
+          </label>)}
+          {Object.entries(facets?.filters || {}).map(([key, choices]) => <label key={key}>
+            {t(key)}<select value={filters[key] || ""} onChange={(event) => {
+              setFilters({ ...filters, [key]: event.target.value }); setCursors([null]);
+            }}><option value="">{t("all")}</option>
+              {choices.map((choice) => <option key={choice.id} value={choice.id}>
+                {key === "lesson_type" ? t(String(choice.id)) : choice.label}
+              </option>)}
+            </select>
+          </label>)}
+        </div>
+        {range.start && !validRange && <p role="alert">{t("schedule_range_required")}</p>}
+        {loading && <p role="status">{t("scheduleLoading")}</p>}
         <LessonList
+          serverPage
           rows={rows}
           action={(row) => (
             <button
@@ -220,6 +301,13 @@ export function PersonalSchedule() {
             </button>
           )}
         />
+        <div className="pagination">
+          <button className="secondary" disabled={loading || cursors.length === 1}
+            onClick={() => setCursors(cursors.slice(0, -1))}>{t("previous_page")}</button>
+          <span>{cursors.length}</span>
+          <button className="secondary" disabled={loading || !nextCursor}
+            onClick={() => nextCursor && setCursors([...cursors, nextCursor])}>{t("next_page")}</button>
+        </div>
       </section>
       {selected && (
         <Dialog labelledBy="note-title" onClose={() => setSelected(null)}>
@@ -281,4 +369,14 @@ export function PersonalSchedule() {
       )}
     </>
   );
+}
+
+interface ScheduleFacets {
+  filters: Record<string, { id: string | number; label: string }[]>;
+  date_bounds: { start: string | null; end: string | null };
+  revision: number;
+}
+
+function addDays(day: string, days: number) {
+  return new Date(Date.parse(day) + days * 86400000).toISOString().slice(0, 10);
 }

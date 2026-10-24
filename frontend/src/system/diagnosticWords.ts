@@ -60,9 +60,9 @@ export const diagnosticWords: Record<string, [string, string, string]> = {
     "Log write failures",
   ],
   processScope: [
-    "События и показатели API относятся к текущему процессу и сбрасываются при перезапуске. История запусков и действий хранится в базе.",
-    "Իրադարձություններն ու API չափումները զրոյացվում են վերագործարկման ժամանակ։ Գործարկումների և գործողությունների պատմությունը պահվում է բազայում։",
-    "Events and API metrics cover this process and reset on restart. Runs and activity persist in the database.",
+    "События в памяти и показатели относятся только к текущему процессу API и сбрасываются при перезапуске. Логи работников здесь не объединяются. История запусков и действий хранится в базе.",
+    "Հիշողության իրադարձություններն ու չափումները վերաբերում են միայն ընթացիկ API գործընթացին և զրոյացվում են վերագործարկման ժամանակ։ Աշխատողների լոգերն այստեղ չեն միավորվում։ Գործարկումների և գործողությունների պատմությունը պահվում է բազայում։",
+    "In-memory events and metrics cover only this API process and reset on restart. Worker logs are not aggregated here. Runs and activity persist in the database.",
   ],
   autoRefresh: [
     "Обновлять автоматически",

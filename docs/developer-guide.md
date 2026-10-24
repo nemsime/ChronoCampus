@@ -1,6 +1,6 @@
 # Руководство разработчика ChronoCampus
 
-Документ для участника, который подключается к разработке существующей системы. Состояние реализации: `7e12b5e`, 24 октября 2026. Установка и команды запуска находятся в [README](../README.md); здесь описаны точки входа и правила изменения кода.
+Документ для участника, который подключается к разработке существующей системы. Обновлён для локальной архитектуры с очередью SQL, 24 октября 2026. Установка находится в [README](../README.md), управление процессами — в [руководстве локального запуска](local-runtime.md); здесь описаны точки входа и правила изменения кода.
 
 ## С чего начать
 
@@ -15,12 +15,13 @@
 
 | Область | Сервер | Интерфейс |
 | --- | --- | --- |
-| Точка входа | [main.py](../backend/app/main.py): приложение, маршруты, обработчики ошибок, восстановление заданий | [main.tsx](../frontend/src/main.tsx) → [App.tsx](../frontend/src/App.tsx) → [Application.tsx](../frontend/src/system/Application.tsx) |
+| Точка входа | [main.py](../backend/app/main.py): API, маршруты, обработчики ошибок; [local_runtime.py](../backend/app/local_runtime.py): управление локальными процессами | [main.tsx](../frontend/src/main.tsx) → [App.tsx](../frontend/src/App.tsx) → [Application.tsx](../frontend/src/system/Application.tsx) |
 | Вход, роли, восстановление пароля | [accounts](../backend/app/accounts/), [security.py](../backend/app/core/security.py) | [Accounts.tsx](../frontend/src/system/Accounts.tsx) |
 | Справочники и учебная нагрузка | [academics/router.py](../backend/app/academics/router.py), [schemas.py](../backend/app/academics/schemas.py) | [Catalogs.tsx](../frontend/src/system/Catalogs.tsx), [catalogSchema.ts](../frontend/src/system/catalogSchema.ts) |
 | Сетка звонков, даты, чётность, состав учащихся | [calendar/rules.py](../backend/app/calendar/rules.py) | Формы календарей и учебных периодов в справочниках |
 | Генерация, ручные правки, публикация | [scheduling](../backend/app/scheduling/) | [Planner.tsx](../frontend/src/system/Planner.tsx) |
-| Расписание и личные заметки | [scheduling/router.py](../backend/app/scheduling/router.py), [notes/router.py](../backend/app/notes/router.py) | [Schedule.tsx](../frontend/src/system/Schedule.tsx) |
+| Расписание и личные заметки | [scheduling/queries.py](../backend/app/scheduling/queries.py), [notes/router.py](../backend/app/notes/router.py) | [Schedule.tsx](../frontend/src/system/Schedule.tsx) |
+| Очередь, выполнение и восстановление заданий | [jobs](../backend/app/jobs/): координатор генерации, отдельный расчёт, письма и обслуживание | [Planner.tsx](../frontend/src/system/Planner.tsx), [Diagnostics.tsx](../frontend/src/system/Diagnostics.tsx) |
 | Личные обращения | [feedback/router.py](../backend/app/feedback/router.py) | [Feedback.tsx](../frontend/src/system/Feedback.tsx) |
 | Данные и транзакции | [models.py](../backend/app/db/models.py), [session.py](../backend/app/db/session.py), [миграции](../backend/alembic/versions/) | Запросы через [api.ts](../frontend/src/system/api.ts) |
 | Переводы | Сервер возвращает коды ошибок и диагностики | [i18n.tsx](../frontend/src/system/i18n.tsx), [ruleMessages.ts](../frontend/src/system/ruleMessages.ts) |
@@ -43,7 +44,9 @@
 1. [snapshot.py](../backend/app/scheduling/snapshot.py) фиксирует исходные данные, версии, закрепления и внешнюю опубликованную занятость.
 2. [solver.py](../backend/app/scheduling/solver.py) строит допустимые варианты, получает начальное решение жадным/локальным поиском и улучшает его CP-SAT.
 3. [validation.py](../backend/app/scheduling/validation.py) независимо проверяет результат и баланс часов. Эта проверка применяется также при правках и публикации.
-4. [router.py](../backend/app/scheduling/router.py) управляет заданиями и сохранением. Устаревший результат не перезаписывает изменённый черновик; публикация проверяется внутри транзакции с блокировкой ревизии БД.
+4. [jobs/generation.py](../backend/app/jobs/generation.py) управляет сохранением задания, снимка и результата; [coordinator.py](../backend/app/jobs/coordinator.py) выполняет его отдельно от API. Аренда и номер владения защищают от записи результата старым процессом. Устаревший результат не перезаписывает изменённый черновик; [router.py](../backend/app/scheduling/router.py) проверяет публикацию внутри транзакции с блокировкой ревизии БД.
+
+API не запускает расчёт в своём потоке и не сбрасывает активные задания при старте. Запускайте всю локальную группу через `scripts/local.ps1 start`; отдельный запуск Uvicorn поднимет только HTTP API. Снимок создаётся при первой попытке выполнения, поэтому ожидающее задание использует актуальные на этот момент данные.
 
 ## Как вносить изменения
 
@@ -51,7 +54,7 @@
 
 Сначала определить, относится ли значение к настройкам вуза, календарю, семестру или компоненту нагрузки. Не добавлять реальные правила университета как константы интерфейса.
 
-При изменении хранения обновить модель и добавить следующую миграцию в [backend/alembic/versions](../backend/alembic/versions/). Применённые миграции `0001` и `0002` не переписывать. Их определения схемы зафиксированы и не должны зависеть от будущих изменений ORM-моделей. Проверять миграцию на пустой БД и на восстановленной копии прежней схемы; исходную БД сохранять отдельно. Архивный `db/ChronoCampus.sql` удаляет и создаёт БД заново и не используется для обновления данных.
+При изменении хранения обновить модель и добавить следующую миграцию в [backend/alembic/versions](../backend/alembic/versions/). Применённые миграции `0001`–`0004` не переписывать. Их определения схемы зафиксированы и не должны зависеть от будущих изменений ORM-моделей. Проверять миграцию на пустой БД и на восстановленной копии прежней схемы; исходную БД сохранять отдельно. Архивный `db/ChronoCampus.sql` удаляет и создаёт БД заново и не используется для обновления данных.
 
 Затем изменить Pydantic-схему, регистрацию ресурса и предметную проверку в `academics`, соответствующие поля `catalogSchema.ts`, подписи на трёх языках и тесты. Связи, вместимость, доступ и допустимость значений проверяет сервер, даже если форма уже ограничивает ввод.
 
@@ -80,6 +83,10 @@
 | Время, часы, ограничения и решатель | [test_scheduling.py](../backend/tests/test_scheduling.py) |
 | Полный цикл, переносы, заметки и обращения | [test_workflow.py](../backend/tests/test_workflow.py) |
 | Конкурентная публикация на SQL Server | [test_sqlserver_publication.py](../backend/tests/test_sqlserver_publication.py), отдельная тестовая БД |
+| Очередь, аренда, повтор и авария координатора на SQL Server | [test_sqlserver_jobs.py](../backend/tests/test_sqlserver_jobs.py), отдельные БД с RCSI OFF и ON |
+| Ограничения расчёта и управление процессами Windows | [test_jobs_process.py](../backend/tests/test_jobs_process.py), [test_local_runtime.py](../backend/tests/test_local_runtime.py) |
+| Зашифрованные письма и обслуживание | [test_mail_jobs.py](../backend/tests/test_mail_jobs.py) |
+| Пагинация и свежая проверка доступа | [test_schedule_queries.py](../backend/tests/test_schedule_queries.py) |
 
 Обычные тесты используют изолированную SQLite БД и не подтверждают все особенности SQL Server. Для изменений транзакций и миграций нужен реальный SQL Server. Не обходить защиту запуска в [conftest.py](../backend/tests/conftest.py): она не позволяет тестам восстанавливать задания в рабочей БД разработчика.
 
@@ -91,7 +98,7 @@
 - Дополнительная пара требует явного разрешения администратора. Праздничная отмена и чрезвычайная отработка имеют разные правила учёта часов.
 - Опубликованную версию не редактируют; изменения готовят в следующем черновике. Изменение справочников может потребовать новой публикации.
 - Стабильные идентификаторы занятий нельзя заменять при переносе. Изменение уже материализованной нагрузки сейчас ограничено; будущая смена учебного плана потребует отдельного механизма версий.
-- Поддерживается один процесс API с одним фоновым исполнителем генерации. Дополнительные `uvicorn --workers` требуют предварительного изменения очереди и восстановления заданий.
+- Локальный launcher запускает один API, один координатор, один обработчик писем/обслуживания и Vite. Расчёт выполняется во временном отдельном процессе; SQL ограничивает число одновременных генераций до одной. Очередь проверена при конкуренции двух координаторов, но многосерверная эксплуатация и масштабирование API требуют отдельной проверки.
 - `MAIL_MODE=file` сохраняет письмо локально. Университетский SMTP и публичный HTTPS требуют отдельной настройки и проверки; это не подтверждается локальными тестами.
 
 Полный перечень оставшихся ограничений — в [verification.md](verification.md); происхождение демонстрационных данных — в [demo-data.md](demo-data.md).
