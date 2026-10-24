@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   Database,
@@ -7,6 +7,9 @@ import {
   UserRound,
   LogOut,
   Activity,
+  Menu,
+  X,
+  ChevronRight,
 } from "lucide-react";
 import {
   Account,
@@ -23,14 +26,29 @@ import { Planner } from "./Planner";
 import { PersonalSchedule } from "./Schedule";
 import { Feedback } from "./Feedback";
 import { LanguageProvider, LanguageSwitch, useLanguage } from "./i18n";
-import { ErrorBox, useAction } from "./common";
+import { ErrorBox, LoadingState, useAction } from "./common";
 import "./styles.css";
 function Workspace() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState("schedule");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const main = useRef<HTMLElement>(null);
   const { busy, error, run } = useAction();
+  const activePage = account?.must_change_password ? "account" : page;
+  useEffect(() => {
+    document.title = `${account ? t(activePage) : t("login")} · ChronoCampus`;
+  }, [activePage, lang, account]);
+  const navigate = (next: string) => {
+    setPage(next);
+    setMenuOpen(false);
+    requestAnimationFrame(() => {
+      main.current?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0 });
+    });
+  };
   useEffect(() => {
     setDiagnosticPage(page);
   }, [page]);
@@ -70,12 +88,13 @@ function Workspace() {
     };
   }, []);
   if (!ready)
-    return <div className="loading-screen">ChronoCampus · {t("loading")}</div>;
+    return <div className="loading-screen"><span className="brand">ChronoCampus</span><LoadingState /></div>;
   if (!account)
     return (
       <SignIn
         onLogin={(user) => {
           setAccount(user);
+          setMenuOpen(false);
           setPage(user.role === "admin" ? "planner" : "schedule");
         }}
       />
@@ -94,26 +113,42 @@ function Workspace() {
   ];
   return (
     <div className="workspace">
-      <aside className="sidebar">
+      <a className="skip-link" href="#main-content">{t("skipContent")}</a>
+      <aside className={`sidebar${menuOpen ? " nav-open" : ""}`} onKeyDown={(event) => {
+        if (event.key === "Escape" && menuOpen) {
+          setMenuOpen(false);
+          menuButton.current?.focus();
+        }
+      }}>
+        <div className="sidebar-top">
         <a
           href="#"
           className="brand"
           onClick={(e) => {
             e.preventDefault();
-            setPage("schedule");
+            navigate("schedule");
           }}
         >
           <span className="brand-mark">C</span>ChronoCampus
         </a>
+        <button ref={menuButton} type="button" className="icon-button mobile-menu"
+          aria-label={t(menuOpen ? "closeMenu" : "openMenu")}
+          aria-expanded={menuOpen} aria-controls="workspace-navigation"
+          onClick={() => setMenuOpen(!menuOpen)}>
+          {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+        </button>
+        </div>
         <p className="sidebar-label">{t(account.role)}</p>
-        <nav>
+        <nav id="workspace-navigation" aria-label={t("navigation")}>
           {navigation.map((item) => (
             <button
               key={item.id}
-              className={page === item.id ? "active" : ""}
-              onClick={() => setPage(item.id)}
+              className={activePage === item.id ? "active" : ""}
+              aria-current={activePage === item.id ? "page" : undefined}
+              disabled={account.must_change_password && item.id !== "account"}
+              onClick={() => navigate(item.id)}
             >
-              <item.icon size={19} />
+              <item.icon size={19} aria-hidden="true" />
               {t(item.id)}
             </button>
           ))}
@@ -130,7 +165,10 @@ function Workspace() {
       </aside>
       <div className="main-area">
         <header className="topbar">
-          <span>{t(page)}</span>
+          <div className="topbar-location"><span className="topbar-context">{t("workspaceLabel")}</span>
+            <ChevronRight size={15} className="topbar-divider" aria-hidden="true" />
+            <span>{t(activePage)}</span>
+          </div>
           <div className="inline">
             <LanguageSwitch />
             <button
@@ -146,11 +184,11 @@ function Workspace() {
                 })
               }
             >
-              <LogOut size={19} />
+              <LogOut size={19} aria-hidden="true" />
             </button>
           </div>
         </header>
-        <main>
+        <main id="main-content" ref={main} tabIndex={-1}>
           <ErrorBox error={error} />
           <DiagnosticBoundary
             key={page}
@@ -158,11 +196,13 @@ function Workspace() {
             reload={t("reload")}
           >
             {account.must_change_password || page === "account" ? (
+              <>
+              <div className="page-heading"><div><h1>{t("account")}</h1><p>{t("accountIntro")}</p></div></div>
               <section className="panel account-panel">
-                <h1>{t("account")}</h1>
-                <p>
-                  {account.display_name} · {account.email}
-                </p>
+                <div className="account-identity">
+                  <span className="avatar" aria-hidden="true">{account.display_name?.slice(0, 1) || "C"}</span>
+                  <div><h2>{account.display_name}</h2><p>{account.email}</p><span className="badge">{t(account.role)}</span></div>
+                </div>
                 {account.must_change_password && (
                   <p className="notice warning">
                     {t("password_change_required")}
@@ -175,6 +215,7 @@ function Workspace() {
                   }}
                 />
               </section>
+              </>
             ) : page === "catalogs" && account.role === "admin" ? (
               <Catalogs />
             ) : page === "planner" && account.role === "admin" ? (

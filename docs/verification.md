@@ -2,6 +2,17 @@
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 
+## UI polish
+
+This update changes the active React interface and its design documentation only. [DESIGN.md](../DESIGN.md) records the restrained visual direction and accessibility/responsive requirements. The backend, algorithms, migrations, dependencies and API contracts are unchanged.
+
+- Navigation now has a labelled mobile disclosure, current-page semantics, keyboard Escape handling and a skip link. Forms, tables, badges, dialogs and spacing share the existing teal visual language with larger readable text and reduced-motion support.
+- The planner explains the draft/generate/publish flow and has an explicit version-selection state. Catalogs group their sections, provide a mobile selector and search displayed reference labels. Schedule filters can be cleared; initial loading is distinct from an empty result. Password inputs have labelled visibility controls; support has explicit loading, empty, selected and closed states.
+- TypeScript, production build and Git whitespace checks passed. An AST comparison verified that all **29 API calls in seven changed screens retain their request arguments**. No backend suite rerun was needed for these UI-only source changes.
+- Render verification passed **36 UI states across RU/HY/EN**, including initial loading, password/reset fields, populated/cancelled lessons and dialog semantics; all **55 new translation keys** resolve in all three languages. Existing diagnostic render verification passed another **24 states**. CSS parsed successfully, and the eight checked text/action/semantic-color pairs exceeded 4.5:1 contrast; this is not a complete accessibility certification.
+- The running local frontend, updated stylesheet and proxied API readiness endpoint returned HTTP 200. The connected browser surface was unavailable, so **fresh browser screenshots, responsive visual inspection, keyboard interactions and password-toggle interactions were not executed**. Server rendering and source review do not replace those checks. Earlier screenshots were used only as baseline context.
+- Independent source review found one low-severity issue: the password visibility target was smaller than the design contract. It was enlarged to 40px on desktop and 44px on mobile; table action targets were aligned as well. No critical/high/medium issue was confirmed. The reviewer ran the build, while its command policy blocked some other checks; the parent session supplied the TypeScript and AST verification above. This is source-review evidence, not browser acceptance.
+
 ## Hosted CI, repository migration and delivery
 
 The active repository is [nemsime/ChronoCampus](https://github.com/nemsime/ChronoCampus). Its initial `main` was copied from the previous repository's remote `main`; the accumulated runtime and CI work is proposed in [PR #1](https://github.com/nemsime/ChronoCampus/pull/1). Git history and all existing remote branches were preserved. Earlier PRs and discussions remain in the previous repository.

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, ReactNode } from "react";
+import { useState, useRef, useEffect, ReactNode, InputHTMLAttributes } from "react";
+import { Eye, EyeOff, Inbox, LoaderCircle, X, type LucideIcon } from "lucide-react";
 import { ApiError } from "./api";
 import { useLanguage } from "./i18n";
 export function ErrorBox({ error }: { error: unknown }) {
@@ -56,6 +57,46 @@ export const dateLabel = (date: string, lang: string) =>
     weekday: "short",
   }).format(new Date(`${date}T12:00:00`));
 
+export function LoadingState({ label, compact = false }: { label?: string; compact?: boolean }) {
+  const { t } = useLanguage();
+  return (
+    <div className={`loading-state${compact ? " compact" : ""}`} role="status">
+      <LoaderCircle size={20} className="spin" aria-hidden="true" />
+      <span>{label || t("loading")}</span>
+    </div>
+  );
+}
+
+export function EmptyState({ icon: Icon = Inbox, title, description, children }: {
+  icon?: LucideIcon; title: string; description?: string; children?: ReactNode;
+}) {
+  return (
+    <div className="empty-state">
+      <span className="empty-state-icon"><Icon size={24} aria-hidden="true" /></span>
+      <h3>{title}</h3>
+      {description && <p>{description}</p>}
+      {children && <div className="empty-state-actions">{children}</div>}
+    </div>
+  );
+}
+
+export function PasswordInput(props: Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const { t } = useLanguage();
+  const [visible, setVisible] = useState(false);
+  return (
+    <span className="password-field">
+      <input {...props} type={visible ? "text" : "password"} />
+      <button type="button" className="icon-button password-toggle"
+        aria-label={t(visible ? "hidePassword" : "showPassword")}
+        title={t(visible ? "hidePassword" : "showPassword")}
+        aria-pressed={visible} disabled={props.disabled}
+        onClick={() => setVisible(!visible)}>
+        {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+      </button>
+    </span>
+  );
+}
+
 export function Dialog({
   children,
   labelledBy,
@@ -65,6 +106,7 @@ export function Dialog({
   labelledBy: string;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current!;
@@ -81,6 +123,10 @@ export function Dialog({
         onClose();
       }}
     >
+      <button type="button" className="icon-button dialog-close" onClick={onClose}
+        aria-label={t("closeDialog")} title={t("closeDialog")}>
+        <X size={20} aria-hidden="true" />
+      </button>
       {children}
     </dialog>
   );

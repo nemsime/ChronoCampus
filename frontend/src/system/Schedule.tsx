@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, SlidersHorizontal, StickyNote } from "lucide-react";
 import { api, ApiError, Row } from "./api";
-import { dateLabel, Dialog, ErrorBox, useAction } from "./common";
+import { dateLabel, Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export function LessonList({
   rows,
@@ -49,7 +50,12 @@ export function LessonList({
   useEffect(() => setPage(0), [filters, rows]);
   return (
     <>
-      {!serverPage && <div className="filters">
+      {!serverPage && <>
+      <div className="schedule-filter-bar">
+        <h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}</h2>
+        {Object.values(filters).some(Boolean) && <button className="link" onClick={() => setFilters({})}>{t("clearFilters")}</button>}
+      </div>
+      <div className="filters">
         <label>
           {t("starts_on")}
           <input
@@ -91,7 +97,7 @@ export function LessonList({
             </select>
           </label>
         ))}
-      </div>}
+      </div></>}
       <div className="lesson-list">
         {(serverPage ? visible : visible.slice(page * 40, (page + 1) * 40)).map((row) => (
           <article
@@ -136,7 +142,7 @@ export function LessonList({
           </article>
         ))}
       </div>
-      {!visible.length && <p className="empty">{t("empty")}</p>}
+      {!visible.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
       {!serverPage && visible.length > 40 && (
         <div className="pagination">
           <button
@@ -182,6 +188,7 @@ export function PersonalSchedule() {
   const rangeDays = (Date.parse(range.end) - Date.parse(range.start)) / 86400000;
   const validRange = Number.isFinite(rangeDays) && rangeDays >= 0 && rangeDays <= 30;
   const cursor = cursors[cursors.length - 1];
+  const activeFilters = Object.values(filters).filter(Boolean).length;
   useEffect(() => {
     let active = true;
     let inFlight = false;
@@ -245,22 +252,27 @@ export function PersonalSchedule() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">CHRONOCAMPUS</p>
           <h1>{t("schedule")}</h1>
-          <p>{t("unpublished")}</p>
+          <p>{t("scheduleIntro")}</p>
         </div>
         <button
           className="secondary"
           disabled={busy || loading}
           onClick={() => void refresh()}
         >
+          <RefreshCw size={16} className={loading ? "spin" : undefined} aria-hidden="true" />
           {t("refresh")}
         </button>
       </div>
       <ErrorBox error={error} />
       <ErrorBox error={readError} />
-      <section className="panel">
-        <p>{t("scheduleRangeHint")}</p>
+      <section className="panel" aria-busy={loading}>
+        <div className="schedule-filter-bar">
+          <div><h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}
+            {activeFilters > 0 && <span className="badge">{activeFilters}</span>}
+          </h2><p>{t("scheduleRangeHint")}</p></div>
+          {activeFilters > 0 && <button className="link" onClick={() => { setFilters({}); setCursors([null]); }}>{t("clearFilters")}</button>}
+        </div>
         <div className="filters">
           {(["start", "end"] as const).map((key) => <label key={key}>
             {t(key === "start" ? "starts_on" : "ends_on")}
@@ -278,8 +290,10 @@ export function PersonalSchedule() {
             </select>
           </label>)}
         </div>
-        {range.start && !validRange && <p role="alert">{t("schedule_range_required")}</p>}
-        {loading && <p role="status">{t("scheduleLoading")}</p>}
+        {range.start && !validRange && <p className="notice warning" role="alert">{t("schedule_range_required")}</p>}
+        {(loading || (!facets && !readError)) && <LoadingState label={t("scheduleLoading")} compact={rows.length > 0} />}
+        {rows.length > 0 && <>
+        <div className="schedule-results"><span className="count-label">{t("lessonsOnPage")}: {rows.length}</span></div>
         <LessonList
           serverPage
           rows={rows}
@@ -294,20 +308,24 @@ export function PersonalSchedule() {
                 );
               }}
             >
-              {notes.some((n) => n.occurrence_id === row.occurrence_id)
-                ? "✎ "
-                : ""}
+              <StickyNote size={16} aria-hidden="true" />
               {t("note")}
+              {notes.some((n) => n.occurrence_id === row.occurrence_id) && <span className="note-dot" aria-hidden="true" />}
             </button>
           )}
         />
-        <div className="pagination">
+        </>}
+        {!loading && !readError && facets && !rows.length && (
+          !facets.date_bounds.start ? <EmptyState icon={CalendarDays} title={t("noPublishedTitle")} description={t("noPublishedHelp")} />
+            : validRange ? <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} /> : null
+        )}
+        {(rows.length > 0 || cursors.length > 1) && <div className="pagination">
           <button className="secondary" disabled={loading || cursors.length === 1}
-            onClick={() => setCursors(cursors.slice(0, -1))}>{t("previous_page")}</button>
-          <span>{cursors.length}</span>
+            onClick={() => setCursors(cursors.slice(0, -1))}><ChevronLeft size={16} aria-hidden="true" />{t("previous_page")}</button>
+          <span className="count-label">{t("pageLabel")} {cursors.length}</span>
           <button className="secondary" disabled={loading || !nextCursor}
-            onClick={() => nextCursor && setCursors([...cursors, nextCursor])}>{t("next_page")}</button>
-        </div>
+            onClick={() => nextCursor && setCursors([...cursors, nextCursor])}>{t("next_page")}<ChevronRight size={16} aria-hidden="true" /></button>
+        </div>}
       </section>
       {selected && (
         <Dialog labelledBy="note-title" onClose={() => setSelected(null)}>

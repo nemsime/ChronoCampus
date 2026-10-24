@@ -9,12 +9,14 @@ import { ruleMessages } from "./ruleMessages";
 import { diagnosticWords } from "./diagnosticWords";
 import { runtimeWords } from "./runtimeWords";
 import { scheduleWords } from "./scheduleWords";
+import { uiWords } from "./uiWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   ...ruleMessages,
   ...diagnosticWords,
   ...runtimeWords,
   ...scheduleWords,
+  ...uiWords,
   schedule: ["Расписание", "Դասացուցակ", "Timetable"],
   catalogs: ["Данные и правила", "Տվյալներ և կանոններ", "Data & rules"],
   planner: ["Генератор", "Գեներատոր", "Planner"],

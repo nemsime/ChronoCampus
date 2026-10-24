@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { MessageSquare, Plus } from "lucide-react";
 import { Account, api, Row } from "./api";
-import { Dialog, ErrorBox, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export function Feedback({ account }: { account: Account }) {
   const { t, lang } = useLanguage();
@@ -8,8 +9,16 @@ export function Feedback({ account }: { account: Account }) {
   const [active, setActive] = useState<number | null>(null);
   const [compose, setCompose] = useState(false);
   const [reply, setReply] = useState("");
+  const [loading, setLoading] = useState(true);
   const { busy, error, run } = useAction();
-  const refresh = async () => setThreads(await api("/feedback"));
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      setThreads(await api("/feedback"));
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     void run(refresh);
   }, []);
@@ -18,25 +27,41 @@ export function Feedback({ account }: { account: Account }) {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">CHRONOCAMPUS / SUPPORT</p>
           <h1>{t("feedback")}</h1>
+          <p className="page-subtitle">{t("supportDescription")}</p>
         </div>
-        <button onClick={() => setCompose(true)}>{t("add")}</button>
+        <button onClick={() => setCompose(true)}>
+          <Plus size={18} aria-hidden="true" />
+          {t("supportNewRequest")}
+        </button>
       </div>
       <ErrorBox error={error} />
+      {!!error && (
+        <button className="secondary" disabled={busy} onClick={() => void run(refresh)}>
+          {t("supportRetry")}
+        </button>
+      )}
       <div className="support-layout">
-        <aside className="panel thread-list">
+        <aside className="panel thread-list" aria-busy={loading}>
+          <div className="thread-list-heading">
+            <h2>{t("supportRequests")}</h2>
+            <span className="count-label">{threads.length}</span>
+          </div>
+          {loading && <LoadingState label={t("supportLoading")} compact />}
           {threads.map((thread) => (
             <button
               className={active === thread.id ? "active" : ""}
               key={thread.id}
+              aria-pressed={active === thread.id}
               onClick={() => {
                 setActive(thread.id);
                 setReply("");
               }}
             >
               <strong>{thread.subject}</strong>
-              <span className="badge">{t(thread.status)}</span>
+              <span className={`badge${thread.status === "closed" ? " success" : thread.status === "in_progress" ? " warn" : ""}`}>
+                {t(thread.status)}
+              </span>
               <small>
                 {new Date(thread.created_at + "Z").toLocaleDateString(
                   lang === "hy" ? "hy-AM" : lang,
@@ -44,9 +69,11 @@ export function Feedback({ account }: { account: Account }) {
               </small>
             </button>
           ))}
-          {!threads.length && <p className="empty">{t("empty")}</p>}
+          {!loading && !error && !threads.length && (
+            <p className="empty">{t("supportEmptyTitle")}</p>
+          )}
         </aside>
-        <section className="panel">
+        <section className="panel conversation-panel">
           {selected ? (
             <>
               <div className="toolbar">
@@ -72,10 +99,15 @@ export function Feedback({ account }: { account: Account }) {
                     ))}
                   </select>
                 ) : (
-                  <span className="badge">{t(selected.status)}</span>
+                  <span className={`badge${selected.status === "closed" ? " success" : selected.status === "in_progress" ? " warn" : ""}`}>
+                    {t(selected.status)}
+                  </span>
                 )}
               </div>
               <div className="messages">
+                {!selected.messages.length && (
+                  <EmptyState icon={MessageSquare} title={t("supportNoMessages")} description={t("supportNoMessagesDescription")} />
+                )}
                 {selected.messages.map((message: Row) => (
                   <article
                     key={message.id}
@@ -101,6 +133,7 @@ export function Feedback({ account }: { account: Account }) {
               {selected.status !== "closed" && (
                 <form
                   className="form-stack"
+                  aria-busy={busy}
                   onSubmit={(e) => {
                     e.preventDefault();
                     void run(async () => {
@@ -121,20 +154,30 @@ export function Feedback({ account }: { account: Account }) {
                       onChange={(e) => setReply(e.target.value)}
                     />
                   </label>
-                  <button disabled={busy}>{t("reply")}</button>
+                  <button disabled={busy}>{t(busy ? "supportSending" : "reply")}</button>
                 </form>
               )}
+              {selected.status === "closed" && (
+                <p className="notice">{t("supportClosedNotice")}</p>
+              )}
             </>
-          ) : (
-            <p className="empty">{t("select")}</p>
+          ) : loading && !threads.length ? (
+            <LoadingState label={t("supportLoading")} />
+          ) : error && !threads.length ? null : (
+            <EmptyState
+              icon={MessageSquare}
+              title={t(threads.length ? "supportSelectTitle" : "supportEmptyTitle")}
+              description={t(threads.length ? "supportSelectDescription" : "supportEmptyDescription")}
+            />
           )}
         </section>
       </div>
       {compose && (
         <Dialog labelledBy="feedback-title" onClose={() => setCompose(false)}>
-          <h2 id="feedback-title">{t("feedback")}</h2>
+          <h2 id="feedback-title">{t("supportNewRequest")}</h2>
           <form
             className="form-stack"
+            aria-busy={busy}
             onSubmit={(e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -159,7 +202,7 @@ export function Feedback({ account }: { account: Account }) {
             </label>
             <ErrorBox error={error} />
             <div className="actions">
-              <button disabled={busy}>{t("save")}</button>
+              <button disabled={busy}>{t(busy ? "supportSending" : "supportSendRequest")}</button>
               <button
                 type="button"
                 className="secondary"
