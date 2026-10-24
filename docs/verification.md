@@ -2,6 +2,17 @@
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 
+## Navigation and long-page usability
+
+The follow-up stays within the active UI. Desktop navigation can collapse to an icon rail, with named controls and a locally remembered preference; mobile keeps the full-label disclosure. A sticky desktop header, section links in the planner/diagnostics and a conditional back-to-top button keep navigation reachable. Section targets include a scroll offset and keyboard focus handling.
+
+- Catalogs paginate 25 rows, with controls at both ends, page clamping after deletions and reset on search/resource changes. Editing opens in the existing native modal with errors and save/cancel controls inside it. Closing is disabled while a request is pending.
+- Planner lessons use 25-row pages and preserve the current page across data refreshes when still valid. The published schedule requests 25 records per existing cursor page instead of 100; API endpoints, cursor semantics and backend code are unchanged. Both lists move to the start of results on an explicit page change.
+- Large workload reports have bounded, keyboard-focusable scrolling and sticky column headings. Catalog navigation and support requests remain available while scrolling; support messages have a bounded conversation area that opens at the latest message.
+- TypeScript and the production build passed. Existing checks rendered 36 UI states and 24 diagnostic states across RU/HY/EN. All 66 UI translation keys resolved. Another 36 focused checks covered page boundaries/callbacks, 25-row rendering, section-link targets/focus callbacks and modal close guards across the three languages. These are server-rendering and direct handler checks, not browser interaction tests.
+- AST comparison found the same 29 API call expressions across seven screens; this does not obscure the intentional schedule page-size change above. No backend or dependency changes were made. Git whitespace checks passed.
+- The connected browser inventory remains empty. Fresh visual inspection at desktop/mobile widths, persisted sidebar behavior in a browser and native focus restoration after closing a dialog remain unverified; no browser acceptance is claimed.
+
 ## UI polish
 
 This update changes the active React interface and its design documentation only. [DESIGN.md](../DESIGN.md) records the restrained visual direction and accessibility/responsive requirements. The backend, algorithms, migrations, dependencies and API contracts are unchanged.

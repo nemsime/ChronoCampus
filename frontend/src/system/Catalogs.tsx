@@ -1,8 +1,8 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Database, Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { api, Row } from "./api";
 import { catalogSchema, Field, resourceNames } from "./catalogSchema";
-import { EmptyState, ErrorBox, LoadingState, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export type CatalogData = Record<string, Row[]>;
 export const rowLabel = (row: Row) =>
@@ -234,7 +234,9 @@ export function Catalogs() {
   const [search, setSearch] = useState("");
   const [slots, setSlots] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-  const { busy, error, run } = useAction();
+  const [page, setPage] = useState(0);
+  const results = useRef<HTMLElement>(null);
+  const { busy, error, setError, run } = useAction();
   const refresh = async () => {
     setLoading(true);
     try { setData(await loadCatalogs()); }
@@ -244,6 +246,7 @@ export function Catalogs() {
     void run(refresh);
   }, []);
   function open(row?: Row) {
+    setError(null);
     setEditing(row?.id ?? null);
     setDraft(
       Object.fromEntries(
@@ -344,10 +347,25 @@ export function Catalogs() {
     [...Object.values(row), ...fields.map((field) => display(field, row)).filter((value) => typeof value === "string")]
       .join(" ").toLocaleLowerCase().includes(query),
   );
+  const pageSize = 25;
+  const lastPage = Math.max(0, Math.ceil(rows.length / pageSize) - 1);
+  const currentPage = Math.min(page, lastPage);
+  useEffect(() => setPage((value) => Math.min(value, lastPage)), [lastPage]);
+  const pagination = <ListPagination page={currentPage} pageSize={pageSize} total={rows.length} onChange={(next) => {
+    setPage(next);
+    results.current?.focus({ preventScroll: true });
+    results.current?.scrollIntoView({ block: "start" });
+  }} />;
   function selectResource(name: string) {
     setResource(name);
     setDraft(null);
     setSearch("");
+    setPage(0);
+    setError(null);
+    requestAnimationFrame(() => {
+      results.current?.focus({ preventScroll: true });
+      results.current?.scrollIntoView({ block: "start" });
+    });
   }
   return (
     <>
@@ -393,7 +411,7 @@ export function Catalogs() {
             </div>
           ))}
         </nav>
-        <section className="panel catalog-content">
+        <section className="panel catalog-content results-anchor" ref={results} tabIndex={-1} aria-label={t(resource)}>
           <div className="section-heading">
             <h2>{t(resource)}</h2>
             <button onClick={() => open()} disabled={busy}>
@@ -409,20 +427,19 @@ export function Catalogs() {
                   type="search"
                   placeholder={t("search")}
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 />
               </span>
             </label>
             {search && <button className="secondary search-clear" onClick={() => setSearch("")}><X size={16} aria-hidden="true" />{t("catalogClearSearch")}</button>}
             {data[resource] && <span className="count-label" role="status">{t("catalogResults")}: {rows.length} / {data[resource].length}</span>}
           </div>
-          <ErrorBox error={error} />
+          {!draft && <ErrorBox error={error} />}
           {draft && (
-            <form onSubmit={save} className="editor">
-              <div className="section-heading">
-                <h3>{t(editing ? "edit" : "add")} · {t(resource)}{editing ? ` · #${editing}` : ""}</h3>
-                <button className="secondary" type="button" onClick={() => setDraft(null)}><X size={16} aria-hidden="true" />{t("cancel")}</button>
-              </div>
+            <Dialog labelledBy="catalog-editor-title" className="catalog-editor-modal" closeDisabled={busy} onClose={() => setDraft(null)}>
+            <h2 id="catalog-editor-title">{t(editing ? "edit" : "add")} · {t(resource)}{editing ? ` · #${editing}` : ""}</h2>
+            <form onSubmit={save} className="catalog-editor" aria-busy={busy}>
+              <ErrorBox error={error} />
               {resource === "calendars" && (
                 <p className="notice">{t("unavailableCalendar")}</p>
               )}
@@ -464,14 +481,18 @@ export function Catalogs() {
                 <button
                   className="secondary"
                   type="button"
+                  disabled={busy}
                   onClick={() => setDraft(null)}
                 >
                   {t("cancel")}
                 </button>
               </div>
             </form>
+            </Dialog>
           )}
           {(busy || loading) && <LoadingState compact={rows.length > 0} />}
+          <div>
+          {pagination}
           {rows.length > 0 && <div className="table-scroll" aria-busy={busy || loading} tabIndex={0} role="region" aria-label={t(resource)}>
             <table>
               <thead>
@@ -483,14 +504,14 @@ export function Catalogs() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
+                {rows.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map((row) => (
                   <tr key={row.id}>
                     {fields.map((f) => (
                       <td key={f.key}>{display(f, row)}</td>
                     ))}
                     <td>
                       <div className="inline">
-                        <button className="secondary" onClick={() => open(row)}>
+                        <button className="secondary" disabled={busy} onClick={() => open(row)}>
                           <Pencil size={16} aria-hidden="true" />{t("edit")}
                         </button>
                         {resource !== "users" && (
@@ -518,6 +539,7 @@ export function Catalogs() {
               </tbody>
             </table>
           </div>}
+          {pagination}
           {!rows.length && !busy && !loading && !error && (
             <EmptyState icon={search ? Search : Database} title={t(search ? "catalogSearchEmptyTitle" : "catalogEmptyTitle")} description={t(search ? "catalogSearchEmptyHelp" : "catalogEmptyHelp")}>
               {search ? (
@@ -527,6 +549,7 @@ export function Catalogs() {
               ) : null}
             </EmptyState>
           )}
+          </div>
         </section>
       </div>
     </>

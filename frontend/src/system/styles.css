@@ -284,6 +284,7 @@ small {
   gap: 20px;
 }
 .workspace {
+  --section-offset: 84px;
   display: flex;
   min-height: 100vh;
 }
@@ -372,6 +373,9 @@ small {
   min-width: 0;
 }
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
   min-height: 68px;
   padding: 12px 32px;
   border-bottom: 1px solid #e4eaf0;
@@ -392,7 +396,7 @@ small {
   color: #225b73;
 }
 .main-area main {
-  padding: 30px 32px 48px;
+  padding: 30px 32px 92px;
   max-width: 1560px;
   margin: 0 auto;
 }
@@ -863,10 +867,43 @@ tbody tr:hover {
   margin-top: 28px;
 }
 .sidebar-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; }
+.sidebar-top, .sidebar-label { flex-shrink: 0; }
+.sidebar-identity { min-width: 0; }
+.sidebar-identity small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.back-to-top { position: fixed; right: 24px; bottom: 20px; z-index: 35; box-shadow: 0 3px 16px #153e5c18; }
+body:has(dialog[open]) .back-to-top { visibility: hidden; }
+.section-links { position: sticky; top: 68px; z-index: 20; display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; margin: 0 0 18px; background: var(--canvas); border-bottom: 1px solid var(--border); }
+.section-links a { display: inline-flex; align-items: center; flex-shrink: 0; min-height: 40px; padding: 8px 12px; color: var(--accent); text-decoration: none; font-weight: 600; border-radius: 8px; white-space: nowrap; }
+.section-links a:hover { background: #e5eff2; }
+main:has(.section-links) { --section-offset: 144px; }
+.section-target, .results-anchor { scroll-margin-top: var(--section-offset); }
+.section-target:focus, .results-anchor:focus { outline: none; }
+.section-target:focus-visible, .results-anchor:focus-visible { outline: 2px solid #67b7c7; outline-offset: 5px; border-radius: 8px; }
+.section-title { margin: 24px 0 20px; }
+.result-pagination { justify-content: space-between; margin: 14px 0; gap: 10px; }
+.result-pagination .inline { flex-wrap: nowrap; }
+.result-pagination button { min-width: 40px; }
+.bounded-table { max-height: 420px; max-height: min(55dvh, 420px); overflow-y: auto; }
+.bounded-table th { position: sticky; top: 0; z-index: 1; }
+.catalog-editor-modal { width: 840px; }
+.catalog-editor .actions { position: sticky; bottom: -30px; background: white; padding: 16px 0; border-top: 1px solid var(--border); margin-bottom: -16px; z-index: 2; }
+.messages { max-height: 460px; max-height: clamp(180px, 45dvh, 460px); overflow-y: auto; padding: 4px; scrollbar-gutter: stable; }
+.messages:focus-visible, .unplaced:focus-visible { outline: 3px solid #67b7c7; outline-offset: 3px; }
+@media (min-width: 761px) {
+  .sidebar-collapsed .sidebar { width: 76px; padding-left: 12px; padding-right: 12px; }
+  .sidebar-collapsed .main-area { margin-left: 76px; width: calc(100% - 76px); }
+  .sidebar-collapsed .sidebar-top { justify-content: center; }
+  .sidebar-collapsed .brand-name, .sidebar-collapsed .nav-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sidebar-collapsed .sidebar-label, .sidebar-collapsed .sidebar-identity { display: none; }
+  .sidebar-collapsed .sidebar nav button { justify-content: center; padding: 12px; }
+  .sidebar-collapsed .sidebar-footer { justify-content: center; }
+  .catalog-nav, .thread-list { position: sticky; top: 84px; align-self: start; max-height: calc(100dvh - 108px); overflow-y: auto; scrollbar-gutter: stable; }
+}
 .mobile-menu { display: none; }
-.topbar-location { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 13px; }
+.topbar-location { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; font-size: 13px; }
+.topbar-location .sidebar-toggle { flex-shrink: 0; }
 .topbar-context, .topbar-divider { color: var(--muted); }
-.topbar-location > span:last-child { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.topbar-location > span:last-child { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topbar .inline { flex-wrap: nowrap; flex-shrink: 0; }
 .topbar select { max-width: 160px; }
 .skip-link { position: fixed; z-index: 100; left: 16px; top: 12px; padding: 12px 18px; background: white; color: var(--accent); border-radius: 8px; transform: translateY(-160%); }
@@ -956,6 +993,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .metric-list dt { color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 @media (max-width: 1100px) {
+  .topbar-context, .topbar-divider { display: none; }
   .sidebar {
     width: 224px;
     padding: 25px 14px;
@@ -1008,6 +1046,7 @@ body:has(dialog[open]) { overflow: hidden; }
     padding: 12px 16px;
     gap: 0;
   }
+  .sidebar-toggle { display: none; }
   .sidebar-top { margin-bottom: 0; }
   .sidebar .brand { font-size: 18px; }
   .mobile-menu { display: inline-flex; color: white; }
@@ -1040,6 +1079,7 @@ body:has(dialog[open]) { overflow: hidden; }
     width: 100%;
   }
   .topbar {
+    position: static;
     min-height: 60px;
     padding: 10px 16px;
   }
@@ -1047,7 +1087,7 @@ body:has(dialog[open]) { overflow: hidden; }
   .topbar-location { font-size: 12px; }
   .topbar select { max-width: 130px; }
   .main-area main {
-    padding: 24px 16px 40px;
+    padding: 24px 16px 88px;
   }
   .page-heading {
     align-items: start;
@@ -1068,7 +1108,12 @@ body:has(dialog[open]) { overflow: hidden; }
   .filters input, .filters select { font-size: 16px; }
   .filters label { flex-basis: calc(50% - 12px); min-width: 0; }
   .toolbar-field { flex-basis: 100%; max-width: none; }
-  .planner-steps { grid-template-columns: 1fr; gap: 18px; }
+  .planner-steps { display: none; }
+  .section-links { margin-bottom: 16px; }
+  .section-links a { min-height: 44px; padding: 8px 10px; font-size: 13px; }
+  .back-to-top { right: 16px; bottom: 16px; }
+  .catalog-editor .actions { bottom: -22px; }
+  .result-pagination > .count-label { flex-basis: 100%; }
   .empty-state { padding: 36px 12px; }
   .section-heading { gap: 10px; }
   .search-field { width: 100%; max-width: none; }

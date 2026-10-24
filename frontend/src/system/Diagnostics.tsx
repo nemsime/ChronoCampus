@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, Row } from "./api";
-import { ErrorBox, LoadingState } from "./common";
+import { ErrorBox, LoadingState, SectionLinks } from "./common";
 import { RefreshCw } from "lucide-react";
 import { useLanguage } from "./i18n";
 
@@ -530,7 +530,12 @@ export function Diagnostics() {
       {!!system.error && data && (
         <p className="notice warning">{t("staleData")}</p>
       )}
-      <section className="panel diagnostic-panel">
+      <SectionLinks items={[
+        { id: "diagnostics-overview", label: t("systemOverview") },
+        { id: "diagnostics-jobs", label: t("queues") },
+        { id: "diagnostics-logs", label: t("diagnosticLogs") },
+      ]} />
+      <section id="diagnostics-overview" className="panel diagnostic-panel section-target" tabIndex={-1} aria-label={t("systemOverview")}>
         <div className="toolbar">
           <label className="check">
             <input
@@ -614,8 +619,8 @@ export function Diagnostics() {
         )}
         <p>{t("processScope")}</p>
       </section>
-      <DurableJobs monitor={jobs} />
-      <section className="panel diagnostic-panel">
+      <section id="diagnostics-jobs" className="section-target" tabIndex={-1} aria-label={t("queues")}><DurableJobs monitor={jobs} /></section>
+      <section id="diagnostics-logs" className="panel diagnostic-panel section-target" tabIndex={-1} aria-label={t("diagnosticLogs")}>
         <div
           className="diagnostic-tabs"
           role="group"

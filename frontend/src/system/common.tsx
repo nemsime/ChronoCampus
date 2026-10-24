@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, ReactNode, InputHTMLAttributes } from "react";
-import { Eye, EyeOff, Inbox, LoaderCircle, X, type LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Inbox, LoaderCircle, X, type LucideIcon } from "lucide-react";
 import { ApiError } from "./api";
 import { useLanguage } from "./i18n";
 export function ErrorBox({ error }: { error: unknown }) {
@@ -97,14 +97,47 @@ export function PasswordInput(props: Omit<InputHTMLAttributes<HTMLInputElement>,
   );
 }
 
+export function SectionLinks({ items }: { items: { id: string; label: string }[] }) {
+  const { t } = useLanguage();
+  return <nav className="section-links" aria-label={t("pageSections")}>
+    {items.map(({ id, label }) => <a key={id} href={`#${id}`} onClick={(event) => {
+      const target = document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: "start" });
+    }}>{label}</a>)}
+  </nav>;
+}
+
+export function ListPagination({ page, pageSize, total, onChange }: {
+  page: number; pageSize: number; total: number; onChange: (page: number) => void;
+}) {
+  const { t } = useLanguage();
+  if (total <= pageSize) return null;
+  const pages = Math.ceil(total / pageSize);
+  return <nav className="pagination result-pagination" aria-label={t("paginationLabel")}>
+    <span className="count-label">{t("shownRecords")} {page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} {t("ofTotal")} {total}</span>
+    <div className="inline">
+      <button type="button" className="secondary" aria-label={t("previous_page")} disabled={page === 0} onClick={() => onChange(page - 1)}><ChevronLeft size={18} aria-hidden="true" /></button>
+      <span className="count-label">{t("pageLabel")} {page + 1} / {pages}</span>
+      <button type="button" className="secondary" aria-label={t("next_page")} disabled={page + 1 >= pages} onClick={() => onChange(page + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
+    </div>
+  </nav>;
+}
+
 export function Dialog({
   children,
   labelledBy,
   onClose,
+  className = "",
+  closeDisabled = false,
 }: {
   children: ReactNode;
   labelledBy: string;
   onClose: () => void;
+  className?: string;
+  closeDisabled?: boolean;
 }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDialogElement>(null);
@@ -115,15 +148,15 @@ export function Dialog({
   }, []);
   return (
     <dialog
-      className="modal"
+      className={`modal${className ? ` ${className}` : ""}`}
       aria-labelledby={labelledBy}
       ref={ref}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        if (!closeDisabled) onClose();
       }}
     >
-      <button type="button" className="icon-button dialog-close" onClick={onClose}
+      <button type="button" className="icon-button dialog-close" onClick={onClose} disabled={closeDisabled}
         aria-label={t("closeDialog")} title={t("closeDialog")}>
         <X size={20} aria-hidden="true" />
       </button>

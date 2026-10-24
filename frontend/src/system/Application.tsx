@@ -10,6 +10,9 @@ import {
   Menu,
   X,
   ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ArrowUp,
 } from "lucide-react";
 import {
   Account,
@@ -34,10 +37,25 @@ function Workspace() {
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState("schedule");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("chronocampus.sidebarCollapsed") === "true"; }
+    catch { return false; }
+  });
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const { busy, error, run } = useAction();
   const activePage = account?.must_change_password ? "account" : page;
+  useEffect(() => {
+    try { localStorage.setItem("chronocampus.sidebarCollapsed", String(sidebarCollapsed)); }
+    catch { /* Navigation still works when browser storage is unavailable. */ }
+  }, [sidebarCollapsed]);
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 600);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   useEffect(() => {
     document.title = `${account ? t(activePage) : t("login")} · ChronoCampus`;
   }, [activePage, lang, account]);
@@ -112,7 +130,7 @@ function Workspace() {
     { id: "account", icon: UserRound },
   ];
   return (
-    <div className="workspace">
+    <div className={`workspace${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <a className="skip-link" href="#main-content">{t("skipContent")}</a>
       <aside className={`sidebar${menuOpen ? " nav-open" : ""}`} onKeyDown={(event) => {
         if (event.key === "Escape" && menuOpen) {
@@ -129,7 +147,7 @@ function Workspace() {
             navigate("schedule");
           }}
         >
-          <span className="brand-mark">C</span>ChronoCampus
+          <span className="brand-mark" aria-hidden="true">C</span><span className="brand-name">ChronoCampus</span>
         </a>
         <button ref={menuButton} type="button" className="icon-button mobile-menu"
           aria-label={t(menuOpen ? "closeMenu" : "openMenu")}
@@ -144,12 +162,14 @@ function Workspace() {
             <button
               key={item.id}
               className={activePage === item.id ? "active" : ""}
+              title={t(item.id)}
+              aria-label={t(item.id)}
               aria-current={activePage === item.id ? "page" : undefined}
               disabled={account.must_change_password && item.id !== "account"}
               onClick={() => navigate(item.id)}
             >
               <item.icon size={19} aria-hidden="true" />
-              {t(item.id)}
+              <span className="nav-label">{t(item.id)}</span>
             </button>
           ))}
         </nav>
@@ -157,7 +177,7 @@ function Workspace() {
           <span className="avatar">
             {account.display_name?.slice(0, 1) || "C"}
           </span>
-          <div>
+          <div className="sidebar-identity">
             <strong>{account.display_name}</strong>
             <small>{account.email}</small>
           </div>
@@ -165,7 +185,15 @@ function Workspace() {
       </aside>
       <div className="main-area">
         <header className="topbar">
-          <div className="topbar-location"><span className="topbar-context">{t("workspaceLabel")}</span>
+          <div className="topbar-location">
+            <button type="button" className="icon-button sidebar-toggle"
+              aria-label={t(sidebarCollapsed ? "expandSidebar" : "collapseSidebar")}
+              title={t(sidebarCollapsed ? "expandSidebar" : "collapseSidebar")}
+              aria-expanded={!sidebarCollapsed} aria-controls="workspace-navigation"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+              {sidebarCollapsed ? <PanelLeftOpen size={20} aria-hidden="true" /> : <PanelLeftClose size={20} aria-hidden="true" />}
+            </button>
+            <span className="topbar-context">{t("workspaceLabel")}</span>
             <ChevronRight size={15} className="topbar-divider" aria-hidden="true" />
             <span>{t(activePage)}</span>
           </div>
@@ -230,6 +258,10 @@ function Workspace() {
           </DiagnosticBoundary>
         </main>
       </div>
+      {showBackToTop && <button type="button" className="back-to-top secondary" onClick={() => {
+        main.current?.focus({ preventScroll: true });
+        window.scrollTo({ top: 0 });
+      }}><ArrowUp size={17} aria-hidden="true" />{t("backToTop")}</button>}
     </div>
   );
 }

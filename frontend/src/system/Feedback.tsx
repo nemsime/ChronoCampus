@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageSquare, Plus } from "lucide-react";
 import { Account, api, Row } from "./api";
 import { Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
@@ -23,6 +23,11 @@ export function Feedback({ account }: { account: Account }) {
     void run(refresh);
   }, []);
   const selected = threads.find((row) => row.id === active);
+  const conversation = useRef<HTMLElement>(null);
+  const messages = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (messages.current) messages.current.scrollTop = messages.current.scrollHeight;
+  }, [active, selected?.messages.length]);
   return (
     <>
       <div className="page-heading">
@@ -56,6 +61,10 @@ export function Feedback({ account }: { account: Account }) {
               onClick={() => {
                 setActive(thread.id);
                 setReply("");
+                requestAnimationFrame(() => {
+                  conversation.current?.focus({ preventScroll: true });
+                  conversation.current?.scrollIntoView({ block: "start" });
+                });
               }}
             >
               <strong>{thread.subject}</strong>
@@ -73,7 +82,7 @@ export function Feedback({ account }: { account: Account }) {
             <p className="empty">{t("supportEmptyTitle")}</p>
           )}
         </aside>
-        <section className="panel conversation-panel">
+        <section className="panel conversation-panel section-target" ref={conversation} tabIndex={-1} aria-label={selected?.subject || t("feedback")}>
           {selected ? (
             <>
               <div className="toolbar">
@@ -104,7 +113,7 @@ export function Feedback({ account }: { account: Account }) {
                   </span>
                 )}
               </div>
-              <div className="messages">
+              <div className="messages" ref={messages} tabIndex={0} role="region" aria-label={t("feedback")}>
                 {!selected.messages.length && (
                   <EmptyState icon={MessageSquare} title={t("supportNoMessages")} description={t("supportNoMessagesDescription")} />
                 )}

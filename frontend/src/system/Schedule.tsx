@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, SlidersHorizontal, StickyNote } from "lucide-react";
 import { api, ApiError, Row } from "./api";
-import { dateLabel, Dialog, EmptyState, ErrorBox, LoadingState, useAction } from "./common";
+import { dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export function LessonList({
   rows,
@@ -47,7 +47,17 @@ export function LessonList({
     [rows, filters, serverPage],
   );
   const [page, setPage] = useState(0);
-  useEffect(() => setPage(0), [filters, rows]);
+  const results = useRef<HTMLDivElement>(null);
+  const pageSize = 25;
+  const lastPage = Math.max(0, Math.ceil(visible.length / pageSize) - 1);
+  const currentPage = Math.min(page, lastPage);
+  useEffect(() => setPage(0), [filters]);
+  useEffect(() => setPage((value) => Math.min(value, lastPage)), [lastPage]);
+  const pagination = !serverPage && <ListPagination page={currentPage} pageSize={pageSize} total={visible.length} onChange={(next) => {
+    setPage(next);
+    results.current?.focus({ preventScroll: true });
+    results.current?.scrollIntoView({ block: "start" });
+  }} />;
   return (
     <>
       {!serverPage && <>
@@ -98,8 +108,10 @@ export function LessonList({
           </label>
         ))}
       </div></>}
+      <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
+      {pagination}
       <div className="lesson-list">
-        {(serverPage ? visible : visible.slice(page * 40, (page + 1) * 40)).map((row) => (
+        {(serverPage ? visible : visible.slice(currentPage * pageSize, (currentPage + 1) * pageSize)).map((row) => (
           <article
             className={`lesson ${row.cancelled ? "cancelled" : ""}`}
             key={row.occurrence_id}
@@ -143,29 +155,8 @@ export function LessonList({
         ))}
       </div>
       {!visible.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
-      {!serverPage && visible.length > 40 && (
-        <div className="pagination">
-          <button
-            className="secondary"
-            aria-label={t("previous_page")}
-            disabled={!page}
-            onClick={() => setPage(page - 1)}
-          >
-            ←
-          </button>
-          <span>
-            {page + 1} / {Math.ceil(visible.length / 40)}
-          </span>
-          <button
-            className="secondary"
-            aria-label={t("next_page")}
-            disabled={(page + 1) * 40 >= visible.length}
-            onClick={() => setPage(page + 1)}
-          >
-            →
-          </button>
-        </div>
-      )}
+      {pagination}
+      </div>
     </>
   );
 }
@@ -184,6 +175,7 @@ export function PersonalSchedule() {
   const [reload, setReload] = useState(0);
   const [loading, setLoading] = useState(false);
   const [readError, setReadError] = useState<unknown>(null);
+  const results = useRef<HTMLDivElement>(null);
   const refresh = async () => { setReload((value) => value + 1); };
   const rangeDays = (Date.parse(range.end) - Date.parse(range.start)) / 86400000;
   const validRange = Number.isFinite(rangeDays) && rangeDays >= 0 && rangeDays <= 30;
@@ -212,7 +204,7 @@ export function PersonalSchedule() {
           return;
         }
         if (!validRange) { setRows([]); return; }
-        const params = new URLSearchParams({ ...range, limit: "100" });
+        const params = new URLSearchParams({ ...range, limit: "25" });
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.set(key, value);
         });
@@ -248,6 +240,18 @@ export function PersonalSchedule() {
   const note = selected
     ? notes.find((n) => n.occurrence_id === selected.occurrence_id)
     : undefined;
+  function changePage(next: (string | null)[]) {
+    setCursors(next);
+    results.current?.focus({ preventScroll: true });
+    results.current?.scrollIntoView({ block: "start" });
+  }
+  const pagination = (rows.length > 0 || cursors.length > 1) && <nav className="pagination result-pagination" aria-label={t("paginationLabel")}>
+    <button className="secondary" disabled={loading || cursors.length === 1}
+      onClick={() => changePage(cursors.slice(0, -1))}><ChevronLeft size={16} aria-hidden="true" />{t("previous_page")}</button>
+    <span className="count-label">{t("pageLabel")} {cursors.length}</span>
+    <button className="secondary" disabled={loading || !nextCursor}
+      onClick={() => nextCursor && changePage([...cursors, nextCursor])}>{t("next_page")}<ChevronRight size={16} aria-hidden="true" /></button>
+  </nav>;
   return (
     <>
       <div className="page-heading">
@@ -291,6 +295,8 @@ export function PersonalSchedule() {
           </label>)}
         </div>
         {range.start && !validRange && <p className="notice warning" role="alert">{t("schedule_range_required")}</p>}
+        <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
+        {pagination}
         {(loading || (!facets && !readError)) && <LoadingState label={t("scheduleLoading")} compact={rows.length > 0} />}
         {rows.length > 0 && <>
         <div className="schedule-results"><span className="count-label">{t("lessonsOnPage")}: {rows.length}</span></div>
@@ -319,13 +325,8 @@ export function PersonalSchedule() {
           !facets.date_bounds.start ? <EmptyState icon={CalendarDays} title={t("noPublishedTitle")} description={t("noPublishedHelp")} />
             : validRange ? <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} /> : null
         )}
-        {(rows.length > 0 || cursors.length > 1) && <div className="pagination">
-          <button className="secondary" disabled={loading || cursors.length === 1}
-            onClick={() => setCursors(cursors.slice(0, -1))}><ChevronLeft size={16} aria-hidden="true" />{t("previous_page")}</button>
-          <span className="count-label">{t("pageLabel")} {cursors.length}</span>
-          <button className="secondary" disabled={loading || !nextCursor}
-            onClick={() => nextCursor && setCursors([...cursors, nextCursor])}>{t("next_page")}<ChevronRight size={16} aria-hidden="true" /></button>
-        </div>}
+        {pagination}
+        </div>
       </section>
       {selected && (
         <Dialog labelledBy="note-title" onClose={() => setSelected(null)}>
