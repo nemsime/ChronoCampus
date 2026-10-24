@@ -1,8 +1,47 @@
-"""Windows process ownership for the local supervisor (no shell or PID-only kills)."""
+"""Owned process trees and stop controls for the local supervisor."""
 import ctypes
 from ctypes import wintypes as w
 import os
+from pathlib import Path
+import signal
 import subprocess
+import sys
+import time
+
+
+def _linux_process_identity(pid):
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="ascii")
+        fields = stat[stat.rfind(")") + 2:].split()
+        if fields[0] == "Z":
+            return None
+        executable = os.path.realpath(f"/proc/{pid}/exe")
+        return {"pid": pid, "created": fields[19], "executable": executable}
+    except (FileNotFoundError, ProcessLookupError, PermissionError, IndexError, OSError):
+        return None
+
+
+def _linux_stop_file(name):
+    launch = name.rsplit("-", 1)[-1]
+    if len(launch) != 32 or any(character not in "0123456789abcdef" for character in launch):
+        raise RuntimeError("invalid_local_stop_name")
+    root = Path(__file__).resolve().parents[3]
+    return root / ".runtime" / f"stop-{launch}.flag"
+
+
+def _linux_group_alive(group_id):
+    """Ignore zombies while waiting for an owned session's descendants to exit."""
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            stat = (entry / "stat").read_text(encoding="ascii")
+            fields = stat[stat.rfind(")") + 2:].split()
+            if fields[0] != "Z" and int(fields[2]) == group_id and int(fields[3]) == group_id:
+                return True
+        except (OSError, ValueError, IndexError):
+            continue
+    return False
 
 
 class _BasicLimits(ctypes.Structure):
@@ -82,6 +121,8 @@ def _check(value):
 
 def process_identity(pid):
     """Read immutable creation time and executable; a reused PID never matches."""
+    if sys.platform == "linux":
+        return _linux_process_identity(pid)
     kernel = _kernel()
     handle = kernel.OpenProcess(0x1000 | 0x100000, False, pid)
     if not handle:
@@ -104,9 +145,12 @@ def process_identity(pid):
 
 
 class ProcessTree:
-    """Only this supervisor owns the non-inherited kill-on-close Job handle."""
+    """Contain launched processes and terminate their owned tree on close."""
 
     def __init__(self):
+        if sys.platform == "linux":
+            self.processes = []
+            return
         self.kernel = _kernel()
         self.handle = _check(self.kernel.CreateJobObjectW(None, None))
         limits = _ExtendedLimits()
@@ -119,6 +163,27 @@ class ProcessTree:
         self.processes = []
 
     def spawn(self, arguments, cwd, environment, stdout, stderr):
+        if sys.platform == "linux":
+            parent_pid = os.getpid()
+
+            def parent_death_signal():
+                libc = ctypes.CDLL(None, use_errno=True)
+                if libc.prctl(1, signal.SIGKILL, 0, 0, 0) != 0 or os.getppid() != parent_pid:
+                    os._exit(127)
+
+            process = subprocess.Popen(
+                [str(argument) for argument in arguments],
+                cwd=cwd,
+                env=environment,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout,
+                stderr=stderr,
+                close_fds=True,
+                start_new_session=True,
+                preexec_fn=parent_death_signal,
+            )
+            self.processes.append(process)
+            return process.pid, process
         import msvcrt
 
         info, extended = _ProcessInfo(), _StartupInfoEx()
@@ -167,9 +232,33 @@ class ProcessTree:
         return info.pid, info.process
 
     def exited(self, process):
+        if sys.platform == "linux":
+            # Keep the session leader waitable until close. Its PID cannot be
+            # reused for an unrelated group before we finish signaling the group.
+            try:
+                return os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is not None
+            except ChildProcessError:
+                return True
         return self.kernel.WaitForSingleObject(process, 0) == 0
 
     def close(self):
+        if sys.platform == "linux":
+            for process in self.processes:
+                try:
+                    os.killpg(process.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline and any(_linux_group_alive(process.pid) for process in self.processes):
+                time.sleep(0.05)
+            for process in self.processes:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait()
+            self.processes = []
+            return
         if getattr(self, "handle", None):
             self.kernel.TerminateJobObject(self.handle, 1)
             self.kernel.CloseHandle(self.handle)
@@ -182,17 +271,29 @@ class ProcessTree:
 
 class StopEvent:
     def __init__(self, name):
+        if sys.platform == "linux":
+            self.path = _linux_stop_file(name)
+            return
         self.kernel = _kernel()
         self.handle = _check(self.kernel.CreateEventW(None, True, False, name))
 
     def is_set(self):
+        if sys.platform == "linux":
+            return self.path.is_file()
         return self.kernel.WaitForSingleObject(self.handle, 0) == 0
 
     def close(self):
+        if sys.platform == "linux":
+            return
         self.kernel.CloseHandle(self.handle)
 
     @staticmethod
     def signal(name):
+        if sys.platform == "linux":
+            path = _linux_stop_file(name)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch()
+            return True
         kernel = _kernel()
         handle = kernel.OpenEventW(2, False, name)
         if not handle:

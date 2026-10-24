@@ -1,6 +1,6 @@
 # Локальная архитектура и запуск
 
-Система работает на вашем Windows-компьютере с уже установленным SQL Server. Сервер в облаке, Redis и Docker для запуска не нужны.
+Система работает локально в Windows или Linux и подключается к доступному SQL Server. Redis и Docker для запуска не нужны.
 
 ```mermaid
 flowchart LR
@@ -29,6 +29,30 @@ powershell -ExecutionPolicy Bypass -File scripts/local.ps1 start
 ```
 
 `init-mail-key` создаёт ключ шифрования очереди писем в игнорируемом `backend/.secrets/mail-keys.json`. Повторная команда сохраняет существующий ключ. Она не выводит его в консоль. Сохраняйте файл вместе с защищённой резервной копией конфигурации; без него ожидающие письма нельзя расшифровать. Для `MAIL_MODE=file` письма появляются в `backend/.mail`, отправки в интернет нет.
+
+Для Linux установите Python 3.11+, Node.js, unixODBC и Microsoft ODBC Driver 18 (см. [инструкции Microsoft](https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)). Из корня проекта создайте окружение и установите зависимости:
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/python -m pip install -e './backend[dev]'
+cp backend/.env.example backend/.env
+npm --prefix frontend ci
+cd backend
+.venv/bin/python -m alembic upgrade head
+.venv/bin/python -m app.manage create-admin admin@your-university.example --name Administrator
+cd ..
+backend/.venv/bin/python -m app.local_runtime init-mail-key
+backend/.venv/bin/python -m app.local_runtime start
+```
+
+Проверьте состояние или остановите процессы командами:
+
+```bash
+backend/.venv/bin/python -m app.local_runtime status
+backend/.venv/bin/python -m app.local_runtime stop
+```
+
+Linux использует отдельные группы процессов; состояние и ограниченные журналы находятся в `.runtime/`.
 
 Откройте [приложение](http://localhost:3000). Управление:
 

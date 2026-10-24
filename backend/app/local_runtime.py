@@ -1,4 +1,4 @@
-"""Native Windows local start/status/stop, with an owning detached supervisor."""
+"""Local start/status/stop, with an owning detached supervisor."""
 import argparse
 from contextlib import contextmanager
 import json
@@ -24,23 +24,35 @@ PORTS = {"api": 8000, "frontend": 3000}
 
 @contextmanager
 def exclusive(name):
-    import msvcrt
-
     RUNTIME.mkdir(exist_ok=True)
     with (RUNTIME / name).open("a+b") as stream:
-        if stream.tell() == 0:
+        if (RUNTIME / name).stat().st_size == 0:
             stream.write(b"0")
             stream.flush()
-        stream.seek(0)
-        try:
-            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
-        except OSError:
-            raise RuntimeError("local_runtime_already_starting") from None
-        try:
-            yield
-        finally:
+        if os.name == "nt":
+            import msvcrt
+
             stream.seek(0)
-            msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            try:
+                msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError:
+                raise RuntimeError("local_runtime_already_starting") from None
+            try:
+                yield
+            finally:
+                stream.seek(0)
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            try:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError("local_runtime_already_starting") from None
+            try:
+                yield
+            finally:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
 
 
 def _read_state():
@@ -129,11 +141,11 @@ def start():
         _preflight()
         launch = uuid4().hex
         with (RUNTIME / "supervisor.stdout.log").open("ab") as out, (RUNTIME / "supervisor.stderr.log").open("ab") as err:
+            options = {"creationflags": subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS} if os.name == "nt" else {"start_new_session": True}
             process = subprocess.Popen(
                 [sys.executable, "-m", "app.local_runtime", "supervise", "--launch-id", launch],
                 cwd=ROOT / "backend", stdin=subprocess.DEVNULL, stdout=out, stderr=err,
-                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
-                close_fds=True,
+                close_fds=True, **options,
             )
         deadline = time.monotonic() + 40
         while time.monotonic() < deadline:
@@ -178,7 +190,7 @@ def supervise(launch):
         streams, children = [], []
         _write_state(state)
         try:
-            python = str(ROOT / "backend/.venv/Scripts/python.exe")
+            python = str(ROOT / "backend/.venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python"))
             commands = [
                 ("coordinator", [python, "-m", "app.jobs.coordinator"], ROOT / "backend"),
                 ("io", [python, "-m", "app.jobs.io_worker"], ROOT / "backend"),
@@ -232,6 +244,7 @@ def supervise(launch):
         finally:
             tree.close()
             control.close()
+            stop_file.unlink(missing_ok=True)
             for stream in streams:
                 stream.close()
             _write_state(state)
@@ -242,8 +255,8 @@ def main():
     parser.add_argument("command", choices=["start", "status", "stop", "supervise", "init-mail-key", "rotate-mail-key"])
     parser.add_argument("--launch-id", default="")
     args = parser.parse_args()
-    if os.name != "nt":
-        parser.error("The local supervisor currently supports Windows only.")
+    if os.name != "nt" and sys.platform != "linux":
+        parser.error("The local supervisor currently supports Windows and Linux only.")
     if args.command == "supervise":
         supervise(args.launch_id)
         return

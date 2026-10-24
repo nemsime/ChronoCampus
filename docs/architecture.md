@@ -1,6 +1,6 @@
 # Architecture and operational boundaries
 
-A modular monolith with separate execution processes: one FastAPI API, one generation coordinator, one mail/maintenance worker, one SQL Server database, and a React client. The coordinator starts at most one temporary CPU solver process. A durable SQL queue connects the API and workers. Native Windows launch is the current target; Redis and cloud deployment are not required. See [local operation](local-runtime.md).
+A modular monolith with separate execution processes: one FastAPI API, one generation coordinator, one mail/maintenance worker, one SQL Server database, and a React client. The coordinator starts at most one temporary CPU solver process. A durable SQL queue connects the API and workers. The local launcher supports native Windows and Linux; Redis and cloud deployment are not required. See [local operation](local-runtime.md).
 
 ## Generation
 
@@ -31,7 +31,7 @@ Reset requests return the same response for known and unknown addresses. Tokens 
 
 API restarts do not interrupt worker ownership. Claims have database-time leases, attempt numbers and increasing fencing tokens; expired owners cannot apply a result. Recovery schedules bounded retries or releases the draft guard atomically with a terminal state. Cancellation retains that guard until the solver stops or its ownership expires. Final result application, validation, draft revision, run status and guard release share one transaction. Admission is limited to four active generation jobs by default; a SQL gate enforces one running generation even if two coordinators are accidentally started.
 
-The CPU child receives bounded JSON frames and a minimal environment without database/mail credentials. Windows Job Objects stop it on coordinator death; Linux has a parent-death hook, but local acceptance is on Windows. Each solver attempt has a memory cap and hard deadline. A process that cannot reap its child must stop instead of claiming more work. Lease fencing protects database state; it does not promise exactly-once SMTP delivery or zero delay after a computer crash.
+The CPU child receives bounded JSON frames and a minimal environment without database/mail credentials. Windows Job Objects stop it on coordinator death; Linux uses a parent-death hook and process groups. Each solver attempt has a memory cap and hard deadline. A process that cannot reap its child must stop instead of claiming more work. Lease fencing protects database state; it does not promise exactly-once SMTP delivery or zero delay after a computer crash.
 
 ## Interface
 
