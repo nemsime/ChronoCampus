@@ -7,6 +7,30 @@
   font-size: 14px;
   line-height: 1.5;
 }
+.diagnostic-panel, .run-card, .run-history { display: grid; gap: 16px; }
+.diagnostic-panel { margin-bottom: 22px; }
+.diagnostic-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; }
+.diagnostic-cards > div { border: 1px solid #dce6ed; border-radius: 10px; background: #f7fafc; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
+.diagnostic-cards strong { font-size: 19px; line-height: 1.35; }
+.diagnostic-cards .health-ok { border-color: #a2d8c5; background: #f0faf5; }
+.diagnostic-cards .health-error { border-color: #e6b2b5; background: #fff4f4; }
+.diagnostic-tabs, .diagnostic-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.diagnostic-filters label { flex: 1 1 170px; }
+.diagnostic-filters input { width: 100%; }
+.run-card { padding: 18px; border: 1px solid #dce6ed; border-radius: 12px; background: #fff; min-width: 0; }
+.run-card details > * + * { margin-top: 12px; }
+.run-history { border-top: 1px solid #dce6ed; padding-top: 24px; margin-top: 24px; min-width: 0; }
+.run-history > label { max-width: 300px; }
+.comparison-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.metric-list { display: grid; gap: 8px; }
+.metric-list > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #e5edf2; }
+.metric-list dd { margin: 0; font-variant-numeric: tabular-nums; }
+.run-timeline { padding-left: 22px; }
+.run-timeline li { margin: 7px 0; }
+.break-code { overflow-wrap: anywhere; white-space: normal; font-size: 12px; }
+.diagnostic-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; max-height: 360px; overflow-y: auto; min-width: 220px; max-width: 600px; }
+.block { display: block; }
+@media (max-width: 800px) { .comparison-grid { grid-template-columns: 1fr; } .diagnostic-cards { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } }
 * {
   box-sizing: border-box;
 }

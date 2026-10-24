@@ -332,7 +332,9 @@ def compatible(candidate, selected):
     return True
 
 
-def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200):
+def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200, progress=None):
+    if progress:
+        progress("constructing", total=len(pools))
     randomizer = random.Random(seed)
     selected = [pool[0] for pool in pools.values() if pool and pool[0].pinned]
     order = sorted(pools, key=lambda identifier: (len(pools[identifier]), identifier))
@@ -352,6 +354,8 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200):
         return (-len(items), m["student_gaps"], m["daily_imbalance"], m["soft_cost"])
 
     best_score = score(selected)
+    if progress:
+        progress("improving", placed=len(selected), total=len(pools))
     if not order:
         return selected, "HEURISTIC", []
     # Bounded displacement/reinsertion; pinned placements are never displaced.
@@ -377,13 +381,17 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200):
         value = score(trial)
         if value < best_score:
             selected, best_score = trial, value
+            if progress:
+                progress("improving", placed=len(selected), total=len(pools))
     return selected, "HEURISTIC", []
 
 
-def constraint_search(pools, snapshot, weights, seed, deadline):
+def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
     incumbent, _, _ = greedy_search(
-        pools, snapshot, weights, seed, deadline, iterations=0
+        pools, snapshot, weights, seed, deadline, iterations=0, progress=progress
     )
+    if progress:
+        progress("building_model", placed=len(incumbent), total=len(pools))
     incumbent_set = set(incumbent)
     model = cp_model.CpModel()
     options, occupancy, patterns = [], defaultdict(list), {}
@@ -517,6 +525,8 @@ def constraint_search(pools, snapshot, weights, seed, deadline):
     selected, phases, status_name = incumbent, [], "HEURISTIC_FALLBACK"
     remaining = deadline - time.monotonic()
     if incumbent and remaining > 1:
+        if progress:
+            progress("initial_solution", placed=len(incumbent), total=len(pools))
         warm = cp_model.CpSolver()
         warm.parameters.num_search_workers = 1
         warm.parameters.max_time_in_seconds = min(5, remaining * 0.2)
@@ -573,7 +583,10 @@ def constraint_search(pools, snapshot, weights, seed, deadline):
             else remaining * (0.55 if index == 0 else 0.65)
         )
         model.minimize(expression)
-        status = solver.solve(model)
+        if progress:
+            progress(name, objective=name, placed=len(selected), total=len(pools))
+        callback = SearchProgress(progress, count, len(pools), name) if progress else None
+        status = solver.solve(model, callback)
         status_name = solver.status_name(status)
         phases.append(
             {"objective": name, "status": status_name, "seconds": solver.wall_time}
@@ -591,6 +604,8 @@ def constraint_search(pools, snapshot, weights, seed, deadline):
             else expression
         )
         phases[-1]["value"] = value
+        if progress:
+            progress(name, objective=name, placed=len(selected), total=len(pools), solver_status=status_name)
         if (
             name == "coverage"
             and len(selected) < len(pools)
@@ -600,7 +615,9 @@ def constraint_search(pools, snapshot, weights, seed, deadline):
             solver.parameters.max_time_in_seconds = max(
                 0.001, deadline - time.monotonic()
             )
-            status = solver.solve(model)
+            if progress:
+                progress("coverage_continued", placed=len(selected), total=len(pools))
+            status = solver.solve(model, SearchProgress(progress, count, len(pools), "coverage_continued") if progress else None)
             phases.append(
                 {
                     "objective": "coverage_continued",
@@ -628,10 +645,28 @@ def constraint_search(pools, snapshot, weights, seed, deadline):
     return selected, status_name, phases
 
 
-def generate(snapshot: dict, algorithm="cp_sat", seed=1, seconds=60) -> dict:
-    started = time.monotonic()
+class SearchProgress(cp_model.CpSolverSolutionCallback):
+    def __init__(self, progress, count, total, stage):
+        super().__init__()
+        self.progress, self.count, self.total, self.stage = progress, count, total, stage
+        self.last = 0.
+
+    def on_solution_callback(self):
+        now = time.monotonic()
+        if now - self.last >= 1:
+            self.last = now
+            self.progress(self.stage, placed=int(self.value(self.count)), total=self.total)
+
+
+def generate(snapshot: dict, algorithm="cp_sat", seed=1, seconds=60, progress=None) -> dict:
+    started = time.perf_counter()
+    if progress:
+        progress("preparing", total=len(snapshot["occurrences"]))
     pools, reasons, weights = candidates_for(snapshot)
-    preparation_seconds = time.monotonic() - started
+    preparation_seconds = time.perf_counter() - started
+    if progress:
+        progress("candidates_ready", total=len(pools), candidate_count=sum(map(len, pools.values())),
+                 preparation_seconds=preparation_seconds)
     invalid_pins = [
         pin["occurrence_id"]
         for pin in snapshot["pins"]
@@ -644,7 +679,7 @@ def generate(snapshot: dict, algorithm="cp_sat", seed=1, seconds=60) -> dict:
             "invalid_pins": invalid_pins,
             "diagnostics": reasons,
             "report": validate(snapshot, []),
-            "elapsed_seconds": time.monotonic() - started,
+            "elapsed_seconds": time.perf_counter() - started,
         }
     pins = [pool[0] for pool in pools.values() if pool and pool[0].pinned]
     if any(not compatible(pin, pins[:i]) for i, pin in enumerate(pins)):
@@ -653,13 +688,15 @@ def generate(snapshot: dict, algorithm="cp_sat", seed=1, seconds=60) -> dict:
             "assignments": [],
             "diagnostics": reasons,
             "report": validate(snapshot, []),
-            "elapsed_seconds": time.monotonic() - started,
+            "elapsed_seconds": time.perf_counter() - started,
         }
     search = constraint_search if algorithm == "cp_sat" else greedy_search
     selected, status, phases = search(
-        pools, snapshot, weights, seed, time.monotonic() + seconds
+        pools, snapshot, weights, seed, time.monotonic() + seconds, progress=progress
     )
     assignments = [c.assignment() for c in selected]
+    if progress:
+        progress("validating", placed=len(assignments), total=len(pools), solver_status=status)
     report = validate(snapshot, assignments)
     unplaced = {
         identifier: reasons[identifier] or [{"code": "search_incomplete"}]
@@ -672,7 +709,7 @@ def generate(snapshot: dict, algorithm="cp_sat", seed=1, seconds=60) -> dict:
         "diagnostics": unplaced,
         "metrics": metrics(selected, weights, snapshot),
         "phases": phases,
-        "elapsed_seconds": time.monotonic() - started,
+        "elapsed_seconds": time.perf_counter() - started,
         "preparation_seconds": preparation_seconds,
         "algorithm": algorithm,
         "seed": seed,

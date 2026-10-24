@@ -1,12 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time
-import logging
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, select, func, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from app.accounts.dependencies import administrator, current_user
 from app.calendar.rules import audiences_overlap, lesson_slot, parity
@@ -17,13 +16,16 @@ from app.scheduling.snapshot import (
     current_assignments,
     record,
     snapshot_hash,
+    comparison_hash,
 )
 from app.scheduling.solver import generate
 from app.scheduling.validation import validate
+from app.observability import telemetry
+from app.observability.audit import record_audit
+from app.observability.runs import Progress, run_view
 
 router = APIRouter(tags=["scheduling"])
 executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="chronocampus-solver")
-logger = logging.getLogger(__name__)
 
 
 class DraftInput(BaseModel):
@@ -188,7 +190,7 @@ def versions(db: Session = Depends(get_db)):
 @router.post(
     "/admin/schedule/versions", status_code=201, dependencies=[Depends(administrator)]
 )
-def create_draft(body: DraftInput, db: Session = Depends(get_db)):
+def create_draft(body: DraftInput, db: Session = Depends(get_db), actor: m.Account = Depends(administrator)):
     lock_revision(db)
     if not db.get(m.Term, body.term_id):
         raise HTTPException(422, "invalid_reference")
@@ -219,6 +221,8 @@ def create_draft(body: DraftInput, db: Session = Depends(get_db)):
                     )
                 )
     version.configuration = {"term": snapshot["term"], "calendar": snapshot["calendar"]}
+    record_audit(db, actor, "draft.created", "schedule", version.id,
+                 after={"term_id": body.term_id, "cohort_ids": groups})
     db.commit()
     return record(version)
 
@@ -250,12 +254,7 @@ def version_detail(identifier: int, db: Session = Depends(get_db)):
         "disruptions": snapshot["disruptions"],
         "occurrences": snapshot["occurrences"],
         "workloads": snapshot["workloads"],
-        "last_run": {
-            key: getattr(last_run, key)
-            for key in ("id", "version_id", "status", "result")
-        }
-        if last_run
-        else None,
+        "last_run": run_view(last_run) if last_run else None,
     }
 
 
@@ -265,7 +264,8 @@ def version_detail(identifier: int, db: Session = Depends(get_db)):
     dependencies=[Depends(administrator)],
 )
 def start_generation(
-    identifier: int, body: GenerateInput, db: Session = Depends(get_db)
+    identifier: int, body: GenerateInput, db: Session = Depends(get_db),
+    actor: m.Account = Depends(administrator),
 ):
     lock_revision(db, changed=False)
     version = require_draft(db, identifier, body.revision)
@@ -295,28 +295,49 @@ def start_generation(
         seed=body.seed,
         algorithm=body.algorithm,
         input_hash=snapshot_hash(snapshot),
+        comparison_hash=comparison_hash(snapshot),
         snapshot=snapshot,
+        actor_id=actor.id,
+        request_id=telemetry.request_id_var.get(),
+        updated_at=datetime.utcnow(),
+        progress={"stage": "queued", "total": len(snapshot["occurrences"]), "events": []},
     )
     db.add(run)
+    db.flush()
+    record_audit(db, actor, "generation.requested", "schedule", version.id,
+                 after={"algorithm": body.algorithm, "seed": body.seed})
     db.commit()
-    executor.submit(execute_run, db.get_bind(), run.id)
-    return {"id": run.id, "status": "queued"}
+    telemetry.emit("generation.queued", run_id=run.id, version_id=version.id,
+                   actor_id=actor.id, algorithm=body.algorithm, seed=body.seed)
+    try:
+        executor.submit(execute_run, db.get_bind(), run.id)
+    except Exception as error:
+        telemetry.exception_event("generation.enqueue_failed", error, run_id=run.id)
+        run.status, run.finished_at = "failed", datetime.utcnow()
+        run.result = {"error": "generation_enqueue_failed"}
+        run.progress = {**run.progress, "stage": "failed"}
+        db.commit()
+        raise HTTPException(503, "generation_enqueue_failed") from None
+    return run_view(run)
 
 
 def recover_runs(engine):
     """The supported deployment runs one API process with one solver worker."""
     with Session(engine) as db:
         lock_revision(db, changed=False)
-        db.execute(
+        count = db.execute(
             update(m.GenerationRun)
             .where(m.GenerationRun.status.in_(["queued", "running"]))
             .values(
                 status="interrupted",
                 finished_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
                 result={"error": "server_restarted"},
             )
-        )
+        ).rowcount
         db.commit()
+        if count:
+            telemetry.emit("generation.recovered", "WARNING", count=count)
 
 
 @router.get(
@@ -337,19 +358,27 @@ def calendar_slots(calendar_id: int, count: int = 6, db: Session = Depends(get_d
 
 
 def execute_run(engine, identifier):
+    context_token = telemetry.request_id_var.set(None)
     with Session(engine, expire_on_commit=False) as db:
         try:
             run = db.get(m.GenerationRun, identifier)
             if not run or run.status != "queued":
                 return
+            telemetry.request_id_var.set(run.request_id)
             run.status = "running"
+            run.started_at = run.updated_at = datetime.utcnow()
             db.commit()
+            progress = Progress(engine, identifier, run.version_id)
+            telemetry.emit("generation.started", run_id=identifier, version_id=run.version_id,
+                           algorithm=run.algorithm, seed=run.seed)
             result = generate(
                 run.snapshot,
                 run.algorithm,
                 run.seed,
                 run.snapshot["term"]["search_seconds"],
+                progress=progress,
             )
+            progress("saving")
             # Search happens outside a transaction. Recheck both catalog and draft versions now.
             revision = lock_revision(db, changed=False)
             version = db.get(m.ScheduleVersion, run.version_id, populate_existing=True)
@@ -381,16 +410,29 @@ def execute_run(engine, identifier):
                 version.revision += 1
                 db.get(m.DataRevision, 1).revision += 1
                 run.status = "complete" if result["report"]["complete"] else "partial"
+            run.updated_at = run.finished_at
+            run.progress = {**progress.state, "stage": run.status}
             db.commit()
+            telemetry.emit("generation.finished", "INFO" if run.status == "complete" else "WARNING",
+                           run_id=identifier, version_id=run.version_id, status=run.status,
+                           elapsed_seconds=result.get("elapsed_seconds"),
+                           placed=len(result.get("assignments", [])))
         except Exception as error:
             db.rollback()
-            logger.error("Generation failed: %s", type(error).__name__)
-            run = db.get(m.GenerationRun, identifier)
-            if run:
-                run.status = "failed"
-                run.finished_at = datetime.utcnow()
-                run.result = {"error": "generation_failed"}
-                db.commit()
+            telemetry.exception_event("generation.failed", error, run_id=identifier)
+            try:
+                run = db.get(m.GenerationRun, identifier, populate_existing=True)
+                if run:
+                    run.status = "failed"
+                    run.finished_at = run.updated_at = datetime.utcnow()
+                    run.result = {"error": "generation_failed", "exception_type": type(error).__name__}
+                    run.progress = {**(run.progress or {}), "stage": "failed"}
+                    db.commit()
+            except Exception as persistence_error:
+                db.rollback()
+                telemetry.exception_event("generation.failure_persistence_failed", persistence_error, run_id=identifier)
+        finally:
+            telemetry.request_id_var.reset(context_token)
 
 
 @router.get("/admin/schedule/runs/{identifier}", dependencies=[Depends(administrator)])
@@ -398,20 +440,21 @@ def run_status(identifier: int, db: Session = Depends(get_db)):
     run = db.get(m.GenerationRun, identifier)
     if not run:
         raise HTTPException(404, "run_not_found")
-    return {
-        key: getattr(run, key)
-        for key in (
-            "id",
-            "version_id",
-            "status",
-            "algorithm",
-            "seed",
-            "input_hash",
-            "result",
-            "created_at",
-            "finished_at",
-        )
-    }
+    return run_view(run)
+
+
+@router.get("/admin/schedule/runs", dependencies=[Depends(administrator)])
+def run_history(db: Session = Depends(get_db), version_id: int | None = Query(None, ge=1),
+                status: Literal["queued", "running", "complete", "partial", "failed", "rejected", "stale", "interrupted"] | None = None,
+                limit: int = Query(20, ge=1, le=50), offset: int = Query(0, ge=0, le=100000)):
+    statement = select(m.GenerationRun).options(defer(m.GenerationRun.snapshot))
+    if version_id is not None:
+        statement = statement.where(m.GenerationRun.version_id == version_id)
+    if status is not None:
+        statement = statement.where(m.GenerationRun.status == status)
+    total = db.scalar(select(func.count()).select_from(statement.subquery()))
+    runs = db.scalars(statement.order_by(m.GenerationRun.id.desc()).offset(offset).limit(limit))
+    return {"items": [run_view(row, detailed=False) for row in runs], "total": total, "limit": limit, "offset": offset}
 
 
 @router.put(
@@ -419,7 +462,8 @@ def run_status(identifier: int, db: Session = Depends(get_db)):
     dependencies=[Depends(administrator)],
 )
 def move_assignment(
-    identifier: int, occurrence_id: int, body: MoveInput, db: Session = Depends(get_db)
+    identifier: int, occurrence_id: int, body: MoveInput, db: Session = Depends(get_db),
+    actor: m.Account = Depends(administrator),
 ):
     lock_revision(db)
     version = require_draft(db, identifier, body.revision)
@@ -460,11 +504,15 @@ def move_assignment(
             409, {"code": "schedule_conflict", "issues": report["issues"]}
         )
     if existing:
+        before = record(existing)
         db.delete(existing)
         db.flush()
+    else:
+        before = {}
     db.add(assignment_model(identifier, moved))
     version.revision += 1
     version.report = report
+    record_audit(db, actor, "lesson.changed", "schedule", identifier, before=before, after=moved)
     db.commit()
     return {"revision": version.revision, "report": report}
 
@@ -473,7 +521,8 @@ def move_assignment(
     "/admin/schedule/versions/{identifier}/publish",
     dependencies=[Depends(administrator)],
 )
-def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db)):
+def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db),
+            actor: m.Account = Depends(administrator)):
     lock_revision(db)
     version = require_draft(db, identifier, body.revision)
     snapshot = build_snapshot(db, version)
@@ -499,6 +548,8 @@ def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db))
     version.revision += 1
     version.report = report
     version.configuration = {"term": snapshot["term"], "calendar": snapshot["calendar"]}
+    record_audit(db, actor, "schedule.published", "schedule", identifier,
+                 before={"status": "draft"}, after={"status": "published", "cohort_ids": version.cohort_ids})
     db.commit()
     return record(version)
 
@@ -512,6 +563,7 @@ def emergency_cancellation(
     occurrence_id: int,
     body: DisruptionInput,
     db: Session = Depends(get_db),
+    actor: m.Account = Depends(administrator),
 ):
     lock_revision(db)
     version = require_draft(db, identifier, body.revision)
@@ -545,5 +597,7 @@ def emergency_cancellation(
     )
     db.delete(assignment)
     version.revision += 1
+    record_audit(db, actor, "lesson.emergency", "schedule", identifier,
+                 before={"occurrence_id": occurrence_id, "day": assignment.day, "slot": assignment.slot})
     db.commit()
     return {"revision": version.revision, "message": "replacement_required"}

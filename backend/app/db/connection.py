@@ -4,6 +4,7 @@ import pyodbc
 from fastapi import Depends, HTTPException
 
 from app.core.config import Settings, get_settings
+from app.observability.telemetry import exception_event
 
 
 def get_connection(settings: Settings = Depends(get_settings)) -> Iterator[pyodbc.Connection]:
@@ -17,7 +18,8 @@ def get_connection(settings: Settings = Depends(get_settings)) -> Iterator[pyodb
         )
         connection.timeout = settings.db_timeout_seconds
         yield connection
-    except pyodbc.Error:
+    except pyodbc.Error as error:
+        exception_event("database.legacy_error", error)
         # Driver messages may include credentials, server names, or SQL text.
         raise HTTPException(status_code=503, detail="Database is unavailable.") from None
     finally:

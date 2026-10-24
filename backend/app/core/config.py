@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: SecretStr = SecretStr("")
     smtp_from: str = ""
+    diagnostic_log_directory: Path = Path(__file__).resolve().parents[2] / ".logs"
+    diagnostic_log_max_bytes: int = Field(default=5_000_000, ge=100_000, le=100_000_000)
+    diagnostic_log_backups: int = Field(default=5, ge=1, le=30)
+    diagnostic_debug: bool = False
+    metrics_token: SecretStr = SecretStr("")
+    metrics_token_file: Path | None = None
 
 
 @lru_cache

@@ -1,0 +1,52 @@
+groups:
+  - name: chronocampus
+    rules:
+      - alert: ChronoCampusUnavailable
+        expr: up{job="chronocampus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: API scrape unavailable; check process, credentials and connectivity
+      - alert: ChronoCampusDatabaseUnavailable
+        expr: chronocampus_database_ready == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: Database or required migration is unavailable
+      - alert: ChronoCampusServerErrors
+        expr: sum(increase(chronocampus_http_request_duration_seconds_count{status=~"5.."}[5m])) > 3
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than three server errors in five minutes
+      - alert: ChronoCampusLogWriteFailure
+        expr: chronocampus_log_write_failures_total > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Diagnostic log write failed; check disk and permissions
+      - alert: ChronoCampusNewGenerationFailure
+        expr: sum(delta(chronocampus_generation_runs{status=~"failed|rejected|interrupted"}[5m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: A generation failed, was rejected or was interrupted
+      - alert: ChronoCampusSlowAPI
+        expr: histogram_quantile(0.95, sum by (le) (rate(chronocampus_http_request_duration_seconds_bucket[5m]))) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: API p95 exceeds two seconds; inspect slow requests and database latency
+      - alert: ChronoCampusQueueWaiting
+        expr: chronocampus_generation_runs{status="queued"} > 0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: Generation queue has remained nonempty for three minutes; inspect active runs

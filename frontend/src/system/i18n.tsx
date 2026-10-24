@@ -6,9 +6,11 @@ import {
   ReactNode,
 } from "react";
 import { ruleMessages } from "./ruleMessages";
+import { diagnosticWords } from "./diagnosticWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   ...ruleMessages,
+  ...diagnosticWords,
   schedule: ["Расписание", "Դասացուցակ", "Timetable"],
   catalogs: ["Данные и правила", "Տվյալներ և կանոններ", "Data & rules"],
   planner: ["Генератор", "Գեներատոր", "Planner"],

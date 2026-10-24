@@ -23,7 +23,7 @@ from conftest import HASH, PASSWORD
     not os.getenv("CHRONOCAMPUS_TEST_DATABASE"),
     reason="Set CHRONOCAMPUS_TEST_DATABASE to an isolated migrated SQL Server database",
 )
-def test_concurrent_publications_serialize_conflicts(monkeypatch):
+def test_concurrent_publications_serialize_conflicts(monkeypatch, tmp_path):
     name = os.environ["CHRONOCAMPUS_TEST_DATABASE"]
     assert re.fullmatch(r"ChronoCampus_MigrationTest_\d{8}", name), (
         "Refusing to modify a non-test database"
@@ -160,7 +160,8 @@ def test_concurrent_publications_serialize_conflicts(monkeypatch):
             )
             versions.append(version.id)
         db.commit()
-    settings = get_settings().model_copy(update={"cookie_secure": False})
+    settings = get_settings().model_copy(update={"cookie_secure": False, "diagnostic_log_directory": tmp_path / "logs"})
+    monkeypatch.setattr("app.main.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.router.get_settings", lambda: settings)
     monkeypatch.setattr("app.main.get_engine", lambda: engine)
 

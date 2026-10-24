@@ -29,6 +29,7 @@ export function ErrorBox({ error }: { error: unknown }) {
       {codes.map((code, i) => (
         <div key={i}>{t(code) === code ? t("request_failed") : t(code)}</div>
       ))}
+      {error instanceof ApiError && error.requestId && <small>{t("diagnosticReference")}: <code className="break-code">{error.requestId}</code></small>}
     </div>
   );
 }

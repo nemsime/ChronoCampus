@@ -62,7 +62,10 @@ def client(database, monkeypatch, tmp_path):
         mail_mode="file",
         mail_directory=tmp_path,
         university_email_domains=["example.invalid"],
+        diagnostic_log_directory=tmp_path / "logs",
     )
+    monkeypatch.setattr("app.main.get_settings", lambda: settings)
+    monkeypatch.setattr("app.observability.router.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.router.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.dependencies.get_settings", lambda: settings)
     monkeypatch.setattr("app.accounts.mail.get_settings", lambda: settings)

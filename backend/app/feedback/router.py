@@ -9,6 +9,7 @@ from app.accounts.dependencies import administrator, current_user
 from app.db import models as m
 from app.db.session import get_db, lock_revision
 from app.scheduling.snapshot import record
+from app.observability.audit import record_audit
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 
@@ -101,6 +102,9 @@ def status(
 ):
     lock_revision(db, changed=False)
     thread = thread_for(db, identifier, account)
+    previous_status = thread.status
     thread.status = body.status
+    record_audit(db, account, "feedback.status_changed", "feedback", identifier,
+                 before={"status": previous_status}, after={"status": body.status})
     db.commit()
     return thread_view(db, thread)

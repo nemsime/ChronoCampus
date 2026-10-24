@@ -169,3 +169,14 @@ def snapshot_hash(snapshot: dict) -> str:
             snapshot, sort_keys=True, ensure_ascii=False, separators=(",", ":")
         ).encode()
     ).hexdigest()
+
+
+def comparison_hash(snapshot: dict) -> str:
+    """Ignore bookkeeping revisions/placement row IDs, retain actual solver inputs."""
+    comparable = {key: value for key, value in snapshot.items() if key != "data_revision"}
+    for key in ("pins", "external", "disruptions"):
+        comparable[key] = sorted([
+            {field: value for field, value in row.items() if field not in {"id", "version_id"}}
+            for row in snapshot.get(key, [])
+        ], key=lambda row: json.dumps(row, sort_keys=True))
+    return snapshot_hash(comparable)

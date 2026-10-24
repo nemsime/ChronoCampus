@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
 import { Dialog, ErrorBox, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
+import { RunCard, RunHistory } from "./Diagnostics";
 export function Planner() {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
@@ -17,6 +18,9 @@ export function Planner() {
   const [seed, setSeed] = useState(1);
   const [editing, setEditing] = useState<Row | null>(null);
   const [slotOptions, setSlotOptions] = useState<Row[]>([]);
+  const selection = useRef<number | null>(null);
+  const loadSequence = useRef(0);
+  const [pollError, setPollError] = useState<unknown>(null);
   const { busy, error, run } = useAction();
   const refresh = async () => {
     const [catalogs, rows] = await Promise.all([
@@ -27,33 +31,45 @@ export function Planner() {
     setVersions(rows);
   };
   const open = async (id: number) => {
+    selection.current = id;
+    const ticket = ++loadSequence.current;
     const response = await api(`/admin/schedule/versions/${id}`);
+    if (selection.current !== id || loadSequence.current !== ticket) return;
     setDetail(response);
     setRunInfo(response.last_run);
+    setPollError(null);
   };
   useEffect(() => {
     void run(refresh);
+    return () => {
+      selection.current = null;
+      ++loadSequence.current;
+    };
   }, []);
   useEffect(() => {
     if (!runInfo || !["queued", "running"].includes(runInfo.status)) return;
     let cancelled = false;
-    const timer = setTimeout(() => {
-      void api<Row>(`/admin/schedule/runs/${runInfo.id}`)
-        .then(async (r) => {
-          if (cancelled) return;
-          setRunInfo(r);
-          if (!["queued", "running"].includes(r.status)) {
-            await open(r.version_id);
-            await refresh();
-          }
-        })
-        .catch((e) => {
-          if (!cancelled)
-            void run(async () => {
-              throw e;
-            });
-        });
-    }, 1500);
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const result = await api<Row>(`/admin/schedule/runs/${runInfo.id}`);
+        if (cancelled || selection.current !== result.version_id) return;
+        setPollError(null);
+        if (["queued", "running"].includes(result.status)) {
+          setRunInfo(result);
+        } else {
+          // Keep polling until the completed draft itself has loaded successfully.
+          await open(result.version_id);
+          if (!cancelled) await refresh();
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setPollError(e);
+          timer = setTimeout(poll, 3000);
+        }
+      }
+    };
+    timer = setTimeout(poll, 1500);
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -91,13 +107,22 @@ export function Planner() {
         <button onClick={() => setCreate(true)}>{t("createDraft")}</button>
       </div>
       <ErrorBox error={error} />
+      <ErrorBox error={pollError} />
+      {!!pollError && <p className="notice warning">{t("staleData")}</p>}
       <section className="panel">
         <div className="toolbar">
           <select
             aria-label={t("draft")}
+            disabled={busy}
             value={version?.id || ""}
             onChange={(e) => {
+              selection.current = e.target.value
+                ? Number(e.target.value)
+                : null;
+              ++loadSequence.current;
               setRunInfo(null);
+              setDetail(null);
+              setPollError(null);
               if (e.target.value) void run(() => open(Number(e.target.value)));
               else setDetail(null);
             }}
@@ -157,15 +182,14 @@ export function Planner() {
                 <button
                   disabled={busy || searching}
                   onClick={() =>
-                    void run(async () =>
-                      setRunInfo(
-                        await api(
-                          `/admin/schedule/versions/${version.id}/generate`,
-                          "POST",
-                          { revision: version.revision, seed, algorithm },
-                        ),
-                      ),
-                    )
+                    void run(async () => {
+                      const result = await api(
+                        `/admin/schedule/versions/${version.id}/generate`,
+                        "POST",
+                        { revision: version.revision, seed, algorithm },
+                      );
+                      if (selection.current === version.id) setRunInfo(result);
+                    })
                   }
                 >
                   {t("generate")}
@@ -190,14 +214,7 @@ export function Planner() {
                 </button>
               </div>
             )}
-            {runInfo && (
-              <p className="notice" role="status">
-                {t(runInfo.status)}
-                {runInfo.result?.elapsed_seconds
-                  ? ` · ${Number(runInfo.result.elapsed_seconds).toFixed(1)} s`
-                  : ""}
-              </p>
-            )}
+            {runInfo && <RunCard run={runInfo} />}
             <div
               className={`notice ${detail.report.complete ? "success" : "warning"}`}
             >
@@ -307,6 +324,7 @@ export function Planner() {
                   : undefined
               }
             />
+            <RunHistory key={version.id} versionId={version.id} />
           </>
         )}
       </section>
