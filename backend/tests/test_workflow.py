@@ -406,3 +406,99 @@ def test_manual_move_cannot_manufacture_holiday_credit(admin_client, campus):
     )
     assert response.status_code == 409, response.text
     assert response.json()["detail"] == "manual_holiday_move"
+
+
+def test_manual_repairs_allow_unrelated_conflicts_but_block_edited_conflicts(
+    admin_client, campus
+):
+    client = admin_client
+    version = draft(client, campus)
+    assert generate(client, version, campus)["status"] == "complete"
+    current = detail(client, version)
+    original = current["assignments"]
+    # Shrink both rooms, invalidating multiple lessons without changing their times.
+    for room in (campus["room"], campus["labroom"]):
+        room.capacity = 10
+    repair_room = m.Room(
+        building_id=campus["building"].id,
+        room_number="103",
+        floor_number=1,
+        room_on_floor=3,
+        capacity=20,
+        room_type="classroom",
+    )
+    campus["db"].add(repair_room)
+    campus["db"].commit()
+    lectures = [a for a in original if a["lesson_type"] == "lecture"]
+
+    def move(lesson, target):
+        return client.put(
+            f"/api/admin/schedule/versions/{version['id']}/assignments/{lesson['occurrence_id']}",
+            json={
+                "revision": detail(client, version)["version"]["revision"],
+                "day": target["day"],
+                "slot": target["slot"],
+                "room_id": repair_room.id,
+            },
+        )
+
+    response = move(lectures[0], lectures[0])
+    assert response.status_code == 200, response.text
+    assert not response.json()["report"]["complete"]
+    assert any(i["code"] == "room_capacity" for i in response.json()["report"]["issues"])
+    # The edited lesson appears second in validation order: check both conflict IDs.
+    response = move(lectures[0], lectures[1])
+    assert response.status_code == 409, response.text
+    assert any(
+        i["code"] == "teacher_conflict" for i in response.json()["detail"]["issues"]
+    )
+    current = detail(client, version)
+    assert client.post(
+        f"/api/admin/schedule/versions/{version['id']}/publish",
+        json={"revision": current["version"]["revision"]},
+    ).status_code == 409
+    # Repair the remaining lessons individually, using the appropriate room type.
+    campus["labroom"].capacity = 20
+    campus["db"].commit()
+    assert move(lectures[1], lectures[1]).status_code == 200
+    current = detail(client, version)
+    assert current["report"]["complete"]
+    publish(client, current["version"])
+
+
+def test_room_deletion_cleans_equipment_and_rolls_back_if_scheduled(admin_client, campus):
+    client = admin_client
+    equipment = m.Equipment(name="Projector", description="")
+    campus["db"].add(equipment)
+    campus["db"].flush()
+    room = campus["room"]
+    campus["db"].add(m.RoomEquipment(
+        room_id=room.id, equipment_type_id=equipment.id, quantity=1
+    ))
+    campus["db"].commit()
+    version = draft(client, campus)
+    assert generate(client, version, campus)["status"] == "complete"
+    response = client.delete(f"/api/admin/catalog/rooms/{room.id}")
+    assert response.status_code == 409, response.text
+    campus["db"].expire_all()
+    assert campus["db"].get(m.RoomEquipment, (room.id, equipment.id)) is not None
+    assert campus["db"].get(m.Equipment, equipment.id) is not None
+
+    unused = m.Room(
+        building_id=campus["building"].id,
+        room_number="104", floor_number=1, room_on_floor=4,
+        capacity=20, room_type="classroom",
+    )
+    campus["db"].add(unused)
+    campus["db"].flush()
+    unused_id, equipment_id = unused.id, equipment.id
+    campus["db"].add(m.RoomEquipment(
+        room_id=unused_id, equipment_type_id=equipment_id, quantity=1
+    ))
+    campus["db"].commit()
+    response = client.delete(f"/api/admin/catalog/rooms/{unused_id}")
+    assert response.status_code == 204, response.text
+    campus["db"].expire_all()
+    assert campus["db"].get(m.Room, unused_id) is None
+    assert campus["db"].get(m.RoomEquipment, (unused_id, equipment_id)) is None
+    assert campus["db"].get(m.Equipment, equipment_id) is not None

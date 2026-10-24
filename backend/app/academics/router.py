@@ -283,5 +283,7 @@ def delete_record(resource: str, identifier: int, db: Session = Depends(get_db))
         raise HTTPException(409, "deactivate_account_instead")
     lock_revision(db)
     row = require_record(db, model, identifier)
+    if resource == "rooms":
+        db.execute(delete(m.RoomEquipment).where(m.RoomEquipment.room_id == identifier))
     db.delete(row)
     db.commit()

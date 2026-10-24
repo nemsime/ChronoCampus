@@ -14,6 +14,7 @@ Includes local accounts and roles, administrative catalogs, configurable calenda
 | [Architecture](docs/architecture.md) | Understand generation, persistence, security, and operational boundaries. |
 | [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
 | [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
+| [Manual merge checklist](docs/manual-merge-check.md) | Recheck the fixes and end-to-end behavior before merging. |
 | [Contribution workflow](skills/repo-workflow/SKILL.md) | Work on a branch, verify integration, and prepare authorized remote publication. |
 
 [Preview.md](docs/Preview.md) is the historical review from 22 October 2026, before the modular implementation; use the documents above for the current system.
