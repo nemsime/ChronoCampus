@@ -23,9 +23,11 @@ Includes local accounts and roles, administrative catalogs, configurable calenda
 
 [Preview.md](docs/Preview.md) is the historical review from 22 October 2026, before the modular implementation; use the documents above for the current system.
 
-## Run locally on Windows
+## Run locally on Windows or Linux
 
-Requirements: Python 3.11+, Node.js 20.19+ or 22.12+, SQL Server, and [Microsoft ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
+Requirements: Python 3.11+, Node.js 20.19+ or 22.12+, access to SQL Server, and [Microsoft ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server). On Linux, install the driver and unixODBC using Microsoft's [Linux installation instructions](https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server).
+
+### Windows
 
 From the repository root in PowerShell:
 
@@ -56,7 +58,36 @@ powershell -ExecutionPolicy Bypass -File scripts/local.ps1 status
 powershell -ExecutionPolicy Bypass -File scripts/local.ps1 stop
 ```
 
-Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, `/api/ready` checks database connectivity and the required schema. On Linux/macOS substitute `python3` and `backend/.venv/bin/python` for the Windows paths.
+### Linux
+
+Install Python, Node.js, unixODBC, and Microsoft ODBC Driver 18 for your distribution, then from the repository root:
+
+```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/python -m pip install -e './backend[dev]'
+cp backend/.env.example backend/.env
+npm --prefix frontend ci
+```
+
+Configure `backend/.env` with a reachable SQL Server connection. Apply migrations and create the administrator:
+
+```bash
+cd backend
+.venv/bin/python -m alembic upgrade head
+.venv/bin/python -m app.manage create-admin admin@your-university.example --name Administrator
+cd ..
+backend/.venv/bin/python -m app.local_runtime init-mail-key
+backend/.venv/bin/python -m app.local_runtime start
+```
+
+The Linux launcher starts and supervises the API, generation coordinator, mail/maintenance worker, and Vite. Check or stop the owned process group with:
+
+```bash
+backend/.venv/bin/python -m app.local_runtime status
+backend/.venv/bin/python -m app.local_runtime stop
+```
+
+Logs and state are in `.runtime/`. Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, `/api/ready` checks database connectivity and the required schema.
 
 ## Demonstration data
 
@@ -87,7 +118,7 @@ Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_M
 
 For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `PUBLIC_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.
 
-Native Windows is the supported launch path for this delivery. The existing root Docker Compose file predates the durable workers and is not a complete runtime launch; container deployment is deferred. Optional monitoring has its own Compose file and is independent of the local launcher.
+The local launcher supports native Windows and Linux. The existing root Docker Compose file predates the durable workers and is not a complete runtime launch; container deployment is deferred. Optional monitoring has its own Compose file and is independent of the local launcher.
 
 ## Verification
 
@@ -109,7 +140,7 @@ git diff --check
 
 Default tests isolate database state with SQLite. The opt-in concurrency test uses real SQL Server: create and migrate an isolated `ChronoCampus_MigrationTest_YYYYMMDD` database and set `CHRONOCAMPUS_TEST_DATABASE` to that name when running pytest. It writes disposable fixtures only there and verifies that concurrent conflicting publications cannot both succeed.
 
-Durable-job SQL tests additionally accept `CHRONOCAMPUS_QUEUE_TEST_DATABASES`: a JSON array of two separately created and migrated test database names, one with `READ_COMMITTED_SNAPSHOT OFF` and one with it `ON`. Names must match `ChronoCampus_RuntimeTest_(OFF|ON)_YYYYMMDD_HHMMSS_xxxxxx`, where the last six characters are lowercase hexadecimal. The tests use the configured local SQL credentials with only the database name replaced; never point them at retained development data. They verify concurrent claims, expired-owner fencing, preparation heartbeats, restart recovery and coordinator hard death. Windows process-containment tests require Windows; SQL tests skip unless explicitly configured.
+Durable-job SQL tests additionally accept `CHRONOCAMPUS_QUEUE_TEST_DATABASES`: a JSON array of two separately created and migrated test database names, one with `READ_COMMITTED_SNAPSHOT OFF` and one with it `ON`. Names must match `ChronoCampus_RuntimeTest_(OFF|ON)_YYYYMMDD_HHMMSS_xxxxxx`, where the last six characters are lowercase hexadecimal. The tests use the configured local SQL credentials with only the database name replaced; never point them at retained development data. They verify concurrent claims, expired-owner fencing, preparation heartbeats, restart recovery and coordinator hard death. Windows Job Object tests run on Windows; Linux launcher/process-group tests run on Linux. SQL tests skip unless explicitly configured.
 
 Live acceptance: administrator login, generation and publication, student/lecturer schedules, note retention after a move, feedback replies/statuses/privacy, all three languages, desktop and mobile. Check partial-publication rejection and prohibited moves. See [verification evidence and limits](docs/verification.md).
 
