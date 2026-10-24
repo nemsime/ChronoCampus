@@ -499,9 +499,20 @@ def move_assignment(
         raise HTTPException(409, "manual_holiday_move")
     candidates = [record(a) for a in rows if a.occurrence_id != occurrence_id] + [moved]
     report = validate(snapshot, candidates)
-    if any(issue["code"] != "configuration_unconfirmed" for issue in report["issues"]):
+    # Catalog changes may invalidate several existing lessons. Allow repairs one
+    # lesson at a time, but never accept a conflict involving the edited lesson.
+    blocking = [
+        issue
+        for issue in report["issues"]
+        if issue["code"] != "configuration_unconfirmed"
+        and (
+            "occurrence_id" not in issue
+            or occurrence_id in (issue["occurrence_id"], issue.get("other_occurrence_id"))
+        )
+    ]
+    if blocking:
         raise HTTPException(
-            409, {"code": "schedule_conflict", "issues": report["issues"]}
+            409, {"code": "schedule_conflict", "issues": blocking}
         )
     if existing:
         before = record(existing)
