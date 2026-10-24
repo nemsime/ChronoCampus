@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { Database, Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
 import { api, Row } from "./api";
 import { catalogSchema, Field, resourceNames } from "./catalogSchema";
-import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, PasswordInput, useAction } from "./common";
 import { useLanguage } from "./i18n";
 export type CatalogData = Record<string, Row[]>;
 export const rowLabel = (row: Row) =>
@@ -193,6 +193,17 @@ function FieldInput({
         onChange={(e) => onChange(e.target.value)}
       />
     );
+  else if (f.type === "password")
+    input = (
+      <PasswordInput
+        {...props}
+        minLength={12}
+        maxLength={256}
+        autoComplete="new-password"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
   else
     input = (
       <input
@@ -200,9 +211,6 @@ function FieldInput({
         type={f.type || "text"}
         min={f.min}
         max={f.max}
-        minLength={f.type === "password" ? 12 : undefined}
-        maxLength={f.type === "password" ? 256 : undefined}
-        autoComplete={f.type === "password" ? "new-password" : undefined}
         value={value ?? ""}
         onChange={(e) =>
           onChange(

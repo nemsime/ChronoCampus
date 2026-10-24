@@ -13,6 +13,7 @@ The follow-up stays within the active UI. Desktop navigation can collapse to an 
 - AST comparison found the same 29 API call expressions across seven screens; this does not obscure the intentional schedule page-size change above. No backend or dependency changes were made. Git whitespace checks passed.
 - The connected browser inventory remains empty. Fresh visual inspection at desktop/mobile widths, persisted sidebar behavior in a browser and native focus restoration after closing a dialog remain unverified; no browser acceptance is claimed.
 - Independent source review identified a focus problem in the compact catalog selector: changing an option moved focus away, interrupting arrow-key selection on some platforms. The selector now keeps focus; desktop catalog navigation buttons still transfer focus to the results. A focused handler check covers both paths. The reviewer could read current source but its environment blocked `git diff`, so its review does not establish diff provenance; parent checks supplied the comparison and build evidence.
+- Following the reported disappearing password-eye control, catalog user editing now uses the same `PasswordInput` as sign-in/change/reset forms, retaining existing length limits and optional-password semantics. Focused rendering covers the catalog field in RU/HY/EN. The reported screenshot shows the older sign-in heading, so the teammate's checkout/runtime still needs to be identified before attributing that specific behavior to the current build.
 
 ## UI polish
 
