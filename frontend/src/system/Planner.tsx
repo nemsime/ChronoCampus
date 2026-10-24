@@ -4,7 +4,7 @@ import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
 import { Dialog, ErrorBox, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
-import { RunCard, RunHistory } from "./Diagnostics";
+import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
 export function Planner() {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
@@ -18,6 +18,7 @@ export function Planner() {
   const [seed, setSeed] = useState(1);
   const [editing, setEditing] = useState<Row | null>(null);
   const [slotOptions, setSlotOptions] = useState<Row[]>([]);
+  const launchIntent = useRef<{ parameters: string; key: string } | null>(null);
   const selection = useRef<number | null>(null);
   const loadSequence = useRef(0);
   const [pollError, setPollError] = useState<unknown>(null);
@@ -47,15 +48,16 @@ export function Planner() {
     };
   }, []);
   useEffect(() => {
-    if (!runInfo || !["queued", "running"].includes(runInfo.status)) return;
+    if (!runInfo || !isRunActive(runInfo)) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
+      const ticket = loadSequence.current;
       try {
         const result = await api<Row>(`/admin/schedule/runs/${runInfo.id}`);
-        if (cancelled || selection.current !== result.version_id) return;
+        if (cancelled || selection.current !== result.version_id || loadSequence.current !== ticket) return;
         setPollError(null);
-        if (["queued", "running"].includes(result.status)) {
+        if (isRunActive(result)) {
           setRunInfo(result);
         } else {
           // Keep polling until the completed draft itself has loaded successfully.
@@ -76,7 +78,7 @@ export function Planner() {
     };
   }, [runInfo]);
   const version = detail?.version;
-  const searching = !!runInfo && ["queued", "running"].includes(runInfo.status);
+  const searching = !!runInfo && isRunActive(runInfo);
   async function edit(row: Row) {
     setEditing(row);
     const calendar = version.configuration.calendar;
@@ -120,6 +122,7 @@ export function Planner() {
                 ? Number(e.target.value)
                 : null;
               ++loadSequence.current;
+              launchIntent.current = null;
               setRunInfo(null);
               setDetail(null);
               setPollError(null);
@@ -163,7 +166,10 @@ export function Planner() {
                   {t("algorithm")}
                   <select
                     value={algorithm}
-                    onChange={(e) => setAlgorithm(e.target.value)}
+                    onChange={(e) => {
+                      launchIntent.current = null;
+                      setAlgorithm(e.target.value);
+                    }}
                   >
                     <option value="cp_sat">{t("cp_sat")}</option>
                     <option value="greedy_local">{t("greedy_local")}</option>
@@ -176,19 +182,33 @@ export function Planner() {
                     min={0}
                     max={2147483647}
                     value={seed}
-                    onChange={(e) => setSeed(Number(e.target.value))}
+                    onChange={(e) => {
+                      launchIntent.current = null;
+                      setSeed(Number(e.target.value));
+                    }}
                   />
                 </label>
                 <button
                   disabled={busy || searching}
                   onClick={() =>
                     void run(async () => {
+                      const parameters = JSON.stringify([version.id, version.revision, seed, algorithm]);
+                      if (launchIntent.current?.parameters !== parameters) {
+                        launchIntent.current = { parameters, key: crypto.randomUUID() };
+                      }
+                      const intent = launchIntent.current;
+                      const ticket = loadSequence.current;
                       const result = await api(
                         `/admin/schedule/versions/${version.id}/generate`,
                         "POST",
-                        { revision: version.revision, seed, algorithm },
+                        { revision: version.revision, seed, algorithm, idempotency_key: intent.key },
                       );
-                      if (selection.current === version.id) setRunInfo(result);
+                      if (!result.id) throw new Error(t("runResponseMissing"));
+                      if (launchIntent.current === intent) launchIntent.current = null;
+                      if (selection.current === version.id && loadSequence.current === ticket) {
+                        setRunInfo(result);
+                        setPollError(null);
+                      }
                     })
                   }
                 >
@@ -215,6 +235,25 @@ export function Planner() {
               </div>
             )}
             {runInfo && <RunCard run={runInfo} />}
+            {searching && (
+              <button
+                className="secondary"
+                disabled={busy || !!runInfo?.job?.cancel_requested_at}
+                onClick={() => void run(async () => {
+                  const ticket = loadSequence.current;
+                  const result = await api<Row>(`/admin/schedule/runs/${runInfo!.id}/cancel`, "POST");
+                  if (selection.current !== result.version_id || loadSequence.current !== ticket) return;
+                  setRunInfo(result);
+                  setPollError(null);
+                  if (!isRunActive(result)) {
+                    await open(result.version_id);
+                    await refresh();
+                  }
+                })}
+              >
+                {t(runInfo?.job?.cancel_requested_at ? "cancellationPending" : "cancelRun")}
+              </button>
+            )}
             <div
               className={`notice ${detail.report.complete ? "success" : "warning"}`}
             >

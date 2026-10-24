@@ -1,7 +1,8 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +35,25 @@ class Settings(BaseSettings):
     diagnostic_debug: bool = False
     metrics_token: SecretStr = SecretStr("")
     metrics_token_file: Path | None = None
+    worker_role: Literal["api", "coordinator", "io"] = "api"
+    worker_instance_id: str = Field(default="", pattern=r"^[A-Za-z0-9_-]{0,100}$")
+    sql_pool_size: int = Field(default=5, ge=1, le=20)
+    job_lease_seconds: int = Field(default=60, ge=15, le=300)
+    job_heartbeat_seconds: int = Field(default=10, ge=1, le=30)
+    job_poll_seconds: float = Field(default=1.0, ge=0.1, le=5)
+    job_max_attempts: int = Field(default=3, ge=1, le=5)
+    generation_queue_limit: int = Field(default=4, ge=1, le=20)
+    solver_grace_seconds: int = Field(default=180, ge=10, le=600)
+    solver_memory_mb: int = Field(default=2048, ge=256, le=16384)
+    solver_input_max_bytes: int = Field(default=16_777_216, ge=1024, le=67_108_864)
+    solver_output_max_bytes: int = Field(default=67_108_864, ge=1024, le=134_217_728)
+    mail_keys_file: Path = Path(__file__).resolve().parents[2] / ".secrets/mail-keys.json"
+
+    @model_validator(mode="after")
+    def heartbeat_fits_lease(self):
+        if self.job_heartbeat_seconds * 2 >= self.job_lease_seconds:
+            raise ValueError("job_heartbeat_seconds must be less than half job_lease_seconds")
+        return self
 
 
 @lru_cache

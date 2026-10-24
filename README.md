@@ -12,6 +12,7 @@ Includes local accounts and roles, administrative catalogs, configurable calenda
 | [nemsime contribution / Вклад в этот этап](docs/contributions.md) | Distinguish the starting project from this delivery and find the corresponding commits. |
 | [University rules](docs/requirements.md) | Check confirmed requirements and facts still awaiting university confirmation. |
 | [Architecture](docs/architecture.md) | Understand generation, persistence, security, and operational boundaries. |
+| [Local runtime / Локальный запуск](docs/local-runtime.md) | Start/stop all processes, recover jobs, and manage local mail keys. |
 | [Diagnostics / Диагностика](docs/observability.md) | Find errors, inspect generation history and audit, and configure optional Grafana/Prometheus. |
 | [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
 | [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
@@ -41,15 +42,16 @@ Configure `backend/.env`. Use an isolated database such as `ChronoCampus_Develop
 Set-Location backend
 .venv/Scripts/python.exe -m alembic upgrade head
 .venv/Scripts/python.exe -m app.manage create-admin admin@your-university.example --name Administrator
-.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Set-Location ..
+powershell -ExecutionPolicy Bypass -File scripts/local.ps1 init-mail-key
+powershell -ExecutionPolicy Bypass -File scripts/local.ps1 start
 ```
 
-Enter the administrator password at the hidden prompt; it must be changed at first login. Run **one API process**: generation uses one background worker and restart recovery assumes a single process.
-
-In a second terminal, from the repository root:
+Enter the administrator password at the hidden prompt; it must be changed at first login. The launcher starts one API, one generation coordinator, one mail/maintenance worker and Vite. The coordinator creates at most one temporary solver process. SQL Server stores the durable queue; Redis and Docker are not required. Use the same script to inspect or stop only these owned processes:
 
 ```powershell
-npm --prefix frontend run dev -- --host 127.0.0.1 --port 3000 --strictPort
+powershell -ExecutionPolicy Bypass -File scripts/local.ps1 status
+powershell -ExecutionPolicy Bypass -File scripts/local.ps1 stop
 ```
 
 Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, `/api/ready` checks database connectivity and the required schema. On Linux/macOS substitute `python3` and `backend/.venv/bin/python` for the Windows paths.
@@ -83,7 +85,7 @@ Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_M
 
 For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `PUBLIC_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.
 
-Docker Compose definitions are supplied, but native Windows is the verified setup. Compose uses an existing SQL Server; use `host.docker.internal` for a host server and suitable SQL authentication. Apply migrations explicitly with `docker compose run --rm backend python -m alembic upgrade head`, then `docker compose up --build`.
+Native Windows is the supported launch path for this delivery. The existing root Docker Compose file predates the durable workers and is not a complete runtime launch; container deployment is deferred. Optional monitoring has its own Compose file and is independent of the local launcher.
 
 ## Verification
 
@@ -105,6 +107,8 @@ git diff --check
 
 Default tests isolate database state with SQLite. The opt-in concurrency test uses real SQL Server: create and migrate an isolated `ChronoCampus_MigrationTest_YYYYMMDD` database and set `CHRONOCAMPUS_TEST_DATABASE` to that name when running pytest. It writes disposable fixtures only there and verifies that concurrent conflicting publications cannot both succeed.
 
+Durable-job SQL tests additionally accept `CHRONOCAMPUS_QUEUE_TEST_DATABASES`: a JSON array of two separately created and migrated test database names, one with `READ_COMMITTED_SNAPSHOT OFF` and one with it `ON`. Names must match `ChronoCampus_RuntimeTest_(OFF|ON)_YYYYMMDD_HHMMSS_xxxxxx`, where the last six characters are lowercase hexadecimal. The tests use the configured local SQL credentials with only the database name replaced; never point them at retained development data. They verify concurrent claims, expired-owner fencing, preparation heartbeats, restart recovery and coordinator hard death. Windows process-containment tests require Windows; SQL tests skip unless explicitly configured.
+
 Live acceptance: administrator login, generation and publication, student/lecturer schedules, note retention after a move, feedback replies/statuses/privacy, all three languages, desktop and mobile. Check partial-publication rejection and prohibited moves. See [verification evidence and limits](docs/verification.md).
 
 ## Code map
@@ -113,6 +117,8 @@ Live acceptance: administrator login, generation and publication, student/lectur
 - `backend/app/academics`: catalogs and workloads.
 - `backend/app/calendar`: shared date, parity, slot, and audience rules.
 - `backend/app/scheduling`: snapshots, solvers, independent validator, drafts, jobs, publication.
+- `backend/app/jobs`: durable SQL queue, generation coordinator/solver isolation, encrypted mail delivery and bounded maintenance.
+- `backend/app/local_runtime.py`, `scripts/local.ps1`: owned Windows process tree and local start/status/stop.
 - `backend/app/observability`: safe JSON logs, request IDs, metrics, transactional audit and run progress; `monitoring/`: optional Grafana/Prometheus.
 - `backend/app/notes`, `feedback`: private user data.
 - `backend/app/db`: models, transactions, revision lock; `backend/alembic`: migrations.

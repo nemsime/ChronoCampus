@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     HTTPException,
     Request,
@@ -18,7 +17,7 @@ from app.accounts.dependencies import (
     check_origin,
     public_account,
 )
-from app.accounts.mail import send_reset
+from app.accounts.mail import MailError, enqueue_reset, validate_configuration
 from app.core.config import get_settings
 from app.core.security import (
     csrf_token,
@@ -30,7 +29,6 @@ from app.core.security import (
 from app.db.models import Account, RateLimit, ResetToken, UserSession
 from app.db.session import get_db, lock_revision
 from app.observability.audit import record_audit
-from app.observability.telemetry import exception_event
 
 router = APIRouter(prefix="/auth", tags=["accounts"])
 # Equal-cost verification even when an address is unknown.
@@ -200,7 +198,6 @@ def change_password(
 def forgot_password(
     body: EmailInput,
     request: Request,
-    tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     check_origin(request)
@@ -212,35 +209,24 @@ def forgot_password(
     )
     settings = get_settings()
     # Configuration errors are independent of account existence.
-    if (
-        settings.mail_mode not in {"file", "smtp"}
-        or not settings.university_email_domains
-    ):
-        raise HTTPException(503, "mail_not_configured")
+    try:
+        validate_configuration(settings)
+    except MailError:
+        raise HTTPException(503, "mail_not_configured") from None
+    lock_revision(db, changed=False)
     account = db.scalar(
         select(Account).where(Account.email == body.email, Account.is_active == true())
     )
     if account and body.email.split("@")[-1] in settings.university_email_domains:
         raw = new_token()
-        db.add(
-            ResetToken(
-                user_id=account.id,
-                token=token_hash(raw),
-                expires_at=datetime.utcnow()
-                + timedelta(minutes=settings.reset_minutes),
-            )
+        reset_token = ResetToken(
+            user_id=account.id,
+            token=token_hash(raw),
+            expires_at=datetime.utcnow() + timedelta(minutes=settings.reset_minutes),
         )
+        enqueue_reset(db, account, raw, reset_token, settings)
         db.commit()
-        tasks.add_task(deliver_reset, body.email, raw)
     return {"message": "reset_requested"}
-
-
-def deliver_reset(email: str, token: str):
-    try:
-        send_reset(email, token)
-    except Exception as error:
-        # Uniform HTTP response, no address/token/SMTP credential in logs.
-        exception_event("mail.delivery_failed", error)
 
 
 @router.post("/reset-password", status_code=204)

@@ -1,31 +1,27 @@
-from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, select, func, update
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, defer
 
-from app.accounts.dependencies import administrator, current_user
+from app.accounts.dependencies import administrator
 from app.calendar.rules import audiences_overlap, lesson_slot, parity
 from app.db import models as m
 from app.db.session import get_db, lock_revision
+from app.jobs.generation import cancel_run, enqueue_generation, execute_run  # noqa: F401
+from app.jobs.models import JobAttempt
+from app.observability.audit import record_audit
+from app.observability.runs import run_view
 from app.scheduling.snapshot import (
     build_snapshot,
     current_assignments,
     record,
-    snapshot_hash,
-    comparison_hash,
 )
-from app.scheduling.solver import generate
 from app.scheduling.validation import validate
-from app.observability import telemetry
-from app.observability.audit import record_audit
-from app.observability.runs import Progress, run_view
 
 router = APIRouter(tags=["scheduling"])
-executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="chronocampus-solver")
 
 
 class DraftInput(BaseModel):
@@ -36,6 +32,7 @@ class DraftInput(BaseModel):
 
 class GenerateInput(BaseModel):
     revision: int
+    idempotency_key: str | None = Field(default=None, min_length=16, max_length=80)
     seed: int = Field(default=1, ge=0, le=2**31 - 1)
     algorithm: Literal["cp_sat", "greedy_local"] = "cp_sat"
 
@@ -137,46 +134,6 @@ def readable(account, component):
     return audiences_overlap(membership, audience)
 
 
-@router.get("/schedule")
-def published_schedule(
-    start: date | None = None,
-    end: date | None = None,
-    term_id: int | None = None,
-    course_group_id: int | None = None,
-    teacher_id: int | None = None,
-    room_id: int | None = None,
-    subject_id: int | None = None,
-    lesson_type: str | None = None,
-    account: m.Account = Depends(current_user),
-    db: Session = Depends(get_db),
-):
-    output = []
-    for assignment, component in current_assignments(db):
-        if not readable(account, component):
-            continue
-        if start and assignment.day < start or end and assignment.day > end:
-            continue
-        if (
-            any(
-                value is not None and getattr(component, key) != value
-                for key, value in (
-                    ("term_id", term_id),
-                    ("course_group_id", course_group_id),
-                    ("teacher_id", teacher_id),
-                    ("subject_id", subject_id),
-                    ("lesson_type", lesson_type),
-                )
-            )
-            or room_id is not None
-            and assignment.room_id != room_id
-        ):
-            continue
-        output.append(assignment_view(db, assignment, component))
-    return sorted(
-        output, key=lambda row: (row["day"], row["starts_at"], row["occurrence_id"])
-    )
-
-
 @router.get("/admin/schedule/versions", dependencies=[Depends(administrator)])
 def versions(db: Session = Depends(get_db)):
     return [
@@ -267,77 +224,9 @@ def start_generation(
     identifier: int, body: GenerateInput, db: Session = Depends(get_db),
     actor: m.Account = Depends(administrator),
 ):
-    lock_revision(db, changed=False)
-    version = require_draft(db, identifier, body.revision)
-    if db.scalar(
-        select(m.GenerationRun.id)
-        .where(
-            m.GenerationRun.version_id == identifier,
-            m.GenerationRun.status.in_(["queued", "running"]),
-        )
-        .limit(1)
-    ):
-        raise HTTPException(409, "generation_already_running")
-    if (
-        db.scalar(
-            select(func.count())
-            .select_from(m.GenerationRun)
-            .where(m.GenerationRun.status.in_(["queued", "running"]))
-        )
-        >= 4
-    ):
-        raise HTTPException(429, "generation_queue_full")
-    snapshot = build_snapshot(db, version, materialize=True)
-    run = m.GenerationRun(
-        version_id=identifier,
-        source_revision=version.revision,
-        status="queued",
-        seed=body.seed,
-        algorithm=body.algorithm,
-        input_hash=snapshot_hash(snapshot),
-        comparison_hash=comparison_hash(snapshot),
-        snapshot=snapshot,
-        actor_id=actor.id,
-        request_id=telemetry.request_id_var.get(),
-        updated_at=datetime.utcnow(),
-        progress={"stage": "queued", "total": len(snapshot["occurrences"]), "events": []},
-    )
-    db.add(run)
-    db.flush()
-    record_audit(db, actor, "generation.requested", "schedule", version.id,
-                 after={"algorithm": body.algorithm, "seed": body.seed})
+    run = enqueue_generation(db, identifier, body, actor)
     db.commit()
-    telemetry.emit("generation.queued", run_id=run.id, version_id=version.id,
-                   actor_id=actor.id, algorithm=body.algorithm, seed=body.seed)
-    try:
-        executor.submit(execute_run, db.get_bind(), run.id)
-    except Exception as error:
-        telemetry.exception_event("generation.enqueue_failed", error, run_id=run.id)
-        run.status, run.finished_at = "failed", datetime.utcnow()
-        run.result = {"error": "generation_enqueue_failed"}
-        run.progress = {**run.progress, "stage": "failed"}
-        db.commit()
-        raise HTTPException(503, "generation_enqueue_failed") from None
     return run_view(run)
-
-
-def recover_runs(engine):
-    """The supported deployment runs one API process with one solver worker."""
-    with Session(engine) as db:
-        lock_revision(db, changed=False)
-        count = db.execute(
-            update(m.GenerationRun)
-            .where(m.GenerationRun.status.in_(["queued", "running"]))
-            .values(
-                status="interrupted",
-                finished_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-                result={"error": "server_restarted"},
-            )
-        ).rowcount
-        db.commit()
-        if count:
-            telemetry.emit("generation.recovered", "WARNING", count=count)
 
 
 @router.get(
@@ -357,83 +246,6 @@ def calendar_slots(calendar_id: int, count: int = 6, db: Session = Depends(get_d
     return result
 
 
-def execute_run(engine, identifier):
-    context_token = telemetry.request_id_var.set(None)
-    with Session(engine, expire_on_commit=False) as db:
-        try:
-            run = db.get(m.GenerationRun, identifier)
-            if not run or run.status != "queued":
-                return
-            telemetry.request_id_var.set(run.request_id)
-            run.status = "running"
-            run.started_at = run.updated_at = datetime.utcnow()
-            db.commit()
-            progress = Progress(engine, identifier, run.version_id)
-            telemetry.emit("generation.started", run_id=identifier, version_id=run.version_id,
-                           algorithm=run.algorithm, seed=run.seed)
-            result = generate(
-                run.snapshot,
-                run.algorithm,
-                run.seed,
-                run.snapshot["term"]["search_seconds"],
-                progress=progress,
-            )
-            progress("saving")
-            # Search happens outside a transaction. Recheck both catalog and draft versions now.
-            revision = lock_revision(db, changed=False)
-            version = db.get(m.ScheduleVersion, run.version_id, populate_existing=True)
-            run.result = result
-            run.finished_at = datetime.utcnow()
-            if (
-                version.status != "draft"
-                or version.revision != run.source_revision
-                or revision != run.snapshot["data_revision"]
-            ):
-                run.status = "stale"
-            elif result["status"] in {"INVALID_PINS", "MODEL_INVALID"} or any(
-                issue["code"] != "configuration_unconfirmed"
-                for issue in result["report"]["issues"]
-            ):
-                run.status = "rejected"
-            else:
-                db.execute(
-                    delete(m.Assignment).where(m.Assignment.version_id == version.id)
-                )
-                db.add_all(
-                    assignment_model(version.id, row) for row in result["assignments"]
-                )
-                version.report = result["report"]
-                version.configuration = {
-                    "term": run.snapshot["term"],
-                    "calendar": run.snapshot["calendar"],
-                }
-                version.revision += 1
-                run.status = "complete" if result["report"]["complete"] else "partial"
-            run.updated_at = run.finished_at
-            run.progress = {**progress.state, "stage": run.status}
-            db.commit()
-            telemetry.emit("generation.finished", "INFO" if run.status == "complete" else "WARNING",
-                           run_id=identifier, version_id=run.version_id, status=run.status,
-                           elapsed_seconds=result.get("elapsed_seconds"),
-                           placed=len(result.get("assignments", [])))
-        except Exception as error:
-            db.rollback()
-            telemetry.exception_event("generation.failed", error, run_id=identifier)
-            try:
-                run = db.get(m.GenerationRun, identifier, populate_existing=True)
-                if run:
-                    run.status = "failed"
-                    run.finished_at = run.updated_at = datetime.utcnow()
-                    run.result = {"error": "generation_failed", "exception_type": type(error).__name__}
-                    run.progress = {**(run.progress or {}), "stage": "failed"}
-                    db.commit()
-            except Exception as persistence_error:
-                db.rollback()
-                telemetry.exception_event("generation.failure_persistence_failed", persistence_error, run_id=identifier)
-        finally:
-            telemetry.request_id_var.reset(context_token)
-
-
 @router.get("/admin/schedule/runs/{identifier}", dependencies=[Depends(administrator)])
 def run_status(identifier: int, db: Session = Depends(get_db)):
     run = db.get(m.GenerationRun, identifier)
@@ -442,9 +254,28 @@ def run_status(identifier: int, db: Session = Depends(get_db)):
     return run_view(run)
 
 
+@router.get("/admin/schedule/runs/{identifier}/attempts", dependencies=[Depends(administrator)])
+def run_attempts(identifier: int, db: Session = Depends(get_db)):
+    run = db.get(m.GenerationRun, identifier)
+    if not run:
+        raise HTTPException(404, "run_not_found")
+    rows = db.scalars(select(JobAttempt).where(JobAttempt.job_id == run.job_id)
+                      .order_by(JobAttempt.attempt_number)) if run.job_id else []
+    return {"items": [{key: getattr(row, key) for key in (
+        "id", "attempt_number", "lease_generation", "worker_instance", "started_at",
+        "deadline_at", "finished_at", "outcome", "error_code", "input_hash")} for row in rows]}
+
+
+@router.post("/admin/schedule/runs/{identifier}/cancel", dependencies=[Depends(administrator)])
+def cancel_generation(identifier: int, db: Session = Depends(get_db)):
+    run = cancel_run(db, identifier)
+    db.commit()
+    return run_view(run)
+
+
 @router.get("/admin/schedule/runs", dependencies=[Depends(administrator)])
 def run_history(db: Session = Depends(get_db), version_id: int | None = Query(None, ge=1),
-                status: Literal["queued", "running", "complete", "partial", "failed", "rejected", "stale", "interrupted"] | None = None,
+                status: Literal["queued", "running", "complete", "partial", "failed", "rejected", "stale", "interrupted", "retry_wait", "cancelled"] | None = None,
                 limit: int = Query(20, ge=1, le=50), offset: int = Query(0, ge=0, le=100000)):
     statement = select(m.GenerationRun).options(defer(m.GenerationRun.snapshot))
     if version_id is not None:

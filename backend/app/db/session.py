@@ -24,8 +24,11 @@ def database_url():
 @lru_cache
 def get_engine() -> Engine:
     url = database_url()
-    timeout = get_settings().db_timeout_seconds
-    options = {"connect_args": {"timeout": timeout}, "pool_timeout": timeout} if make_url(url).get_backend_name() == "mssql" else {}
+    settings = get_settings()
+    timeout = settings.db_timeout_seconds
+    pool_size = min(settings.sql_pool_size, {"api": 5, "coordinator": 3, "io": 2}[settings.worker_role])
+    options = {"connect_args": {"timeout": timeout}, "pool_timeout": timeout,
+               "pool_size": pool_size, "max_overflow": 0} if make_url(url).get_backend_name() == "mssql" else {}
     engine = create_engine(url, pool_pre_ping=True, hide_parameters=True, **options)
     if engine.dialect.name == "mssql":
         @event.listens_for(engine, "connect")

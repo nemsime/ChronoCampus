@@ -1,10 +1,10 @@
 from datetime import date, time
-import pytest
-from sqlalchemy import select
 
+import pytest
 from app.db import models as m
 from app.scheduling.router import execute_run
 from conftest import HASH, PASSWORD
+from sqlalchemy import select
 
 
 @pytest.fixture
@@ -125,11 +125,6 @@ def campus(database, monkeypatch):
             equipment_ids=[],
         )
     db.commit()
-    pending = []
-    monkeypatch.setattr(
-        "app.scheduling.router.executor.submit",
-        lambda function, engine, identifier: pending.append((engine, identifier)),
-    )
     return locals()
 
 
@@ -154,13 +149,21 @@ def draft(client, campus):
     return response.json()
 
 
+def queued_run(campus, *, first=False):
+    db = campus["db"]
+    db.expire_all()
+    ids = list(db.scalars(select(m.GenerationRun.id).where(m.GenerationRun.status == "queued")
+                          .order_by(m.GenerationRun.id)))
+    return db.get_bind(), ids[0 if first else -1]
+
+
 def generate(client, version, campus):
     response = client.post(
         f"/api/admin/schedule/versions/{version['id']}/generate",
         json={"revision": version["revision"]},
     )
     assert response.status_code == 202, response.text
-    engine, identifier = campus["pending"].pop()
+    engine, identifier = queued_run(campus)
     execute_run(engine, identifier)
     campus["db"].expire_all()
     return client.get(f"/api/admin/schedule/runs/{identifier}").json()
@@ -245,7 +248,7 @@ def test_generation_publication_note_survives_move_and_privacy(admin_client, cam
     assert client.get("/api/notes").json()[0]["id"] == note["id"]
 
 
-def test_stale_job_does_not_overwrite_draft(admin_client, campus):
+def test_catalog_edits_before_claim_are_included_in_snapshot(admin_client, campus):
     client = admin_client
     v = draft(client, campus)
     response = client.post(
@@ -259,13 +262,15 @@ def test_stale_job_does_not_overwrite_draft(admin_client, campus):
         ).status_code
         == 201
     )
-    execute_run(*campus["pending"].pop())
+    execute_run(*queued_run(campus))
     campus["db"].expire_all()
     assert (
         client.get(f"/api/admin/schedule/runs/{response.json()['id']}").json()["status"]
-        == "stale"
+        == "complete"
     )
-    assert detail(client, v)["assignments"] == []
+    assert len(detail(client, v)["assignments"]) == 4
+    run = client.get(f"/api/admin/schedule/runs/{response.json()['id']}").json()
+    assert run["inputs_updated_since_enqueue"] and run["snapshot_created_at"]
 
 
 def test_queued_generations_for_different_drafts_both_apply(admin_client, campus):
@@ -279,7 +284,7 @@ def test_queued_generations_for_different_drafts_both_apply(admin_client, campus
         assert response.status_code == 202, response.text
 
     for version in versions:
-        engine, identifier = campus["pending"].pop(0)
+        engine, identifier = queued_run(campus, first=True)
         execute_run(engine, identifier)
         campus["db"].expire_all()
         run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
@@ -326,7 +331,7 @@ def test_other_draft_changes_preserve_queued_generation(admin_client, campus, ch
         )
         assert response.status_code == 200, response.text
 
-    engine, identifier = campus["pending"].pop()
+    engine, identifier = queued_run(campus)
     execute_run(engine, identifier)
     campus["db"].expire_all()
     run = client.get(f"/api/admin/schedule/runs/{identifier}").json()
@@ -369,7 +374,7 @@ def test_own_draft_changes_reject_queued_generation(admin_client, campus, change
     assert edited["assignments"] != original["assignments"]
     assert edited["version"]["revision"] == original["version"]["revision"] + 1
 
-    engine, identifier = campus["pending"].pop()
+    engine, identifier = queued_run(campus)
     execute_run(engine, identifier)
     campus["db"].expire_all()
     assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "stale"
@@ -379,7 +384,7 @@ def test_own_draft_changes_reject_queued_generation(admin_client, campus, change
     assert result["version"]["revision"] == edited["version"]["revision"]
 
 
-def test_publication_invalidates_other_queued_generation(admin_client, campus):
+def test_publication_before_claim_is_included_in_snapshot(admin_client, campus):
     client = admin_client
     version = draft(client, campus)
     other = draft(client, campus)
@@ -391,11 +396,11 @@ def test_publication_invalidates_other_queued_generation(admin_client, campus):
     assert response.status_code == 202, response.text
     publish(client, detail(client, other)["version"])
 
-    engine, identifier = campus["pending"].pop()
+    engine, identifier = queued_run(campus)
     execute_run(engine, identifier)
     campus["db"].expire_all()
-    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "stale"
-    assert detail(client, version)["assignments"] == []
+    assert client.get(f"/api/admin/schedule/runs/{identifier}").json()["status"] == "complete"
+    assert len(detail(client, version)["assignments"]) == 4
 
 
 def test_emergency_requires_explicit_extra_permission(admin_client, campus):
