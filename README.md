@@ -1,5 +1,7 @@
 # ChronoCampus
 
+Active team repository: [nemsime/ChronoCampus](https://github.com/nemsime/ChronoCampus). The [previous repository](https://github.com/qaneee/ChronoCampus) retains the earlier pull requests and discussions; its Git history and branches were copied without rewriting commits. Existing working copies can retain it as `upstream` and use the active repository as `origin`.
+
 University timetable generation with manual corrections and explicit publication. React/TypeScript, FastAPI, SQL Server, SQLAlchemy/Alembic, and OR-Tools CP-SAT.
 
 Includes local accounts and roles, administrative catalogs, configurable calendars, semester workloads, automatic generation, pins, conflict checking, publication, personal dated notes, and private feedback. Interface languages: Russian, Armenian, English. Full-time and part-time calendars are independent.
@@ -89,7 +91,7 @@ Native Windows is the supported launch path for this delivery. The existing root
 
 ## Verification
 
-[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis and frontend types/build for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. See [CI setup, required branch protection, and coverage limits](docs/ci.md).
+[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis on Ubuntu and Windows, plus frontend types/build, for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. Successful `main` runs produce a [local delivery bundle](docs/delivery.md); they do not deploy or update your computer. See [CI setup, current hosted blocker, required branch protection, and coverage limits](docs/ci.md).
 
 From `backend`:
 
