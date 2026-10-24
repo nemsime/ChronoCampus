@@ -1,9 +1,10 @@
 from collections.abc import Iterator
 from functools import lru_cache
+import time
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine, update
-from sqlalchemy.engine import URL, Engine
+from sqlalchemy import create_engine, update, event
+from sqlalchemy.engine import URL, Engine, make_url
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -22,7 +23,26 @@ def database_url():
 
 @lru_cache
 def get_engine() -> Engine:
-    return create_engine(database_url(), pool_pre_ping=True, hide_parameters=True)
+    url = database_url()
+    timeout = get_settings().db_timeout_seconds
+    options = {"connect_args": {"timeout": timeout}, "pool_timeout": timeout} if make_url(url).get_backend_name() == "mssql" else {}
+    engine = create_engine(url, pool_pre_ping=True, hide_parameters=True, **options)
+    if engine.dialect.name == "mssql":
+        @event.listens_for(engine, "connect")
+        def bounded_queries(connection, record):
+            connection.timeout = timeout
+    from app.observability.telemetry import database_query
+    @event.listens_for(engine, "before_cursor_execute")
+    def query_started(connection, cursor, statement, parameters, context, executemany):
+        context._chrono_started = time.perf_counter()
+    @event.listens_for(engine, "after_cursor_execute")
+    def query_finished(connection, cursor, statement, parameters, context, executemany):
+        database_query(time.perf_counter() - context._chrono_started)
+    @event.listens_for(engine, "handle_error")
+    def query_failed(context):
+        since = getattr(context.execution_context, "_chrono_started", time.perf_counter())
+        database_query(time.perf_counter() - since, failed=True)
+    return engine
 
 
 def get_db() -> Iterator[Session]:

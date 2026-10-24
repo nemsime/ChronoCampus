@@ -6,8 +6,17 @@ import {
   Settings,
   UserRound,
   LogOut,
+  Activity,
 } from "lucide-react";
-import { Account, api, setCsrf } from "./api";
+import {
+  Account,
+  api,
+  setCsrf,
+  reportClientError,
+  setDiagnosticPage,
+} from "./api";
+import { Diagnostics } from "./Diagnostics";
+import { DiagnosticBoundary } from "./DiagnosticBoundary";
 import { SignIn, PasswordForm } from "./Accounts";
 import { Catalogs } from "./Catalogs";
 import { Planner } from "./Planner";
@@ -22,6 +31,21 @@ function Workspace() {
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState("schedule");
   const { busy, error, run } = useAction();
+  useEffect(() => {
+    setDiagnosticPage(page);
+  }, [page]);
+  useEffect(() => {
+    const error = (event: ErrorEvent) =>
+      reportClientError("javascript_error", event.error);
+    const rejection = (event: PromiseRejectionEvent) =>
+      reportClientError("unhandled_rejection", event.reason);
+    window.addEventListener("error", error);
+    window.addEventListener("unhandledrejection", rejection);
+    return () => {
+      window.removeEventListener("error", error);
+      window.removeEventListener("unhandledrejection", rejection);
+    };
+  }, []);
   useEffect(() => {
     let live = true;
     void api("/auth/me")
@@ -62,6 +86,7 @@ function Workspace() {
       ? [
           { id: "planner", icon: Settings },
           { id: "catalogs", icon: Database },
+          { id: "diagnostics", icon: Activity },
         ]
       : []),
     { id: "feedback", icon: MessageSquare },
@@ -127,33 +152,41 @@ function Workspace() {
         </header>
         <main>
           <ErrorBox error={error} />
-          {account.must_change_password || page === "account" ? (
-            <section className="panel account-panel">
-              <h1>{t("account")}</h1>
-              <p>
-                {account.display_name} · {account.email}
-              </p>
-              {account.must_change_password && (
-                <p className="notice warning">
-                  {t("password_change_required")}
+          <DiagnosticBoundary
+            key={page}
+            message={t("frontendFailure")}
+            reload={t("reload")}
+          >
+            {account.must_change_password || page === "account" ? (
+              <section className="panel account-panel">
+                <h1>{t("account")}</h1>
+                <p>
+                  {account.display_name} · {account.email}
                 </p>
-              )}
-              <PasswordForm
-                onDone={() => {
-                  setCsrf("");
-                  setAccount(null);
-                }}
-              />
-            </section>
-          ) : page === "catalogs" && account.role === "admin" ? (
-            <Catalogs />
-          ) : page === "planner" && account.role === "admin" ? (
-            <Planner />
-          ) : page === "feedback" ? (
-            <Feedback account={account} />
-          ) : (
-            <PersonalSchedule />
-          )}
+                {account.must_change_password && (
+                  <p className="notice warning">
+                    {t("password_change_required")}
+                  </p>
+                )}
+                <PasswordForm
+                  onDone={() => {
+                    setCsrf("");
+                    setAccount(null);
+                  }}
+                />
+              </section>
+            ) : page === "catalogs" && account.role === "admin" ? (
+              <Catalogs />
+            ) : page === "planner" && account.role === "admin" ? (
+              <Planner />
+            ) : page === "diagnostics" && account.role === "admin" ? (
+              <Diagnostics />
+            ) : page === "feedback" ? (
+              <Feedback account={account} />
+            ) : (
+              <PersonalSchedule />
+            )}
+          </DiagnosticBoundary>
         </main>
       </div>
     </div>

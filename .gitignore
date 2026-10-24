@@ -81,6 +81,8 @@ logs/
 /db/dumps/
 /db/private/
 /backend/.mail/
+/backend/.logs/
+/monitoring/secrets/
 /backend/.demo-credentials.json
 
 # Editor and operating-system files

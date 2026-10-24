@@ -10,6 +10,7 @@ from app.core.security import password_hash
 from app.db import models as m
 from app.db.session import get_db, lock_revision
 from app.academics import schemas as s
+from app.observability.audit import record_audit
 
 router = APIRouter(
     prefix="/admin", tags=["administration"], dependencies=[Depends(administrator)]
@@ -259,6 +260,7 @@ def save_record(resource, body, db, actor, identifier=None):
         ) from None
     lock_revision(db)
     existing = require_record(db, model, identifier) if identifier else None
+    before = serialize(existing, db) if existing else {}
     validate_domain(db, resource, data, existing, actor)
     equipment = data.pop("equipment_ids") if resource == "rooms" else None
     row = existing or model()
@@ -272,18 +274,20 @@ def save_record(resource, body, db, actor, identifier=None):
             m.RoomEquipment(room_id=row.id, equipment_type_id=identifier, quantity=1)
             for identifier in equipment
         )
+    record_audit(db, actor, "catalog.updated" if existing else "catalog.created", resource,
+                 row.id, before=before, after=serialize(row, db))
     db.commit()
     return serialize(row, db)
 
 
 @router.delete("/catalog/{resource}/{identifier}", status_code=204)
-def delete_record(resource: str, identifier: int, db: Session = Depends(get_db)):
+def delete_record(resource: str, identifier: int, db: Session = Depends(get_db),
+                  actor: m.Account = Depends(administrator)):
     model, _ = resource_type(resource)
     if resource == "users":
         raise HTTPException(409, "deactivate_account_instead")
     lock_revision(db)
     row = require_record(db, model, identifier)
-    if resource == "rooms":
-        db.execute(delete(m.RoomEquipment).where(m.RoomEquipment.room_id == identifier))
+    record_audit(db, actor, "catalog.deleted", resource, identifier, before=serialize(row, db))
     db.delete(row)
     db.commit()

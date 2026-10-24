@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     JSON,
+    Integer,
     String,
     Time,
     Unicode,
@@ -334,10 +335,28 @@ class GenerationRun(Base):
     seed: Mapped[int]
     algorithm: Mapped[str] = mapped_column(String(20))
     input_hash: Mapped[str] = mapped_column(String(64))
+    comparison_hash: Mapped[str | None] = mapped_column(String(64))
     snapshot: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime)
+    request_id: Mapped[str | None] = mapped_column(String(32))
+    actor_id: Mapped[int | None] = mapped_column(Integer)
+    progress: Mapped[dict | None] = mapped_column(JSON)
+
+
+class AuditEvent(Base):
+    __tablename__ = "AuditEvent"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    actor_id: Mapped[int | None] = mapped_column(Integer)
+    request_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    action: Mapped[str] = mapped_column(String(60))
+    resource: Mapped[str] = mapped_column(String(50))
+    entity_id: Mapped[int | None] = mapped_column(Integer)
+    changes: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class Note(Base):

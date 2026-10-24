@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import logging
 
 from fastapi import (
     APIRouter,
@@ -30,9 +29,10 @@ from app.core.security import (
 )
 from app.db.models import Account, RateLimit, ResetToken, UserSession
 from app.db.session import get_db, lock_revision
+from app.observability.audit import record_audit
+from app.observability.telemetry import exception_event
 
 router = APIRouter(prefix="/auth", tags=["accounts"])
-logger = logging.getLogger(__name__)
 # Equal-cost verification even when an address is unknown.
 DUMMY_HASH = password_hash("unusable-placeholder")
 
@@ -137,6 +137,7 @@ def login(
         )
     )
     account.last_login = datetime.utcnow()
+    record_audit(db, account, "account.login", "users", account.id)
     db.commit()
     response.set_cookie(
         COOKIE,
@@ -170,6 +171,7 @@ def logout(
         .where(UserSession.session_token == token_hash(request.cookies[COOKIE]))
         .values(is_revoked=True)
     )
+    record_audit(db, account, "account.logout", "users", account.id)
     db.commit()
     response.delete_cookie(COOKIE, path="/api")
 
@@ -189,6 +191,7 @@ def change_password(
     account.password_hash = password_hash(body.password)
     account.must_change_password = False
     revoke_sessions(db, account.id)
+    record_audit(db, account, "account.password_changed", "users", account.id)
     db.commit()
     response.delete_cookie(COOKIE, path="/api")
 
@@ -235,9 +238,9 @@ def forgot_password(
 def deliver_reset(email: str, token: str):
     try:
         send_reset(email, token)
-    except Exception:
+    except Exception as error:
         # Uniform HTTP response, no address/token/SMTP credential in logs.
-        logger.error("Password recovery delivery failed")
+        exception_event("mail.delivery_failed", error)
 
 
 @router.post("/reset-password", status_code=204)
@@ -265,5 +268,6 @@ def reset_password(
     account.password_hash = password_hash(body.password)
     account.must_change_password = False
     revoke_sessions(db, account.id)
+    record_audit(db, account, "account.password_reset", "users", account.id)
     db.commit()
     response.delete_cookie(COOKIE, path="/api")

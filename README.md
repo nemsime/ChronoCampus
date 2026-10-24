@@ -12,6 +12,7 @@ Includes local accounts and roles, administrative catalogs, configurable calenda
 | [nemsime contribution / Вклад в этот этап](docs/contributions.md) | Distinguish the starting project from this delivery and find the corresponding commits. |
 | [University rules](docs/requirements.md) | Check confirmed requirements and facts still awaiting university confirmation. |
 | [Architecture](docs/architecture.md) | Understand generation, persistence, security, and operational boundaries. |
+| [Diagnostics / Диагностика](docs/observability.md) | Find errors, inspect generation history and audit, and configure optional Grafana/Prometheus. |
 | [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
 | [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
 | [Manual merge checklist](docs/manual-merge-check.md) | Recheck the fixes and end-to-end behavior before merging. |
@@ -51,7 +52,7 @@ In a second terminal, from the repository root:
 npm --prefix frontend run dev -- --host 127.0.0.1 --port 3000 --strictPort
 ```
 
-Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, not database availability. On Linux/macOS substitute `python3` and `backend/.venv/bin/python` for the Windows paths.
+Open [ChronoCampus](http://localhost:3000). Vite forwards `/api` to port 8000. `frontend/.env.example` documents the server-only `API_PROXY_TARGET` setting. Use a consistent browser hostname. [API documentation](http://localhost:8000/docs) describes endpoints; `/api/health` checks the process, `/api/ready` checks database connectivity and the required schema. On Linux/macOS substitute `python3` and `backend/.venv/bin/python` for the Windows paths.
 
 ## Demonstration data
 
@@ -110,6 +111,7 @@ Live acceptance: administrator login, generation and publication, student/lectur
 - `backend/app/academics`: catalogs and workloads.
 - `backend/app/calendar`: shared date, parity, slot, and audience rules.
 - `backend/app/scheduling`: snapshots, solvers, independent validator, drafts, jobs, publication.
+- `backend/app/observability`: safe JSON logs, request IDs, metrics, transactional audit and run progress; `monitoring/`: optional Grafana/Prometheus.
 - `backend/app/notes`, `feedback`: private user data.
 - `backend/app/db`: models, transactions, revision lock; `backend/alembic`: migrations.
 - `frontend/src/system`: active interface through `App.tsx`. Earlier prototype components outside this import graph are retained as reference and are not mounted.

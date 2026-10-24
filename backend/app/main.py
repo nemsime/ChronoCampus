@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
-import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
@@ -15,17 +15,22 @@ from app.scheduling.router import router as scheduling_router, recover_runs
 from app.db.session import get_engine
 from app.notes.router import router as notes_router
 from app.feedback.router import router as feedback_router
+from app.observability import telemetry
+from app.observability.router import router as diagnostics_router, client_router, database_probe
+from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 @asynccontextmanager
 async def lifespan(app):
+    telemetry.configure(get_settings())
+    telemetry.emit("application.started")
     try:
         recover_runs(get_engine())
-    except (DBAPIError, HTTPException):
-        logging.getLogger(__name__).warning(
-            "Database startup recovery unavailable; apply migrations before generating"
-        )
+    except (DBAPIError, HTTPException) as error:
+        telemetry.exception_event("application.recovery_unavailable", error)
     yield
+    telemetry.emit("application.stopped")
 
 
 app = FastAPI(title="ChronoCampus API", version="1.0.0", lifespan=lifespan)
@@ -35,27 +40,34 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Accept", "Content-Type", "X-CSRF-Token"],
+    expose_headers=["X-Request-ID"],
 )
+app.add_middleware(telemetry.RequestTelemetry)
 app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")
 app.include_router(scheduling_router, prefix="/api")
 app.include_router(notes_router, prefix="/api")
 app.include_router(feedback_router, prefix="/api")
+app.include_router(diagnostics_router, prefix="/api")
+app.include_router(client_router, prefix="/api")
 
 
 @app.exception_handler(IntegrityError)
 def integrity_error(request: Request, error: IntegrityError):
+    telemetry.emit("database.conflict", "WARNING")
     return JSONResponse(status_code=409, content={"detail": "data_conflict"})
 
 
 @app.exception_handler(DBAPIError)
 def database_error(request: Request, error: DBAPIError):
+    telemetry.exception_event("database.error", error)
     return JSONResponse(status_code=503, content={"detail": "database_unavailable"})
 
 
 @app.exception_handler(RequestValidationError)
 def validation_error(request: Request, error: RequestValidationError):
+    telemetry.emit("request.validation_failed", "WARNING", error_code="invalid_input", count=len(error.errors()))
     errors = [
         {key: value for key, value in item.items() if key not in {"input", "ctx"}}
         for item in error.errors()
@@ -63,7 +75,27 @@ def validation_error(request: Request, error: RequestValidationError):
     return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
 
 
+@app.exception_handler(StarletteHTTPException)
+async def domain_error(request: Request, error: StarletteHTTPException):
+    code = error.detail.get("code") if isinstance(error.detail, dict) else error.detail
+    safe_code = code if isinstance(code, str) and code in telemetry.ERROR_CODES else "http_error"
+    telemetry.emit("request.rejected", "ERROR" if error.status_code >= 500 else "WARNING",
+                   status=error.status_code, error_code=safe_code)
+    return await http_exception_handler(request, error)
+
+
 @app.get("/api/health", tags=["health"])
 def health() -> dict[str, str]:
-    """Process liveness only; /api/groups also checks database access."""
+    """Process liveness only; /api/ready checks database and required schema."""
     return {"status": "ok"}
+
+
+@app.get("/api/ready", tags=["health"])
+def ready():
+    try:
+        with Session(get_engine()) as db:
+            ok = database_probe(db)["ready"]
+    except Exception as error:
+        telemetry.exception_event("database.readiness_failed", error)
+        ok = False
+    return JSONResponse({"status": "ready" if ok else "unavailable"}, status_code=200 if ok else 503)
