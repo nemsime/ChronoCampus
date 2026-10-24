@@ -91,7 +91,7 @@ Native Windows is the supported launch path for this delivery. The existing root
 
 ## Verification
 
-[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis on Ubuntu and Windows, plus frontend types/build, for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. Successful `main` runs produce a [local delivery bundle](docs/delivery.md); they do not deploy or update your computer. See [CI setup, current hosted blocker, required branch protection, and coverage limits](docs/ci.md).
+[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis on Ubuntu and Windows, plus frontend types/build, for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. Successful `main` runs produce a [local delivery bundle](docs/delivery.md); they do not deploy or update your computer. See [CI setup, repository migration, main protection, and coverage limits](docs/ci.md).
 
 From `backend`:
 

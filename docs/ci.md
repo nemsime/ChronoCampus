@@ -26,18 +26,18 @@ On 24 October 2026, [run 40082491033](https://github.com/qaneee/ChronoCampus/act
 
 The authenticated collaborator cannot administer the old owner's Actions/billing or branch protection. The new repository is owned by the authenticated account, so its Actions and protection settings can be configured. Updating workflow YAML does not remove the old account's billing restriction. Run CI on the latest PR commit in the new repository and merge only after `CI` succeeds; then verify the `main` run and delivery artifact. Earlier local results do not substitute for those hosted runs.
 
-## Enforce checks before merging
+## Protected main
 
-Adding the workflow enables checks; branch protection is a separate repository setting. In the old repository, `main` was unprotected and the available account lacked administration access. In the new repository, enforce the following rule before merging the first passing PR.
+Adding the workflow enables checks; branch protection is a separate repository setting. In the old repository, `main` was unprotected and the available account lacked administration access. Protection on `nemsime/ChronoCampus` was configured and read back through the GitHub API on 24 October 2026, before the first PR merge:
 
-An administrator (or a role allowed to edit repository rules) must configure a protection rule for `main` in **Settings → Branches**:
+1. A pull request and resolved review conversations are required.
+2. The aggregate **CI** check must pass and must come from **GitHub Actions** (app ID `15368`).
+3. The branch must be up to date with `main`.
+4. These requirements also apply to administrators. Force pushes and branch deletion are disabled.
 
-1. Require a pull request before merging.
-2. Require status checks to pass before merging; select **CI** from **GitHub Actions** after its first completed run.
-3. Require branches to be up to date before merging.
-4. Do not allow bypassing these requirements; keep force pushes and deletions disabled.
+The first PR was observed as `BLOCKED` while its required check was pending. The rule does not require a minimum number of approving teammate reviews; this allows the authorized maintainer to merge after validation. Team access invitations were issued separately and require each recipient to accept.
 
-Select the aggregate `CI` job, not just `Backend` or `Frontend`. An intentional failing PR should then be blocked from merging, and a passing, up-to-date PR should be eligible. Protection for private repositories depends on the owner's GitHub plan. See GitHub's [branch protection documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule) and [required-check troubleshooting](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks).
+If recreating the repository, configure the same rule in **Settings → Branches**, selecting the aggregate `CI` job rather than only `Backend` or `Frontend`. Protection for private repositories depends on the owner's GitHub plan. See GitHub's [branch protection documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule) and [required-check troubleshooting](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks).
 
 ## Local checks
 
