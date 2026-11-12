@@ -10,6 +10,7 @@ import { diagnosticWords } from "./diagnosticWords";
 import { runtimeWords } from "./runtimeWords";
 import { scheduleWords } from "./scheduleWords";
 import { uiWords } from "./uiWords";
+import { designWords } from "./designWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   ...ruleMessages,
@@ -17,6 +18,7 @@ const words: Record<string, [string, string, string]> = {
   ...runtimeWords,
   ...scheduleWords,
   ...uiWords,
+  ...designWords,
   schedule: ["Расписание", "Դասացուցակ", "Timetable"],
   catalogs: ["Данные и правила", "Տվյալներ և կանոններ", "Data & rules"],
   planner: ["Генератор", "Գեներատոր", "Planner"],
@@ -458,11 +460,16 @@ type Context = {
 const I18n = createContext<Context>(null!);
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>(() => {
-    const v = localStorage.getItem("chronocampus.language");
-    return v === "hy" || v === "en" ? v : "ru";
+    try {
+      const v = localStorage.getItem("chronocampus.language");
+      return v === "hy" || v === "en" ? v : "ru";
+    } catch {
+      return "ru";
+    }
   });
   useEffect(() => {
-    localStorage.setItem("chronocampus.language", lang);
+    try { localStorage.setItem("chronocampus.language", lang); }
+    catch { /* The selected language still works without browser storage. */ }
     document.documentElement.lang = lang;
   }, [lang]);
   const t = (key: string) =>

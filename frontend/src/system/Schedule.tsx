@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, SlidersHorizontal, StickyNote } from "lucide-react";
+import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, MapPin, RefreshCw, SlidersHorizontal, StickyNote, UserRound, Users } from "lucide-react";
 import { api, ApiError, Row } from "./api";
 import { dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
@@ -58,6 +58,13 @@ export function LessonList({
     results.current?.focus({ preventScroll: true });
     results.current?.scrollIntoView({ block: "start" });
   }} />;
+  const pageRows = serverPage ? visible : visible.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const days = Array.from(pageRows.reduce<Map<string, Row[]>>((groups, row) => {
+    const lessons = groups.get(row.day) || [];
+    lessons.push(row);
+    groups.set(row.day, lessons);
+    return groups;
+  }, new Map<string, Row[]>()));
   return (
     <>
       {!serverPage && <>
@@ -110,18 +117,22 @@ export function LessonList({
       </div></>}
       <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
       {pagination}
-      <div className="lesson-list">
-        {(serverPage ? visible : visible.slice(currentPage * pageSize, (currentPage + 1) * pageSize)).map((row) => (
+      <div className="lesson-list lesson-list-grouped">
+        {days.map(([day, lessons]) => <section className="lesson-date-group" key={day}>
+          <div className="lesson-date-heading">
+            <h3><CalendarDays size={17} aria-hidden="true" /><time dateTime={day}>{dateLabel(day, lang)}</time></h3>
+            <span className="lesson-date-count">{lessons.length} · {t("lessonsLabel")}</span>
+          </div>
+          {lessons.map((row) => (
           <article
             className={`lesson ${row.cancelled ? "cancelled" : ""}`}
             key={row.occurrence_id}
           >
             <div className="lesson-time">
-              <strong>{dateLabel(row.day, lang)}</strong>
-              <span>
+              <strong>
                 {String(row.starts_at).slice(0, 5)}–
                 {String(row.ends_at).slice(0, 5)}
-              </span>
+              </strong>
               <small>
                 {t("slot")} {row.slot} · {t(row.parity)}
               </small>
@@ -136,11 +147,12 @@ export function LessonList({
                   <span className="badge warn">{t("cancelled")}</span>
                 )}
               </div>
-              <h3>{row.subject}</h3>
-              <p>
-                {row.teacher} · {t("room_id")} {row.room}
-              </p>
-              <small>
+              <h4>{row.subject}</h4>
+              <div className="lesson-details">
+                <span><UserRound size={14} aria-hidden="true" />{row.teacher}</span>
+                <span><MapPin size={14} aria-hidden="true" />{t("room_id")} {row.room}</span>
+              </div>
+              <small className="lesson-audience"><Users size={13} aria-hidden="true" />
                 {row.group}
                 {row.small_group_id
                   ? ` · ${t("small_group_id")} ${row.small_group}`
@@ -152,7 +164,8 @@ export function LessonList({
             </div>
             {action && <div className="lesson-action">{action(row)}</div>}
           </article>
-        ))}
+          ))}
+        </section>)}
       </div>
       {!visible.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
       {pagination}
@@ -245,7 +258,7 @@ export function PersonalSchedule() {
     results.current?.focus({ preventScroll: true });
     results.current?.scrollIntoView({ block: "start" });
   }
-  const pagination = (rows.length > 0 || cursors.length > 1) && <nav className="pagination result-pagination" aria-label={t("paginationLabel")}>
+  const pagination = (nextCursor !== null || cursors.length > 1) && <nav className="pagination result-pagination personal-pagination" aria-label={t("paginationLabel")}>
     <button className="secondary" disabled={loading || cursors.length === 1}
       onClick={() => changePage(cursors.slice(0, -1))}><ChevronLeft size={16} aria-hidden="true" />{t("previous_page")}</button>
     <span className="count-label">{t("pageLabel")} {cursors.length}</span>
@@ -254,8 +267,9 @@ export function PersonalSchedule() {
   </nav>;
   return (
     <>
-      <div className="page-heading">
-        <div>
+      <div className="page-heading page-hero">
+        <div className="page-hero-copy">
+          <p className="eyebrow">{t("scheduleEyebrow")}</p>
           <h1>{t("schedule")}</h1>
           <p>{t("scheduleIntro")}</p>
         </div>
@@ -268,9 +282,20 @@ export function PersonalSchedule() {
           {t("refresh")}
         </button>
       </div>
+      <dl className="summary-strip schedule-summary">
+        {[
+          { icon: CalendarDays, label: "lessonsOnPage", value: rows.length },
+          { icon: CalendarDays, label: "teachingDaysOnPage", value: new Set(rows.map((row) => row.day)).size },
+          { icon: BookOpen, label: "subjectsOnPage", value: new Set(rows.map((row) => row.subject_id)).size },
+          { icon: StickyNote, label: "notesOnPage", value: rows.filter((row) => notes.some((note) => note.occurrence_id === row.occurrence_id)).length },
+        ].map(({ icon: Icon, label, value }) => <div className="summary-item" key={label}>
+          <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
+          <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className="summary-item-value">{loading ? "—" : value}</dd></div>
+        </div>)}
+      </dl>
       <ErrorBox error={error} />
       <ErrorBox error={readError} />
-      <section className="panel" aria-busy={loading}>
+      <section className="panel schedule-panel" aria-busy={loading}>
         <div className="schedule-filter-bar">
           <div><h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}
             {activeFilters > 0 && <span className="badge">{activeFilters}</span>}
@@ -329,7 +354,7 @@ export function PersonalSchedule() {
         </div>
       </section>
       {selected && (
-        <Dialog labelledBy="note-title" onClose={() => setSelected(null)}>
+        <Dialog labelledBy="note-title" closeDisabled={busy} onClose={() => setSelected(null)}>
           <h2 id="note-title">{t("note")}</h2>
           <p>
             {selected.subject} · {selected.day}
@@ -338,11 +363,12 @@ export function PersonalSchedule() {
             onSubmit={(e) => {
               e.preventDefault();
               void run(async () => {
-                await api(`/notes/${selected.occurrence_id}`, "PUT", {
+                const saved = await api<Row>(`/notes/${selected.occurrence_id}`, "PUT", {
                   content,
                 });
-                await refresh();
+                setNotes((current) => [...current.filter((memo) => memo.occurrence_id !== saved.occurrence_id), saved]);
                 setSelected(null);
+                await refresh();
               });
             }}
           >
@@ -352,6 +378,7 @@ export function PersonalSchedule() {
                 autoFocus
                 required
                 maxLength={10000}
+                disabled={busy}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
@@ -367,8 +394,9 @@ export function PersonalSchedule() {
                   onClick={() =>
                     void run(async () => {
                       await api(`/notes/${note.id}`, "DELETE");
-                      await refresh();
+                      setNotes((current) => current.filter((memo) => memo.id !== note.id));
                       setSelected(null);
+                      await refresh();
                     })
                   }
                 >
@@ -378,6 +406,7 @@ export function PersonalSchedule() {
               <button
                 type="button"
                 className="secondary"
+                disabled={busy}
                 onClick={() => setSelected(null)}
               >
                 {t("cancel")}

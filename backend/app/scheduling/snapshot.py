@@ -92,6 +92,9 @@ def build_snapshot(
             record(row) for row in db.scalars(select(model).order_by(model.id))
         ]
     equipment = list(db.scalars(select(m.RoomEquipment)))
+    study_forms = dict(db.execute(select(m.Major.id, m.Major.study_form)).all())
+    for group in snapshot["groups"]:
+        group["study_form"] = study_forms[group["major_id"]]
     for room in snapshot["rooms"]:
         room["equipment_ids"] = [
             e.equipment_type_id for e in equipment if e.room_id == room["id"]

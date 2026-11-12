@@ -83,6 +83,41 @@ def membership(db, data):
         raise HTTPException(422, "invalid_lab_group")
 
 
+def validate_calendar_workloads(db, resource, data, existing):
+    """Calendar edits must preserve already materialized curriculum identity."""
+    if not existing or resource not in {"calendars", "terms"}:
+        return
+    if resource == "calendars":
+        scope = m.Workload.term_id.in_(
+            select(m.Term.id).where(m.Term.calendar_id == existing.id)
+        )
+        form, units = data["study_form"], data["academic_hours_per_lesson"]
+        old_units = existing.academic_hours_per_lesson
+    else:
+        calendar = require_record(db, m.CalendarConfig, data["calendar_id"])
+        previous = require_record(db, m.CalendarConfig, existing.calendar_id)
+        scope = m.Workload.term_id == existing.id
+        form, units = calendar.study_form, calendar.academic_hours_per_lesson
+        old_units = previous.academic_hours_per_lesson
+    if db.scalar(
+        select(m.Workload.id)
+        .join(m.CourseGroup, m.CourseGroup.id == m.Workload.course_group_id)
+        .join(m.Major, m.Major.id == m.CourseGroup.major_id)
+        .where(scope, m.Major.study_form != form).limit(1)
+    ):
+        raise HTTPException(422, "study_form_mismatch")
+    if old_units != units and db.scalar(
+        select(m.Occurrence.id)
+        .join(m.Workload, m.Workload.id == m.Occurrence.component_id)
+        .where(scope).limit(1)
+    ):
+        raise HTTPException(409, "academic_units_have_occurrences")
+    if units and db.scalar(
+        select(m.Workload.id).where(scope, m.Workload.semester_hours % units != 0).limit(1)
+    ):
+        raise HTTPException(422, "indivisible_workload")
+
+
 def validate_domain(db, resource, data, existing, actor):
     if resource in {"users", "workloads", "subgroups"}:
         membership(db, data)
@@ -97,6 +132,7 @@ def validate_domain(db, resource, data, existing, actor):
                 ).first()
                 if not found:
                     raise HTTPException(422, "invalid_reference")
+    validate_calendar_workloads(db, resource, data, existing)
     if resource == "users":
         try:
             data["email"] = EmailInput(email=data["email"]).email
@@ -288,6 +324,12 @@ def delete_record(resource: str, identifier: int, db: Session = Depends(get_db),
         raise HTTPException(409, "deactivate_account_instead")
     lock_revision(db)
     row = require_record(db, model, identifier)
+    if resource == "equipment" and any(
+        identifier in equipment_ids
+        for equipment_ids in db.scalars(select(m.Workload.equipment_ids))
+    ):
+        # Workload requirements are JSON, so the database cannot enforce this FK.
+        raise HTTPException(409, "equipment_has_workload")
     record_audit(db, actor, "catalog.deleted", resource, identifier, before=serialize(row, db))
     if resource == "rooms":
         db.execute(delete(m.RoomEquipment).where(m.RoomEquipment.room_id == identifier))

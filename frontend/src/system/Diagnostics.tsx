@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, Row } from "./api";
-import { ErrorBox, LoadingState, SectionLinks } from "./common";
+import { ErrorBox, LoadingState, SectionLinks, timestampLabel } from "./common";
 import { RefreshCw } from "lucide-react";
 import { useLanguage } from "./i18n";
 
@@ -41,12 +41,7 @@ function useMonitor(url: string | null, automatic = true) {
 
 export function timestamp(value: string | undefined, lang: string) {
   if (!value) return "—";
-  const date = new Date(
-    /[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : value + "Z",
-  );
-  return Number.isNaN(date.getTime())
-    ? "—"
-    : date.toLocaleString(lang === "hy" ? "hy-AM" : lang);
+  return timestampLabel(value, lang, true);
 }
 const seconds = (value: unknown) =>
   typeof value === "number" ? `${value.toFixed(2)} s` : "—";

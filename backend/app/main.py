@@ -22,6 +22,7 @@ from app.observability.router import client_router, database_probe
 from app.observability.router import router as diagnostics_router
 from app.scheduling.router import router as scheduling_router
 from app.scheduling.queries import router as schedule_queries_router
+from app.workspace.router import router as workspace_router
 
 
 @asynccontextmanager
@@ -46,6 +47,7 @@ app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")
 app.include_router(schedule_queries_router, prefix="/api")
+app.include_router(workspace_router, prefix="/api")
 app.include_router(scheduling_router, prefix="/api")
 app.include_router(notes_router, prefix="/api")
 app.include_router(feedback_router, prefix="/api")

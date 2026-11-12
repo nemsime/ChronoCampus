@@ -22,4 +22,4 @@ Subjects include mathematical analysis, OOP, physics, computer architecture, QA,
 
 Demo autumn terms: 1 September 2026–29 January 2027; teaching: 1 September–18 December (16 calendar weeks). This does not assert that the university always ends classes on 18 December. Exact dates are administrator settings. A 21 September holiday demonstrates separate cancelled-hour accounting.
 
-The idempotent seed is restricted to `ChronoCampus_Development`. Random passwords are stored only in ignored `backend/.demo-credentials.json`. Existing user records and the original database are preserved.
+The idempotent seed is restricted to `ChronoCampus_Development`. It reuses existing records, but regenerates passwords for every seeded demo account on each run and revokes their active sessions. The current random passwords are stored only in ignored `backend/.demo-credentials.json`; previous passwords cannot be recovered. The original database and non-demo records are preserved.

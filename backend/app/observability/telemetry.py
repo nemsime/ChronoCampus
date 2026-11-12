@@ -88,6 +88,8 @@ ERROR_CODES = {
     "study_form_mismatch",
     "indivisible_workload",
     "workload_has_occurrences",
+    "academic_units_have_occurrences",
+    "equipment_has_workload",
     "deactivate_account_instead",
     "resource_not_found",
     "version_not_found",

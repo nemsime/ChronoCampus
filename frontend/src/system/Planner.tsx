@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, CircleStop, Play, Plus, RefreshCw, Upload } from "lucide-react";
+import { AlertCircle, CalendarCheck, CalendarDays, CheckCircle2, CircleStop, Clock3, Play, Plus, RefreshCw, ShieldCheck, Upload } from "lucide-react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
 import { Dialog, EmptyState, ErrorBox, LoadingState, SectionLinks, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
 import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
-export function Planner() {
+export function Planner({ initialVersionId = null }: { initialVersionId?: number | null } = {}) {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
   const [versions, setVersions] = useState<Row[]>([]);
@@ -46,12 +46,15 @@ export function Planner() {
     setPollError(null);
   };
   useEffect(() => {
-    void run(refresh);
+    void run(async () => {
+      await refresh();
+      if (initialVersionId !== null) await open(initialVersionId);
+    });
     return () => {
       selection.current = null;
       ++loadSequence.current;
     };
-  }, []);
+  }, [initialVersionId]);
   useEffect(() => {
     if (!runInfo || !isRunActive(runInfo)) return;
     let cancelled = false;
@@ -103,30 +106,51 @@ export function Planner() {
       ? `${rowLabel((data.subjects || []).find((r) => r.id === c.subject_id) || { id: c.subject_id })} · ${t(c.lesson_type)} · ${rowLabel((data.groups || []).find((r) => r.id === c.course_group_id) || { id: c.course_group_id })}${c.small_group_id ? ` / ${c.small_group_id}` : ""}${c.lab_group_id ? ` / ${c.lab_group_id}` : ""}`
       : `#${id}`;
   };
+  const published = version?.status === "published";
+  const complete = !!detail?.report.complete;
+  const requiredHours = detail?.report.hours.reduce((total: number, row: Row) => total + row.required_hours, 0) || 0;
+  const remainingHours = detail?.report.hours.reduce((total: number, row: Row) => total + row.remaining_hours, 0) || 0;
   return (
     <>
-      <div className="page-heading">
-        <div>
+      <div className="page-heading page-hero">
+        <div className="page-hero-copy">
+          <p className="eyebrow">{t("plannerEyebrow")}</p>
           <h1>{t("planner")}</h1>
           <p>{t("unpublished")}</p>
         </div>
-        <button onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
+        <button disabled={busy} onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
       </div>
-      <ol className="planner-steps">
-        <li>{t("plannerStepDraft")}</li>
-        <li>{t("plannerStepGenerate")}</li>
-        <li>{t("plannerStepReview")}</li>
+      <ol className="planner-steps planner-stage-rail">
+        {[
+          { label: "plannerStepDraft", done: !!detail, current: !detail },
+          { label: "plannerStepGenerate", done: (complete && !searching) || published, current: !!detail && (!complete || searching) && !published },
+          { label: "plannerStepReview", done: published, current: complete && !searching && !published },
+        ].map((step, index) => <li key={step.label} className={step.done ? "planner-stage-complete" : step.current ? "planner-stage-current" : ""} aria-current={step.current ? "step" : undefined}>
+          <span className="planner-stage-number" aria-hidden="true">{step.done ? <CheckCircle2 size={19} /> : index + 1}</span>
+          <span>{t(step.label)}</span>
+        </li>)}
       </ol>
       <ErrorBox error={error} />
       <ErrorBox error={pollError} />
       {!!pollError && <p className="notice warning">{t("staleData")}</p>}
+      {detail && <dl className="summary-strip planner-summary">
+        {[
+          { icon: CalendarCheck, label: "placedLessons", value: `${detail.assignments.length} / ${detail.occurrences.length}` },
+          { icon: Clock3, label: "semester_hours", value: requiredHours },
+          { icon: AlertCircle, label: "remaining_hours", value: remainingHours },
+          { icon: ShieldCheck, label: "publicationReadiness", value: t(published ? "published" : searching ? "running" : complete ? "readyToPublish" : "needsReview"), status: true },
+        ].map(({ icon: Icon, label, value, status }) => <div className={`summary-item${status && complete && !searching ? " state-ready" : ""}`} key={label}>
+          <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
+          <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className={`summary-item-value${status ? " summary-item-status" : ""}`}>{value}</dd></div>
+        </div>)}
+      </dl>}
       {detail && <SectionLinks items={[
         { id: "planner-controls", label: t("plannerControls") },
         { id: "planner-report", label: t("plannerReport") },
         { id: "planner-lessons", label: t("schedule") },
         { id: "planner-history", label: t("runHistory") },
       ]} />}
-      <section className="panel">
+      <section className="panel planner-panel">
         <div className="toolbar">
           <label className="toolbar-field">
             {t("plannerVersion")}
@@ -176,7 +200,7 @@ export function Planner() {
         {detail && (
           <>
             <section id="planner-controls" className="section-target" tabIndex={-1} aria-label={t("plannerControls")}>
-            <div className="section-heading">
+            <div className="section-heading planner-version-heading">
               <div>
                 <p className="eyebrow">{t("plannerVersion")} · #{version.id}</p>
                 <h2>{version.name}</h2>
@@ -282,8 +306,9 @@ export function Planner() {
               </button>
             )}
             <div
-              className={`notice ${detail.report.complete ? "success" : "warning"}`}
+              className={`notice planner-readiness ${detail.report.complete ? "success" : "warning"}`}
             >
+              {detail.report.complete ? <CheckCircle2 size={19} aria-hidden="true" /> : <AlertCircle size={19} aria-hidden="true" />}
               {t(detail.report.complete ? "complete" : "partial")}
             </div>
             <ErrorBox error={detail.report.issues} />
@@ -403,7 +428,7 @@ export function Planner() {
         )}
       </section>
       {create && (
-        <Dialog labelledBy="draft-title" onClose={() => setCreate(false)}>
+        <Dialog labelledBy="draft-title" closeDisabled={busy} onClose={() => setCreate(false)}>
           <h2 id="draft-title">{t("createDraft")}</h2>
           <form
             className="form-stack"
@@ -416,10 +441,13 @@ export function Planner() {
                   name: f.get("name"),
                   cohort_ids: groups,
                 });
-                await refresh();
-                await open(row.id);
+                setVersions((current) => [row, ...current]);
                 setCreate(false);
                 setRunInfo(null);
+                setDetail(null);
+                launchIntent.current = null;
+                await open(row.id);
+                await refresh();
               });
             }}
           >
@@ -472,6 +500,7 @@ export function Planner() {
               <button
                 type="button"
                 className="secondary"
+                disabled={busy}
                 onClick={() => setCreate(false)}
               >
                 {t("cancel")}
@@ -481,7 +510,7 @@ export function Planner() {
         </Dialog>
       )}
       {editing && (
-        <Dialog labelledBy="move-title" onClose={() => setEditing(null)}>
+        <Dialog labelledBy="move-title" closeDisabled={busy} onClose={() => setEditing(null)}>
           <h2 id="move-title">{t("edit")}</h2>
           <p>{editing.subject}</p>
           <form
@@ -500,8 +529,8 @@ export function Planner() {
                     pinned: editing.pinned,
                   },
                 );
-                await open(version.id);
                 setEditing(null);
+                await open(version.id);
               });
             }}
           >
@@ -564,6 +593,7 @@ export function Planner() {
               <button
                 type="button"
                 className="secondary"
+                disabled={busy}
                 onClick={() => setEditing(null)}
               >
                 {t("cancel")}
@@ -587,8 +617,8 @@ export function Planner() {
                       "POST",
                       { revision: version.revision, reason: f.get("reason") },
                     );
-                    await open(version.id);
                     setEditing(null);
+                    await open(version.id);
                   });
                 }}
               >
