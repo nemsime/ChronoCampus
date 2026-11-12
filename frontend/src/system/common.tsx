@@ -50,12 +50,30 @@ export function useAction() {
   };
   return { busy, error, setError, run };
 }
-export const dateLabel = (date: string, lang: string) =>
-  new Intl.DateTimeFormat(lang === "hy" ? "hy-AM" : lang, {
+const armenianDays = ["կիր", "երկ", "երք", "չրք", "հնգ", "ուրբ", "շբթ"];
+const armenianMonths = ["հնվ", "փտվ", "մրտ", "ապր", "մյս", "հնս", "հլս", "օգս", "սեպ", "հոկ", "նոյ", "դեկ"];
+export const dateLabel = (date: string, lang: string) => {
+  const value = new Date(`${date}T12:00:00`);
+  // Some browser distributions omit Armenian ICU data and silently use English.
+  if (lang === "hy" && !Intl.DateTimeFormat.supportedLocalesOf(["hy-AM"]).length)
+    return `${armenianDays[value.getDay()]}, ${value.getDate()} ${armenianMonths[value.getMonth()]}`;
+  return new Intl.DateTimeFormat(lang === "hy" ? "hy-AM" : lang, {
     day: "numeric",
     month: "short",
     weekday: "short",
-  }).format(new Date(`${date}T12:00:00`));
+  }).format(value);
+};
+
+export const timestampLabel = (timestamp: string, lang: string, includeYear = false) => {
+  const value = new Date(timestamp.endsWith("Z") || /[+-]\d\d:\d\d$/.test(timestamp) ? timestamp : `${timestamp}Z`);
+  if (Number.isNaN(value.getTime())) return "—";
+  if (lang === "hy" && !Intl.DateTimeFormat.supportedLocalesOf(["hy-AM"]).length)
+    return `${value.getDate()} ${armenianMonths[value.getMonth()]}${includeYear ? ` ${value.getFullYear()}` : ""}, ${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`;
+  return new Intl.DateTimeFormat(lang === "hy" ? "hy-AM" : lang, {
+    ...(includeYear ? { year: "numeric" } : {}),
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  }).format(value);
+};
 
 export function LoadingState({ label, compact = false }: { label?: string; compact?: boolean }) {
   const { t } = useLanguage();

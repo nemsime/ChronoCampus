@@ -1,5 +1,9 @@
 # Manual checks before merging
 
+For the current system-wide acceptance procedure, use the
+[full manual checking guide](manual-checking-guide.md). This document retains the
+focused regression cases for the earlier merge.
+
 Use this checklist on `fix/manual-corrections-and-room-deletion`. Record the date,
 commit, browser, database name, and pass/fail for each section. Run on an isolated
 development database, not the university's original database. The steps below
@@ -7,10 +11,11 @@ include deliberate catalog changes and publication of test schedules.
 
 ## 1. Start the application
 
-Follow the [README setup](../README.md#run-locally-on-windows). Install backend
+Follow the [README setup](../README.md#run-locally-on-windows-or-linux). Install backend
 and frontend dependencies, configure `backend/.env`, and run `alembic upgrade head`.
-These fixes do not add a migration. Run one API process and the frontend in separate
-terminals. Open http://localhost:3000 using that hostname consistently.
+Start the native local launcher so the API, generation coordinator,
+mail/maintenance worker, and frontend all run. Open http://localhost:3000 using
+that hostname consistently.
 
 For demo data, use the `ChronoCampus_Development` database and run
 `python -m app.manage seed-demo` from `backend`. Local credentials are in

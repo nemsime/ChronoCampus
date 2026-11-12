@@ -8,6 +8,7 @@ import secrets
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from app.accounts.router import revoke_sessions
 from app.core.security import password_hash
 from app.db import models as m
 from app.db.session import get_engine, lock_revision
@@ -22,12 +23,34 @@ def ensure(db, model, lookup, **values):
     return row
 
 
+def _seed_account(db, credentials, email, name, role, **membership):
+    existing = db.scalar(select(m.Account).where(m.Account.email == email))
+    if existing and existing.role != role:
+        raise RuntimeError(f"Demo account {email} exists with an unexpected role")
+
+    secret = secrets.token_urlsafe(18)
+    if existing:
+        row = existing
+        revoke_sessions(db, row.id)
+    else:
+        row = m.Account(
+            email=email,
+            display_name=name,
+            role=role,
+            is_active=True,
+            **membership,
+        )
+        db.add(row)
+
+    row.password_hash = password_hash(secret)
+    row.must_change_password = False
+    credentials[email] = {"password": secret, "name": name, "role": role}
+    db.flush()
+    return row
+
+
 def seed_demo(credentials_path: Path):
-    credentials = (
-        json.loads(credentials_path.read_text(encoding="utf-8"))
-        if credentials_path.exists()
-        else {}
-    )
+    credentials = {}
     with Session(get_engine(), expire_on_commit=False) as db:
         database = db.scalar(text("SELECT DB_NAME()"))
         if database != "ChronoCampus_Development":
@@ -37,23 +60,7 @@ def seed_demo(credentials_path: Path):
         lock_revision(db)
 
         def account(email, name, role, **membership):
-            existing = db.scalar(select(m.Account).where(m.Account.email == email))
-            if existing:
-                return existing
-            secret = secrets.token_urlsafe(18)
-            row = m.Account(
-                email=email,
-                display_name=name,
-                role=role,
-                password_hash=password_hash(secret),
-                must_change_password=False,
-                is_active=True,
-                **membership,
-            )
-            db.add(row)
-            db.flush()
-            credentials[email] = {"password": secret, "name": name, "role": role}
-            return row
+            return _seed_account(db, credentials, email, name, role, **membership)
 
         account("admin.demo@example.invalid", "Demo Administrator", "admin")
         faculties = [

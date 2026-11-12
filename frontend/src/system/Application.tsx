@@ -13,6 +13,10 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ArrowUp,
+  LayoutDashboard,
+  ArrowUpRight,
+  CircleHelp,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Account,
@@ -27,15 +31,18 @@ import { SignIn, PasswordForm } from "./Accounts";
 import { Catalogs } from "./Catalogs";
 import { Planner } from "./Planner";
 import { PersonalSchedule } from "./Schedule";
+import { Overview, localDay } from "./Overview";
 import { Feedback } from "./Feedback";
 import { LanguageProvider, LanguageSwitch, useLanguage } from "./i18n";
-import { ErrorBox, LoadingState, useAction } from "./common";
+import { dateLabel, ErrorBox, LoadingState, useAction } from "./common";
 import "./styles.css";
+import "./workspace.css";
 function Workspace() {
   const { t, lang } = useLanguage();
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
-  const [page, setPage] = useState("schedule");
+  const [page, setPage] = useState("overview");
+  const [plannerVersion, setPlannerVersion] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("chronocampus.sidebarCollapsed") === "true"; }
@@ -59,7 +66,8 @@ function Workspace() {
   useEffect(() => {
     document.title = `${account ? t(activePage) : t("login")} · ChronoCampus`;
   }, [activePage, lang, account]);
-  const navigate = (next: string) => {
+  const navigate = (next: string, versionId: number | null = null) => {
+    setPlannerVersion(next === "planner" ? versionId : null);
     setPage(next);
     setMenuOpen(false);
     requestAnimationFrame(() => {
@@ -113,21 +121,22 @@ function Workspace() {
         onLogin={(user) => {
           setAccount(user);
           setMenuOpen(false);
-          setPage(user.role === "admin" ? "planner" : "schedule");
+          setPage("overview");
         }}
       />
     );
   const navigation = [
-    { id: "schedule", icon: CalendarDays },
+    { id: "overview", icon: LayoutDashboard, group: "navigationMain" },
+    { id: "schedule", icon: CalendarDays, group: "navigationMain" },
     ...(account.role === "admin"
       ? [
-          { id: "planner", icon: Settings },
-          { id: "catalogs", icon: Database },
-          { id: "diagnostics", icon: Activity },
+          { id: "planner", icon: Settings, group: "navigationMain" },
+          { id: "catalogs", icon: Database, group: "navigationAdmin" },
+          { id: "diagnostics", icon: Activity, group: "navigationAdmin" },
         ]
       : []),
-    { id: "feedback", icon: MessageSquare },
-    { id: "account", icon: UserRound },
+    { id: "feedback", icon: MessageSquare, group: "navigationPersonal" },
+    { id: "account", icon: UserRound, group: "navigationPersonal" },
   ];
   return (
     <div className={`workspace${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
@@ -144,10 +153,10 @@ function Workspace() {
           className="brand"
           onClick={(e) => {
             e.preventDefault();
-            navigate("schedule");
+            navigate("overview");
           }}
         >
-          <span className="brand-mark" aria-hidden="true">C</span><span className="brand-name">ChronoCampus</span>
+          <span className="brand-mark" aria-hidden="true"><CalendarDays size={22} strokeWidth={1.7} /></span><span className="brand-name">Chrono<span>Campus</span><small>{t("campusEdition")}</small></span>
         </a>
         <button ref={menuButton} type="button" className="icon-button mobile-menu"
           aria-label={t(menuOpen ? "closeMenu" : "openMenu")}
@@ -156,9 +165,8 @@ function Workspace() {
           {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
         </button>
         </div>
-        <p className="sidebar-label">{t(account.role)}</p>
         <nav id="workspace-navigation" aria-label={t("navigation")}>
-          {navigation.map((item) => (
+          {["navigationMain", ...(account.role === "admin" ? ["navigationAdmin"] : []), "navigationPersonal"].map(group => <div className="navigation-group" key={group}><p className="nav-group-label">{t(group)}</p>{navigation.filter(item => item.group === group).map((item) => (
             <button
               key={item.id}
               className={activePage === item.id ? "active" : ""}
@@ -170,17 +178,24 @@ function Workspace() {
             >
               <item.icon size={19} aria-hidden="true" />
               <span className="nav-label">{t(item.id)}</span>
+              {activePage === item.id && <span className="nav-active-dot" aria-hidden="true" />}
             </button>
-          ))}
+          ))}</div>)}
         </nav>
+        <div className="sidebar-help">
+          <CircleHelp size={21} aria-hidden="true" />
+          <strong>{t("workspaceHelpTitle")}</strong><p>{t("workspaceHelpText")}</p>
+          <button disabled={account.must_change_password} onClick={() => navigate("feedback")}>{t("workspaceHelpAction")}<ArrowUpRight size={14} aria-hidden="true" /></button>
+        </div>
         <div className="sidebar-footer">
           <span className="avatar">
             {account.display_name?.slice(0, 1) || "C"}
           </span>
           <div className="sidebar-identity">
             <strong>{account.display_name}</strong>
-            <small>{account.email}</small>
+            <small>{t(account.role)}</small>
           </div>
+          <button className="icon-button sidebar-account" disabled={account.must_change_password} aria-label={t("account")} onClick={() => navigate("account")}><ChevronRight size={16} aria-hidden="true" /></button>
         </div>
       </aside>
       <div className="main-area">
@@ -198,7 +213,9 @@ function Workspace() {
             <span>{t(activePage)}</span>
           </div>
           <div className="inline">
+            <span className="topbar-date"><CalendarDays size={15} aria-hidden="true" />{lang === "hy" ? `${dateLabel(localDay(), lang)}, ${new Date().getFullYear()}` : new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric" }).format(new Date())}</span>
             <LanguageSwitch />
+            <span className="topbar-separator" aria-hidden="true" />
             <button
               className="icon-button"
               title={t("logout")}
@@ -225,8 +242,8 @@ function Workspace() {
           >
             {account.must_change_password || page === "account" ? (
               <>
-              <div className="page-heading"><div><h1>{t("account")}</h1><p>{t("accountIntro")}</p></div></div>
-              <section className="panel account-panel">
+              <div className="page-heading page-hero"><div className="page-hero-copy"><p className="eyebrow">{t("navigationPersonal")}</p><h1>{t("account")}</h1><p>{t("accountIntro")}</p></div><span className="page-hero-icon"><UserRound size={26} aria-hidden="true" /></span></div>
+              <div className="account-layout"><section className="panel account-panel">
                 <div className="account-identity">
                   <span className="avatar" aria-hidden="true">{account.display_name?.slice(0, 1) || "C"}</span>
                   <div><h2>{account.display_name}</h2><p>{account.email}</p><span className="badge">{t(account.role)}</span></div>
@@ -243,15 +260,18 @@ function Workspace() {
                   }}
                 />
               </section>
+              <aside className="panel account-security"><span className="security-icon"><ShieldCheck size={28} aria-hidden="true" /></span><h2>{t("accountSecurity")}</h2><p>{t("accountSecurityHelp")}</p><div className="security-rule"><span>12–256</span>{t("newPassword")}</div><p className="account-access-note">{t("authAccessHelp")}</p></aside></div>
               </>
             ) : page === "catalogs" && account.role === "admin" ? (
               <Catalogs />
             ) : page === "planner" && account.role === "admin" ? (
-              <Planner />
+              <Planner initialVersionId={plannerVersion} />
             ) : page === "diagnostics" && account.role === "admin" ? (
               <Diagnostics />
             ) : page === "feedback" ? (
               <Feedback account={account} />
+            ) : page === "overview" ? (
+              <Overview account={account} onNavigate={navigate} />
             ) : (
               <PersonalSchedule />
             )}

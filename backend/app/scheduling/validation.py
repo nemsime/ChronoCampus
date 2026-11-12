@@ -9,6 +9,7 @@ from app.calendar.rules import (
     overlaps,
     resource_rule_matches,
     teaching_dates,
+    week_index,
 )
 
 
@@ -123,6 +124,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
     context = validation_context(snapshot)
     components = {c["id"]: c for c in snapshot["workloads"]}
     occurrences = {o["id"]: o for o in snapshot["occurrences"]}
+    groups = {group["id"]: group for group in snapshot["groups"]}
     seen, placed, cancelled = set(), Counter(), Counter()
     issues, effective = [], []
     if not components:
@@ -130,12 +132,23 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
     if not snapshot["term"]["confirmed"] or not snapshot["calendar"]["confirmed"]:
         issues.append({"code": "configuration_unconfirmed"})
     for group_id in {c["course_group_id"] for c in components.values()}:
+        form = groups[group_id].get("study_form")
+        if form is not None and form != snapshot["calendar"]["study_form"]:
+            issues.append({"code": "study_form_mismatch", "course_group_id": group_id})
         if not any(
             p["course_group_id"] in {None, group_id} for p in snapshot["periods"]
         ):
             issues.append(
                 {"code": "teaching_period_required", "course_group_id": group_id}
             )
+        else:
+            weeks = {week_index(snapshot["term"]["starts_on"], day)
+                     for day in context["days"][group_id]}
+            configured = snapshot["calendar"]["teaching_weeks"]
+            if len(weeks) != configured:
+                issues.append({"code": "teaching_week_count_mismatch",
+                               "course_group_id": group_id,
+                               "configured": configured, "actual": len(weeks)})
     for assignment in assignments:
         identifier = assignment["occurrence_id"]
         if identifier not in occurrences or identifier in seen:
@@ -206,10 +219,11 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                 "remaining_hours": component["semester_hours"] - credited,
             }
         )
-    complete = not issues and all(row["remaining_hours"] == 0 for row in ledger)
+    unplaced = sorted(set(occurrences) - seen)
+    complete = not issues and not unplaced and all(row["remaining_hours"] == 0 for row in ledger)
     return {
         "complete": complete,
         "issues": issues,
         "hours": ledger,
-        "unplaced_occurrences": sorted(set(occurrences) - seen),
+        "unplaced_occurrences": unplaced,
     }

@@ -2,6 +2,7 @@ import { FormEvent, useId, useState } from "react";
 import { Account, api, setCsrf } from "./api";
 import { ErrorBox, PasswordInput, useAction } from "./common";
 import { LanguageSwitch, useLanguage } from "./i18n";
+import { ArrowRight, CalendarDays, Check, LockKeyhole } from "lucide-react";
 export function PasswordForm({
   onDone,
   token,
@@ -108,19 +109,26 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
     <div className="auth-shell">
       <section className="auth-story">
         <div className="brand">
-          <span className="brand-mark">C</span>ChronoCampus
+          <span className="brand-mark" aria-hidden="true"><CalendarDays size={24} strokeWidth={1.7} /></span><span>Chrono<span className="brand-light">Campus</span></span>
         </div>
-        <div>
-          <p className="eyebrow">{t("schedule")}</p>
-          <h2>{t("welcome")}</h2>
-          <p>{t("welcomeText")}</p>
+        <div className="auth-story-content">
+          <p className="eyebrow"><span />{t("authEyebrow")}</p>
+          <h2>{t("authHeadline")}</h2>
+          <p>{t("authStory")}</p>
+          <div className="auth-schedule-art" aria-hidden="true">
+            <div className="auth-art-header"><CalendarDays size={19} /><span>{t("authArtTitle")}</span><span className="art-dot" /></div>
+            <div className="auth-art-grid">{Array.from({ length: 20 }, (_, index) => <span className={`art-cell art-cell-${index}`} key={index}><i /><i /></span>)}</div>
+            <div className="auth-art-label"><span><Check size={14} /></span>{t("authArtBadge")}</div>
+          </div>
         </div>
-        <small>ChronoCampus · 2026</small>
+        <small>{t("authFooter")}<span>ChronoCampus © {new Date().getFullYear()}</span></small>
       </section>
       <section className="auth-panel">
         <LanguageSwitch />
         <div className="auth-card">
           <header className="auth-card-header">
+            <span className="auth-lock"><LockKeyhole size={22} strokeWidth={1.5} aria-hidden="true" /></span>
+            <p className="eyebrow">{t("authPortal")}</p>
             <h1>{t(token || mode === "reset" ? "reset" : "authSignInTitle")}</h1>
             <p className="auth-description">
               {t(
@@ -177,6 +185,7 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
                     ? mode === "login" ? "authSigningIn" : "authSendingReset"
                     : mode === "login" ? "login" : "reset",
                 )}
+                {!busy && <ArrowRight size={17} aria-hidden="true" />}
               </button>
               <button
                 className="link"
@@ -192,6 +201,7 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
               </button>
             </form>
           )}
+          <p className="auth-access-note"><LockKeyhole size={13} aria-hidden="true" />{t("authAccessHelp")}</p>
         </div>
       </section>
     </div>

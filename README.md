@@ -18,6 +18,7 @@ Includes local accounts and roles, administrative catalogs, configurable calenda
 | [Diagnostics / Диагностика](docs/observability.md) | Find errors, inspect generation history and audit, and configure optional Grafana/Prometheus. |
 | [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
 | [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
+| [Full manual checking guide](docs/manual-checking-guide.md) | Prepare test data and check every current feature, permissions, publication, recovery, and mobile/language behavior. |
 | [Manual merge checklist](docs/manual-merge-check.md) | Recheck the fixes and end-to-end behavior before merging. |
 | [Contribution workflow](skills/repo-workflow/SKILL.md) | Work on a branch, verify integration, and prepare authorized remote publication. |
 
@@ -97,7 +98,7 @@ After migrations, from `backend`:
 .venv/Scripts/python.exe -m app.manage seed-demo
 ```
 
-The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`.
+The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records and regenerate passwords for all seeded demo accounts, invalidating their previous passwords and sessions. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Current random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`.
 
 Demo teaching dates and academic-hour settings are illustrative. Real university calendars remain unconfirmed until an administrator enters the missing facts. See [data provenance](docs/demo-data.md).
 

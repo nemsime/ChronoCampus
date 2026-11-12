@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { Database, Pencil, Plus, RefreshCw, Save, Search, Trash2, X } from "lucide-react";
+import { BookOpen, Building2, CalendarDays, CalendarPlus, CalendarRange, Clock3, Database, DoorOpen, FlaskConical, GraduationCap, Landmark, Layers3, ListChecks, Monitor, Pencil, Plus, RefreshCw, Save, Search, SlidersHorizontal, Sun, Trash2, UserRound, Users, X, type LucideIcon } from "lucide-react";
 import { api, Row } from "./api";
 import { catalogSchema, Field, resourceNames } from "./catalogSchema";
 import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, PasswordInput, useAction } from "./common";
@@ -27,6 +27,13 @@ const resourceGroups = [
   { title: "catalogSpaces", resources: ["buildings", "rooms", "equipment"] },
   { title: "catalogPlanning", resources: ["terms", "calendars", "periods", "holidays", "extra-permissions", "availability", "workloads"] },
 ];
+const resourceIcons: Record<string, LucideIcon> = {
+  faculties: Landmark, majors: GraduationCap, groups: Users, subgroups: Layers3,
+  "lab-groups": FlaskConical, buildings: Building2, rooms: DoorOpen, equipment: Monitor,
+  subjects: BookOpen, users: UserRound, calendars: Clock3, terms: CalendarDays,
+  periods: CalendarRange, holidays: Sun, "extra-permissions": CalendarPlus,
+  availability: SlidersHorizontal, workloads: ListChecks,
+};
 function FieldInput({
   field: f,
   value,
@@ -245,6 +252,7 @@ export function Catalogs() {
   const [page, setPage] = useState(0);
   const results = useRef<HTMLElement>(null);
   const { busy, error, setError, run } = useAction();
+  const ResourceIcon = resourceIcons[resource] || Database;
   const refresh = async () => {
     setLoading(true);
     try { setData(await loadCatalogs()); }
@@ -291,13 +299,19 @@ export function Catalogs() {
         )
           body[field.key] = "";
       }
-      await api(
+      const saved = await api<Row>(
         `/admin/catalog/${resource}${editing ? `/${editing}` : ""}`,
         editing ? "PUT" : "POST",
         body,
       );
-      await refresh();
+      setData((current) => ({
+        ...current,
+        [resource]: editing
+          ? (current[resource] || []).map((row) => row.id === saved.id ? saved : row)
+          : [...(current[resource] || []), saved],
+      }));
       setDraft(null);
+      await refresh();
     });
   }
   function display(field: Field, row: Row) {
@@ -377,8 +391,9 @@ export function Catalogs() {
   }
   return (
     <>
-      <div className="page-heading">
-        <div>
+      <div className="page-heading page-hero">
+        <div className="page-hero-copy">
+          <p className="eyebrow">{t("catalogEyebrow")}</p>
           <h1>{t("catalogs")}</h1>
           <p>{t("catalogHelp")}</p>
         </div>
@@ -390,6 +405,16 @@ export function Catalogs() {
           <RefreshCw size={16} aria-hidden="true" />{t("refresh")}
         </button>
       </div>
+      <dl className="summary-strip catalog-summary">
+        {[
+          { icon: Database, label: "catalogTotalRecords", value: Object.values(data).reduce((total, rows) => total + rows.length, 0) },
+          { icon: Layers3, label: "catalogSections", value: resourceNames.length },
+          { icon: resourceIcons[resource] || Database, label: resource, value: data[resource]?.length || 0 },
+        ].map(({ icon: Icon, label, value }) => <div className="summary-item" key={label}>
+          <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
+          <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className="summary-item-value">{loading ? "—" : value}</dd></div>
+        </div>)}
+      </dl>
       <div className="catalog-layout">
         <label className="catalog-mobile-select">
           {t("catalogResource")}
@@ -405,23 +430,25 @@ export function Catalogs() {
           {resourceGroups.map((group) => (
             <div className="catalog-nav-group" key={group.title}>
               <h2 className="catalog-nav-heading">{t(group.title)}</h2>
-              {group.resources.map((name) => (
+              {group.resources.map((name) => {
+                const Icon = resourceIcons[name] || Database;
+                return (
                 <button
                   className={name === resource ? "active" : ""}
                   aria-current={name === resource ? "page" : undefined}
                   key={name}
                   onClick={() => selectResource(name, true)}
                 >
-                  {t(name)}
+                  <span className="catalog-resource-label"><Icon className="catalog-resource-icon" size={16} aria-hidden="true" />{t(name)}</span>
                   <small>{data[name]?.length ?? "—"}</small>
                 </button>
-              ))}
+              ); })}
             </div>
           ))}
         </nav>
         <section className="panel catalog-content results-anchor" ref={results} tabIndex={-1} aria-label={t(resource)}>
           <div className="section-heading">
-            <h2>{t(resource)}</h2>
+            <h2 className="catalog-resource-heading"><ResourceIcon size={21} aria-hidden="true" />{t(resource)}</h2>
             <button onClick={() => open()} disabled={busy}>
               <Plus size={16} aria-hidden="true" />{t("add")}
             </button>
