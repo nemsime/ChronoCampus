@@ -113,6 +113,176 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 .timeline-filter-details > summary { padding-block: 12px; color: var(--muted); cursor: pointer; }
 .timeline-filter-details > summary .badge { margin-left: 10px; }
 
+/* Keep sign-in, recovery and registration in one centered campus-style frame. */
+.auth-entry-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100svh;
+  font-family: "Inter", "Noto Sans Armenian", "Segoe UI", sans-serif;
+  background-color: #eef1e9;
+  background-image:
+    linear-gradient(#dfe5dc 1px, transparent 1px),
+    linear-gradient(90deg, #dfe5dc 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+.auth-entry-shell::before,
+.auth-entry-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.auth-entry-shell::before {
+  width: 220px;
+  height: 190px;
+  top: 52px;
+  right: -78px;
+  border-radius: 42% 0 0 46%;
+  background: #dce5d8;
+  transform: rotate(17deg);
+}
+.auth-entry-shell::after {
+  width: 260px;
+  height: 260px;
+  left: -78px;
+  bottom: -123px;
+  border-radius: 50%;
+  background: #f5e1d3;
+}
+.auth-entry-shell .auth-header {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  padding: 16px 24px;
+}
+.auth-entry-shell .auth-header .brand { gap: 8px; font-size: 15px; font-family: inherit; }
+.auth-entry-shell .auth-header .brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+}
+.auth-entry-shell .auth-header .brand-mark svg { width: 15px; height: 15px; }
+.auth-entry-shell .auth-header select {
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+.auth-entry-shell .auth-panel {
+  min-height: 100svh;
+  padding: 60px 20px 10px;
+}
+.auth-entry-shell .auth-card {
+  position: relative;
+  width: min(340px, 100%);
+  max-width: none;
+  padding: 24px;
+  border: 1px solid #e6e9e1;
+  border-radius: 28px;
+  background: #fffdfa;
+  box-shadow: 0 10px 0 #dce5d8, 0 22px 40px #293a2b1c;
+}
+.auth-entry-shell .auth-card-header { margin-bottom: 16px; text-align: left; }
+.auth-entry-shell .auth-card-header .eyebrow {
+  margin: 0 0 7px;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.auth-entry-shell .auth-card h1 {
+  display: grid;
+  gap: 0;
+  margin-bottom: 6px;
+  font-size: 27px;
+  line-height: 1.05;
+  font-family: inherit;
+}
+.auth-entry-shell .auth-entry-title span { color: var(--accent); }
+.auth-entry-shell .auth-description { font-size: 11px; line-height: 1.5; }
+.auth-entry-shell .form-stack { gap: 12px; }
+.auth-entry-shell .auth-card label { gap: 5px; font-size: 11px; color: var(--text); text-align: left; }
+.auth-entry-shell .auth-card input {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid #bfc9bb;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+}
+.auth-entry-shell .auth-card .password-field input { padding-right: 45px; }
+.auth-entry-shell .auth-card .password-toggle {
+  right: 3px;
+  min-height: 34px;
+  width: 36px;
+  color: #64746a;
+}
+.auth-entry-shell .auth-card .form-stack > button:not(.link) {
+  min-height: 42px;
+  border-radius: 999px;
+  background: var(--accent);
+  font-size: 12px;
+}
+.auth-entry-shell .auth-card .form-stack > button:not(.link):hover { background: var(--accent-hover); }
+.auth-entry-shell .auth-form-links {
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 4px 18px;
+}
+.auth-entry-shell .auth-form-links button.link {
+  min-height: 0;
+  flex: 0 0 auto;
+  padding: 4px;
+  color: var(--accent-hover);
+  font-size: 10px;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-scene { position: absolute; z-index: 0; inset: 0; pointer-events: none; }
+.auth-floating-note,
+.auth-floating-calendar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  background: #fffdfa;
+  border: 1px solid #edf0e9;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px #33433114;
+}
+.auth-floating-note {
+  top: 50%;
+  left: max(8%, calc(50% - 360px));
+  gap: 9px;
+  width: 116px;
+  padding: 9px 10px;
+  transform: translateY(-50%) rotate(-5deg);
+}
+.auth-note-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  color: #536957;
+  background: #e8ead9;
+}
+.auth-note-lines { display: grid; flex: 1; gap: 5px; }
+.auth-note-lines i { height: 4px; border-radius: 5px; background: #cbd4c8; }
+.auth-note-lines i:last-child { width: 68%; }
+.auth-floating-calendar {
+  right: max(8%, calc(50% - 370px));
+  top: 50%;
+  display: grid;
+  grid-template-columns: repeat(7, 9px);
+  gap: 4px;
+  padding: 11px;
+  transform: translateY(-50%) rotate(5deg);
+}
+.auth-floating-calendar i { width: 9px; height: 9px; border-radius: 3px; background: #dfe7dc; }
+.auth-floating-calendar i:nth-child(3n) { background: #f2ded0; }
+.auth-floating-calendar i:nth-child(4n) { background: #e8ead9; }
+
 /* One chronological column: a continuous line, a dot and a lesson card. */
 .lesson-list-grouped { max-width: 980px; }
 .lesson-date-group { position: relative; padding-bottom: 6px; }
@@ -141,6 +311,13 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
   .lesson-list-grouped .lesson-action { grid-column: 2; margin-left: 0; }
 }
 @media (max-width: 760px) {
+  .auth-entry-shell .auth-header { padding: 14px 16px; }
+  .auth-entry-shell .auth-panel { padding: 60px 16px 10px; }
+  .auth-entry-shell .auth-card { padding: 24px 22px; border-radius: 24px; }
+  .auth-entry-shell .auth-floating-note { left: -48px; }
+  .auth-entry-shell .auth-floating-calendar { right: -42px; }
+  .auth-entry-shell::before { width: 160px; height: 140px; right: -76px; }
+  .auth-entry-shell::after { width: 190px; height: 190px; left: -94px; bottom: -100px; }
   .auth-header { gap: 12px; padding: 20px 18px; }
   .auth-header .brand { font-size: 19px; }
   .auth-header .brand-mark { width: 32px; height: 32px; }
@@ -166,6 +343,10 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
   .lesson-date-heading { gap: 8px; }
   .lesson-date-heading h3 { font-size: 14px; }
   .lesson-date-count { font-size: 11px; }
+}
+@media (max-height: 600px) {
+  .auth-entry-shell .auth-panel { padding-block: 48px 8px; }
+  .auth-entry-shell .auth-card { padding-block: 20px; }
 }
 @media print {
   .lesson-list-grouped .lesson { box-shadow: none; border-color: #aaa; }

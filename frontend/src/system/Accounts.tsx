@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Account, api, setCsrf } from "./api";
 import { ErrorBox, PasswordInput, useAction } from "./common";
 import { LanguageSwitch, useLanguage } from "./i18n";
-import { ArrowRight, CalendarDays, LockKeyhole } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock3 } from "lucide-react";
 export function useAuthLink() {
   const read = () => {
     const params = new URLSearchParams(location.hash.slice(1));
@@ -115,10 +115,20 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
   const { busy, error, setError, run } = useAction();
   const [mode, setMode] = useState<"login" | "reset" | "register">("login");
   const [message, setMessage] = useState("");
+  const [loginFieldsEditable, setLoginFieldsEditable] = useState(false);
   const { token, verification } = authLink;
-  useEffect(() => { form.current?.reset(); }, [mode, token]);
+  useEffect(() => {
+    const clearForm = () => {
+      form.current?.reset();
+      setLoginFieldsEditable(false);
+    };
+    clearForm();
+    window.addEventListener("pageshow", clearForm);
+    return () => window.removeEventListener("pageshow", clearForm);
+  }, [mode, token]);
   function navigate(next: "login" | "reset" | "register") {
     form.current?.reset();
+    setLoginFieldsEditable(false);
     clearAuthLink();
     setMode(next);
     setMessage("");
@@ -149,7 +159,16 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
     });
   }
   return (
-    <div className="auth-shell">
+    <div className="auth-shell auth-entry-shell">
+      <div className="auth-scene" aria-hidden="true">
+        <div className="auth-floating-note">
+          <span className="auth-note-icon"><Clock3 size={15} /></span>
+          <span className="auth-note-lines"><i /><i /></span>
+        </div>
+        <div className="auth-floating-calendar">
+          {Array.from({ length: 21 }, (_, index) => <i key={index} />)}
+        </div>
+      </div>
       <header className="auth-header">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true"><CalendarDays size={24} strokeWidth={1.7} /></span><span>Chrono<span className="brand-light">Campus</span></span>
@@ -159,9 +178,10 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
       <section className="auth-panel">
         <div className="auth-card">
           <header className="auth-card-header">
-            <span className="auth-lock"><LockKeyhole size={22} strokeWidth={1.5} aria-hidden="true" /></span>
             <p className="eyebrow">{t("authPortal")}</p>
-            <h1>{t(verification && token ? "verifyEmail" : token || mode === "reset" ? "reset" : mode === "register" ? "register" : "authSignInTitle")}</h1>
+            <h1 className={mode === "login" && !token ? "auth-entry-title" : undefined}>
+              {mode === "login" && !token ? <>{t("login")}<span>ChronoCampus</span></> : t(verification && token ? "verifyEmail" : token || mode === "reset" ? "reset" : mode === "register" ? "register" : "authSignInTitle")}
+            </h1>
             <p className="auth-description">
               {t(
                 token
@@ -200,7 +220,10 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                 <input
                   name="email"
                   type="email"
+                  placeholder={t("authEmailPlaceholder")}
                   autoComplete="off"
+                  readOnly={mode === "login" && !loginFieldsEditable}
+                  onFocus={() => setLoginFieldsEditable(true)}
                   required
                   maxLength={255}
                 />
@@ -211,7 +234,10 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                   <PasswordInput
                     id={passwordId}
                     name="password"
-                    autoComplete="off"
+                    placeholder={t("authPasswordPlaceholder")}
+                    autoComplete="new-password"
+                    readOnly={!loginFieldsEditable}
+                    onFocus={() => setLoginFieldsEditable(true)}
                     required
                     maxLength={256}
                   />
