@@ -421,7 +421,7 @@ export function Catalogs({ mode = "university", onCreateDraft }: { mode?: Catalo
         <label>{t("term_id")}<select value={termId} disabled={loading || busy} onChange={event => { setTermId(event.target.value); setSearch(""); setPage(0); }}>
           <option value="">{t("select")}</option>{(data.terms || []).map(row => <option key={row.id} value={row.id}>{row.name}</option>)}
         </select></label>
-        <p>{t(!data.terms?.length ? "semesterFirst" : "semesterScopeHelp")}</p>
+        <p>{t(data.terms?.length ? "semesterScopeBrief" : "semesterFirst")}</p>
         {onCreateDraft && <button disabled={busy || loading || !selectedTerm} onClick={() => onCreateDraft(termId)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>}
       </section>}
       <div className="admin-management">
