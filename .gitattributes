@@ -1,0 +1,7 @@
+# Normalize text files to LF across Linux and Windows checkouts.
+# Covers Python, TypeScript/React, SQL, PowerShell, Dockerfiles, and config/docs.
+* text=auto eol=lf
+
+# Keep the archived Word source documents and bundled fonts byte-for-byte.
+*.doc binary
+*.ttf binary
