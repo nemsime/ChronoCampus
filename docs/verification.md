@@ -1,5 +1,36 @@
 # Verification
 
+## Database runtime repair — 15 November 2026
+
+This supersedes the unverified/unapplied migration limitation in the dean
+implementation record below. The reload-enabled development backend had loaded
+the new account model while SQL Server remained at `0006_smtp_password_reset`.
+Login queried the missing `User.faculty_id` column, and readiness returned 503.
+
+- Used the local SQL Server administrator credential through an in-memory pipe
+  for isolated migration checks and backup operations; it was not printed,
+  persisted in scripts, or substituted for the application's runtime account.
+- Full Alembic upgrade passed on an empty disposable SQL Server database.
+  Created a native COPY_ONLY/CHECKSUM development backup, passed RESTORE VERIFYONLY,
+  restored it into a second disposable database and successfully upgraded that
+  copy from 0006 to 0007. Both disposable databases were removed. The verified
+  pre-upgrade backup remains outside Git in the SQL Server data directory.
+- With zero active jobs, stopped the API/coordinator/I/O containers, applied
+  `alembic upgrade head` through a one-off Compose backend using the configured
+  application database permissions, and restarted the original containers.
+  No reset-token purge, seed, password reset or account recreation was performed.
+- Restored-copy and live post-migration counts matched: User 20, Faculty 3,
+  CourseGroup 6, ScheduleVersion 5, LessonAssignment 1038, LessonOccurrence 848,
+  PublishedGroupSchedule 3, GenerationRun 16 and PersonalLessonNote 2.
+- Live schema reports `0007_dean_suggestions`; API readiness and readiness through
+  the frontend proxy return 200. Existing `admin.demo@example.invalid` login,
+  catalog reads and version review reads return 200 using its unchanged locally
+  stored password. Logged out only the verification session (204). No password
+  or session secret was included in verification output.
+
+These checks establish SQL Server schema compatibility and API login recovery;
+fresh browser/mobile/keyboard/print acceptance remains unverified.
+
 ## Dean role and weekly timetable — 15 November 2026
 
 Implemented the dean role, nullable faculty scope, safe published/draft version
