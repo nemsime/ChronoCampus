@@ -147,7 +147,6 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
         </div>
         <div className="auth-story-content">
           <h2>{t("authHeadline")}</h2>
-          <p>{t("authStory")}</p>
           <div className="auth-schedule-art" aria-hidden="true">
             <div className="auth-art-header"><CalendarDays size={19} /><span>{t("authArtTitle")}</span><span className="art-dot" /></div>
             <div className="auth-art-grid">{Array.from({ length: 20 }, (_, index) => <span className={`art-cell art-cell-${index}`} key={index}><i /><i /></span>)}</div>
