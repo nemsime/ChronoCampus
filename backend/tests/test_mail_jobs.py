@@ -37,6 +37,7 @@ def mail_runtime(client, tmp_path, monkeypatch):
 
     settings = get_settings()
     settings.mail_keys_file = tmp_path / "test-mail-keys.json"
+    settings.smtp_from = "ChronoCampus <no-reply@example.invalid>"
     init_keys(settings.mail_keys_file)
     monkeypatch.setattr("app.jobs.io_worker.get_settings", lambda: settings)
     monkeypatch.setattr("app.jobs.queue.get_settings", lambda: settings)
@@ -82,13 +83,9 @@ def test_known_unknown_and_missing_key_uniform(client, database, mail_runtime):
             client.post("/api/auth/forgot-password", json={"email": email})
             for email in ("admin@example.invalid", "unknown@example.invalid")
         ]
-        assert (
-            responses[0].status_code
-            == responses[1].status_code
-            == (503 if missing else 202)
-        )
+        assert responses[0].status_code == responses[1].status_code == 202
         assert responses[0].json() == responses[1].json()
-    assert database.scalar(select(func.count()).select_from(MailOutbox)) == 1
+    assert database.scalar(select(func.count()).select_from(MailOutbox)) == 0
 
 
 def test_encryption_and_delivery_persist(database, mail_runtime, tmp_path):
@@ -270,7 +267,9 @@ def test_file_replay_uses_one_stable_name(mail_runtime, tmp_path):
 def test_maintenance_is_bounded_and_preserves_active_references(database, mail_runtime):
     queued(database, mail_runtime)
     outbox = database.scalar(select(MailOutbox))
-    database.scalar(select(ResetToken)).expires_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    database.scalar(select(ResetToken)).expires_at = datetime.now(UTC).replace(
+        tzinfo=None
+    ) - timedelta(seconds=1)
     database.get(BackgroundJob, outbox.job_id).available_at = datetime.now(UTC).replace(
         tzinfo=None
     ) + timedelta(hours=1)
@@ -436,22 +435,17 @@ def test_exhausted_crash_recovery_erases_ciphertext_immediately(database, mail_r
     )
 
 
-def test_missing_key_validation_does_not_query_accounts(client, database, mail_runtime):
+def test_reset_delivery_is_independent_of_outbox_keys(client, database, mail_runtime):
     mail_runtime.mail_keys_file.unlink()
-
-    def no_account_lookup(connection, cursor, statement, *args):
-        if statement.lstrip().upper().startswith("SELECT") and '"User"' in statement:
-            raise AssertionError("account lookup preceded key validation")
-
-    engine = database.get_bind()
-    event.listen(engine, "before_cursor_execute", no_account_lookup)
-    try:
-        for email in ("admin@example.invalid", "unknown@example.invalid"):
-            response = client.post("/api/auth/forgot-password", json={"email": email})
-            assert response.status_code == 503
-            assert response.json() == {"detail": "mail_not_configured"}
-    finally:
-        event.remove(engine, "before_cursor_execute", no_account_lookup)
+    known = client.post(
+        "/api/auth/forgot-password", json={"email": "admin@example.invalid"}
+    )
+    unknown = client.post(
+        "/api/auth/forgot-password", json={"email": "unknown@example.invalid"}
+    )
+    assert known.status_code == unknown.status_code == 202
+    assert known.json() == unknown.json()
+    assert database.scalar(select(func.count()).select_from(MailOutbox)) == 0
 
 
 def test_malformed_existing_key_is_never_replaced(mail_runtime):
@@ -529,6 +523,7 @@ def test_main_honors_local_shutdown(mail_runtime, monkeypatch):
 
 def test_mail_expires_during_smtp_setup(mail_runtime, monkeypatch):
     from app.accounts import mail
+
     clock = [100.0]
     monkeypatch.setattr(mail.time, "monotonic", lambda: clock[0])
     mail_runtime.mail_mode, mail_runtime.smtp_host = "smtp", "smtp.invalid"
@@ -537,42 +532,65 @@ def test_mail_expires_during_smtp_setup(mail_runtime, monkeypatch):
     class SMTP:
         def __init__(self, *args, **kwargs):
             self.sock = self
+
         def __enter__(self):
             return self
+
         def __exit__(self, *args):
             return False
+
         def starttls(self, **kwargs):
             clock[0] = 102.0
+
         def settimeout(self, timeout):
             pass
+
         def send_message(self, message):
             submitted.append(message)
 
     monkeypatch.setattr(mail.smtplib, "SMTP", SMTP)
     with pytest.raises(MailError, match="mail_expired"):
-        send_reset("admin@example.invalid", RAW, job_id=1, message_id="<1@invalid>",
-                   settings=mail_runtime, deadline=101.0)
+        send_reset(
+            "admin@example.invalid",
+            RAW,
+            job_id=1,
+            message_id="<1@invalid>",
+            settings=mail_runtime,
+            deadline=101.0,
+        )
     assert submitted == []
 
 
-def test_mail_expires_before_atomic_file_publication(mail_runtime, monkeypatch, tmp_path):
+def test_mail_expires_before_atomic_file_publication(
+    mail_runtime, monkeypatch, tmp_path
+):
     from app.accounts import mail
+
     clock = [100.0]
     monkeypatch.setattr(mail.time, "monotonic", lambda: clock[0])
     original = mail.os.fsync
+
     def delayed_sync(descriptor):
         original(descriptor)
         clock[0] = 102.0
+
     monkeypatch.setattr(mail.os, "fsync", delayed_sync)
     with pytest.raises(MailError, match="mail_expired"):
-        send_reset("admin@example.invalid", RAW, job_id=1, message_id="<1@invalid>",
-                   settings=mail_runtime, deadline=101.0)
+        send_reset(
+            "admin@example.invalid",
+            RAW,
+            job_id=1,
+            message_id="<1@invalid>",
+            settings=mail_runtime,
+            deadline=101.0,
+        )
     assert not list(tmp_path.glob("*.eml"))
     assert not list(tmp_path.glob("*.tmp"))
 
 
 def test_mail_claim_preserves_token_expiry(database, mail_runtime):
     from app.jobs.queue import claim_job, database_now
+
     identifier = queued(database, mail_runtime)
     outbox = database.scalar(select(MailOutbox))
     outbox.expires_at = database_now(database) + timedelta(seconds=20)
@@ -584,12 +602,21 @@ def test_mail_claim_preserves_token_expiry(database, mail_runtime):
 
 def test_expired_queued_mail_never_waits_for_backoff(database, mail_runtime, tmp_path):
     from app.jobs.queue import database_now
+
     identifier = queued(database, mail_runtime)
-    database.scalar(select(MailOutbox)).expires_at = database_now(database) - timedelta(seconds=1)
-    database.get(BackgroundJob, identifier).available_at = database_now(database) + timedelta(hours=1)
+    database.scalar(select(MailOutbox)).expires_at = database_now(database) - timedelta(
+        seconds=1
+    )
+    database.get(BackgroundJob, identifier).available_at = database_now(
+        database
+    ) + timedelta(hours=1)
     database.commit()
     process_once(database.bind, "expiry-sweep")
     refresh(database)
     job = database.get(BackgroundJob, identifier)
-    assert job.state == "failed" and job.error_code == "mail_expired" and job.attempt_count == 0
+    assert (
+        job.state == "failed"
+        and job.error_code == "mail_expired"
+        and job.attempt_count == 0
+    )
     assert not list(tmp_path.glob("*.eml"))

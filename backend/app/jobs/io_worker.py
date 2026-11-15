@@ -270,6 +270,7 @@ def _maintenance(engine, claim):
                 ResetToken,
                 ResetToken.id,
                 (ResetToken.expires_at <= now)
+                & (ResetToken.created_at <= now - timedelta(hours=1))
                 & ~exists(
                     select(MailOutbox.id).where(
                         MailOutbox.reset_token_id == ResetToken.id

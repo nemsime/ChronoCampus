@@ -96,7 +96,7 @@ def test_reset_only_post_changes_password_and_token_is_single_use(
     )
     assert known.status_code == unknown.status_code == 202
     assert known.json() == unknown.json()
-    assert not list(tmp_path.glob("*.eml"))
+    assert list(tmp_path.glob("*.eml"))
     process_once(database.get_bind(), "account-test-io")
     from email import policy
     from email.parser import BytesParser
@@ -104,7 +104,10 @@ def test_reset_only_post_changes_password_and_token_is_single_use(
     message = BytesParser(policy=policy.default).parsebytes(
         next(tmp_path.glob("*.eml")).read_bytes()
     )
-    raw = re.search(r"#reset=([A-Za-z0-9_-]+)", message.get_content())[1]
+    raw = re.search(
+        r"token=([A-Za-z0-9_-]+)",
+        message.get_body(preferencelist=("plain",)).get_content(),
+    )[1]
     token = database.scalar(select(ResetToken))
     assert token.token == token_hash(raw) and not token.used
     assert database.get(Account, 1).password_hash == original

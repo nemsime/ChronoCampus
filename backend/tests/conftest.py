@@ -66,7 +66,41 @@ def client(database, monkeypatch, tmp_path):
         university_email_domains=["example.invalid"],
         diagnostic_log_directory=tmp_path / "logs",
     )
+    # Capture only the reset SMTP transport in tests; production reset never writes raw tokens.
+    from app.accounts.mail import sendEmail
+    from uuid import uuid4
+
+    class CaptureSMTP:
+        def __init__(self, *args, **kwargs):
+            self.sock = self
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def settimeout(self, value):
+            pass
+
+        def send_message(self, message):
+            (tmp_path / f"reset-{uuid4().hex}.eml").write_bytes(message.as_bytes())
+
+    def capture_reset(mail, *, text_body=None, settings):
+        runtime = settings.model_copy(
+            update={
+                "mail_mode": "smtp",
+                "smtp_host": "mailpit",
+                "smtp_port": 1025,
+                "smtp_from": "ChronoCampus <no-reply@chronocampus.local>",
+            }
+        )
+        return sendEmail(mail, text_body=text_body, settings=runtime)
+
+    monkeypatch.setattr("app.accounts.mail.smtplib.SMTP", CaptureSMTP)
+    monkeypatch.setattr("app.accounts.recovery.sendEmail", capture_reset)
     from app.accounts.mail import init_keys
+
     init_keys(settings.mail_keys_file)
     monkeypatch.setattr("app.main.get_settings", lambda: settings)
     monkeypatch.setattr("app.observability.router.get_settings", lambda: settings)

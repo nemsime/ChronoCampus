@@ -119,6 +119,7 @@ function Workspace() {
   if (!account || authLink.token)
     return (
       <SignIn
+        authLink={authLink}
         onSessionEnded={() => { setAccount(null); setCsrf(""); }}
         onLogin={(user) => {
           setAccount(user);

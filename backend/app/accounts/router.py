@@ -3,13 +3,14 @@ import re
 
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Depends,
     HTTPException,
     Request,
     Response,
 )
-from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import select, true, update
+from pydantic import AliasChoices, BaseModel, Field, field_validator
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.accounts.dependencies import (
@@ -19,6 +20,7 @@ from app.accounts.dependencies import (
     public_account,
 )
 from app.accounts.mail import MailError, enqueue_reset, validate_configuration
+from app.accounts.recovery import GENERIC_NOTICE, consume_reset, request_reset
 from app.core.config import get_settings
 from app.core.security import (
     csrf_token,
@@ -83,7 +85,12 @@ class ChangePasswordInput(PasswordInput):
 
 
 class ResetInput(PasswordInput):
-    token: str = Field(min_length=20, max_length=128)
+    password: str = Field(
+        min_length=12,
+        max_length=256,
+        validation_alias=AliasChoices("newPassword", "password"),
+    )
+    token: str = Field(max_length=128)
 
 
 def throttle(db: Session, key: str, limit=8):
@@ -222,39 +229,23 @@ def change_password(
 def forgot_password(
     body: EmailInput,
     request: Request,
+    background: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     check_origin(request)
-    throttle(db, "reset-email:" + body.email, limit=5)
-    throttle(
-        db,
-        "reset-ip:" + (request.client.host if request.client else "unknown"),
-        limit=30,
-    )
-    settings = get_settings()
-    # Configuration errors are independent of account existence.
+    # Rate limiting never changes the public response or discloses account state.
     try:
-        validate_configuration(settings)
-    except MailError:
-        raise HTTPException(503, "mail_not_configured") from None
-    lock_revision(db, changed=False)
-    account = db.scalar(
-        select(Account).where(Account.email == body.email, Account.is_active == true())
-    )
-    if (
-        account
-        and account.email_verified
-        and body.email.split("@")[-1] in settings.university_email_domains
-    ):
-        raw = new_token()
-        reset_token = ResetToken(
-            user_id=account.id,
-            token=token_hash(raw),
-            expires_at=datetime.utcnow() + timedelta(minutes=settings.reset_minutes),
+        throttle(
+            db,
+            "reset-ip:" + (request.client.host if request.client else "unknown"),
+            limit=30,
         )
-        enqueue_reset(db, account, raw, reset_token, settings)
-        db.commit()
-    return {"message": "reset_requested"}
+    except HTTPException as error:
+        if error.status_code != 429:
+            raise
+        return {"message": GENERIC_NOTICE}
+    request_reset(db, body.email, get_settings(), background=background)
+    return {"message": GENERIC_NOTICE}
 
 
 @router.post("/reset-password", status_code=204)
@@ -270,25 +261,8 @@ def reset_password(
         "reset-submit:" + (request.client.host if request.client else "unknown"),
         limit=30,
     )
-    lock_revision(db, changed=False)
-    token = db.scalar(
-        select(ResetToken).where(ResetToken.token == token_hash(body.token))
-    )
-    if (
-        not token
-        or token.purpose != "reset"
-        or token.used
-        or token.expires_at <= datetime.utcnow()
-    ):
+    if not consume_reset(db, body.token, body.password):
         raise HTTPException(400, "invalid_reset_token")
-    account = db.get(Account, token.user_id)
-    if not account or not account.is_active or not account.email_verified:
-        raise HTTPException(400, "invalid_reset_token")
-    account.password_hash = password_hash(body.password)
-    account.must_change_password = False
-    revoke_sessions(db, account.id)
-    record_audit(db, account, "account.password_reset", "users", account.id)
-    db.commit()
     response.delete_cookie(COOKIE, path="/api")
 
 

@@ -231,17 +231,56 @@ def send_reset(
         finally:
             temporary.unlink(missing_ok=True)
     elif settings.mail_mode == "smtp":
-        timeout = remaining()
-        with smtplib.SMTP(
-            settings.smtp_host, settings.smtp_port, timeout=timeout
-        ) as client:
-            client.starttls(context=ssl.create_default_context())
-            client.sock.settimeout(remaining())
-            if settings.smtp_username:
-                client.login(
-                    settings.smtp_username, settings.smtp_password.get_secret_value()
-                )
-            client.sock.settimeout(remaining())
-            client.send_message(message)
+        _smtp_send(message, settings, remaining)
     else:
         raise MailError("mail_not_configured")
+
+
+def _smtp_send(message, settings, remaining):
+    if not settings.smtp_host or not settings.smtp_from:
+        raise MailError("mail_not_configured")
+    if bool(settings.smtp_username) != bool(settings.smtp_password.get_secret_value()):
+        raise MailError("mail_not_configured")
+    implicit = settings.smtp_port == 465
+    factory = smtplib.SMTP_SSL if implicit else smtplib.SMTP
+    options = {"timeout": remaining()}
+    if implicit:
+        options["context"] = ssl.create_default_context()
+    with factory(settings.smtp_host, settings.smtp_port, **options) as client:
+        local_plain = settings.smtp_port == 1025 and settings.smtp_host in {
+            "localhost",
+            "127.0.0.1",
+            "::1",
+            "mailpit",
+        }
+        if not implicit and not local_plain:
+            client.starttls(context=ssl.create_default_context())
+        client.sock.settimeout(remaining())
+        if settings.smtp_username:
+            client.login(
+                settings.smtp_username, settings.smtp_password.get_secret_value()
+            )
+        client.sock.settimeout(remaining())
+        client.send_message(message)
+
+
+def sendEmail(mail, *, text_body=None, settings=None):
+    """Provider-independent SMTP. Never persist or log the message in SMTP mode."""
+    import re
+    from html import unescape
+
+    settings = settings or get_settings()
+    message = EmailMessage()
+    message["From"] = settings.smtp_from or "ChronoCampus <no-reply@chronocampus.local>"
+    message["To"] = mail["to"]
+    message["Subject"] = mail["subject"]
+    message["Message-ID"] = f"<{uuid4().hex}@chronocampus.local>"
+    message.set_content(
+        text_body
+        if text_body is not None
+        else unescape(re.sub(r"<[^>]+>", "", mail["html"]))
+    )
+    message.add_alternative(mail["html"], subtype="html")
+    if settings.mail_mode != "smtp":
+        raise MailError("mail_not_configured")
+    _smtp_send(message, settings, lambda: 10.0)

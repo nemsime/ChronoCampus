@@ -69,7 +69,15 @@ def test_registration_verification_and_forgot_password(client, database, tmp_pat
         client.post("/api/auth/forgot-password", json={"email": email}).status_code
         == 202
     )
-    reset = raw_token(database)
+    reset_messages = [
+        BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+        for path in tmp_path.glob("*.eml")
+        if "token=" in path.read_text()
+    ]
+    reset = re.search(
+        r"token=([A-Za-z0-9_-]+)",
+        reset_messages[-1].get_body(preferencelist=("plain",)).get_content(),
+    )[1]
     assert (
         client.post(
             "/api/auth/verify-email", json={"token": reset, "password": PASSWORD}

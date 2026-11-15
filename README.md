@@ -115,6 +115,9 @@ Holiday cancellations count separately from delivered hours and need no makeup. 
 
 ## Recovery and deployment
 
+See [SMTP password recovery and Mailpit setup](docs/password-recovery.md) for the
+current reset contract, migration approval requirement, and test commands.
+
 Students can choose **Create account** on the sign-in screen, enter their name and
 university email, and follow an emailed verification link to choose a separate
 ChronoCampus password (12–256 characters). Only explicitly configured
@@ -128,21 +131,21 @@ creates a student; an administrator assigns the academic group in **Data & rules
 The address format alone does not establish a group or grant staff privileges.
 Expired verification links can be replaced by submitting **Create account** again.
 Existing users can choose **Forgot password?** to receive a single-use reset link.
-Both links expire after `RESET_MINUTES` and are consumed only on successful form
-submission. Registration links cannot reset an existing account's password.
+Verification links expire after `RESET_MINUTES`; password-reset links expire after
+30 minutes. Both are consumed only on successful form submission. Registration links cannot reset an existing account's password.
 
-For a local demonstration, initialize the mail key, apply migrations, and start
-the normal runtime (including the I/O worker). With `MAIL_MODE=file`, open the
-newest `.eml` in `backend/.mail` and copy its `#verify=` or `#reset=` URL into the
-browser. This demonstrates the real verification/reset flow without a mailbox;
-invented addresses do not create university mailboxes. To receive mail in a real
-inbox, configure an authorized outgoing SMTP service as described below.
+For a local demonstration, initialize the mail key, apply migrations, and run
+`docker compose -f compose.yaml -f compose.mailpit.yaml up -d --build`.
+Verification and password-reset emails appear at `http://localhost:8025`.
+Open a verification link or `/reset-password?token=...` reset link from that inbox.
+Invented addresses do not create university mailboxes. The legacy `MAIL_MODE=file`
+option captures registration verification only; password reset requires SMTP.
 
-Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_MODE=file` writes messages to ignored `backend/.mail` and sends no email. To send, configure `MAIL_MODE=smtp`, STARTTLS host/port, sender, and credentials, then verify with the university mail service. Reset links expire, are single-use, and change passwords only after form submission. Administrators can issue a temporary password requiring a change.
+Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_MODE=file` writes messages to ignored `backend/.mail` and sends no email. Reset delivery requires `MAIL_MODE=smtp`, an authorized SMTP sender, and the environment settings in the SMTP guide. Local Mailpit captures reset emails at `http://localhost:8025`. Reset links expire after 30 minutes, are single-use, and change passwords only after form submission. Administrators can issue a temporary password requiring a change.
 
-For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `PUBLIC_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.
+For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `FRONTEND_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.
 
-The local launcher supports native Windows and Linux. The existing root Docker Compose file predates the durable workers and is not a complete runtime launch; container deployment is deferred. Optional monitoring has its own Compose file and is independent of the local launcher.
+The local launcher supports native Windows and Linux. Use `compose.mailpit.yaml` with the root Compose file for the local SMTP inbox and durable workers. SQL Server is configured separately; this is a local demo setup, not a production deployment. Optional monitoring has its own Compose file and is independent of the local launcher.
 
 ## Verification
 

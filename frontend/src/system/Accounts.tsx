@@ -6,10 +6,18 @@ import { ArrowRight, CalendarDays, Check, LockKeyhole } from "lucide-react";
 export function useAuthLink() {
   const read = () => {
     const params = new URLSearchParams(location.hash.slice(1));
-    return { token: params.get("verify") || params.get("reset") || "", verification: params.has("verify") };
+    const query = new URLSearchParams(location.search);
+    const resetPage = location.pathname === "/reset-password";
+    return { token: resetPage ? query.get("token") || "invalid" : params.get("verify") || params.get("reset") || "", verification: !resetPage && params.has("verify") };
   };
   const [link, setLink] = useState(read);
   useEffect(() => {
+    // Keep the token only in React memory, removing it from address/history immediately.
+    if (location.pathname === "/reset-password" && new URLSearchParams(location.search).has("token")) {
+      const query = new URLSearchParams(location.search);
+      query.delete("token");
+      history.replaceState(null, "", location.pathname + (query.size ? "?" + query : ""));
+    }
     const update = () => setLink(read());
     window.addEventListener("hashchange", update);
     return () => window.removeEventListener("hashchange", update);
@@ -17,7 +25,7 @@ export function useAuthLink() {
   return link;
 }
 function clearAuthLink() {
-  history.replaceState(null, "", location.pathname + location.search);
+  history.replaceState(null, "", (location.pathname === "/reset-password" ? "/" : location.pathname) + location.search);
   window.dispatchEvent(new Event("hashchange"));
 }
 export function PasswordForm({
@@ -44,7 +52,7 @@ export function PasswordForm({
             token ? verification ? "/auth/verify-email" : "/auth/reset-password" : "/auth/change-password",
             "POST",
             token
-              ? { token, password: f.get("password") }
+              ? verification ? { token, password: f.get("password") } : { token, newPassword: f.get("password") }
               : {
                   current_password: f.get("current_password"),
                   password: f.get("password"),
@@ -98,13 +106,13 @@ export function PasswordForm({
     </form>
   );
 }
-export function SignIn({ onLogin, onSessionEnded }: { onLogin: (a: Account) => void; onSessionEnded: () => void }) {
+export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Account) => void; onSessionEnded: () => void; authLink: { token: string; verification: boolean } }) {
   const { t } = useLanguage();
   const passwordId = useId();
   const { busy, error, setError, run } = useAction();
   const [mode, setMode] = useState<"login" | "reset" | "register">("login");
   const [message, setMessage] = useState("");
-  const { token, verification } = useAuthLink();
+  const { token, verification } = authLink;
   function navigate(next: "login" | "reset" | "register") {
     clearAuthLink();
     setMode(next);

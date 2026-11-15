@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr, field_validator, model_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,16 +19,27 @@ class Settings(BaseSettings):
     database_url: SecretStr = SecretStr("")
     session_hours: int = Field(default=12, ge=1, le=168)
     cookie_secure: bool = True
-    public_url: str = "http://localhost:3000"
+    public_url: str = Field(
+        default="http://localhost:3000",
+        validation_alias=AliasChoices("FRONTEND_URL", "PUBLIC_URL", "public_url"),
+    )
     reset_minutes: int = Field(default=30, ge=5, le=120)
     university_email_domains: list[str] = []
     mail_mode: str = "disabled"
     mail_directory: Path = Path(__file__).resolve().parents[2] / ".mail"
     smtp_host: str = ""
     smtp_port: int = 587
-    smtp_username: str = ""
-    smtp_password: SecretStr = SecretStr("")
-    smtp_from: str = ""
+    smtp_username: str = Field(
+        default="",
+        validation_alias=AliasChoices("SMTP_USER", "SMTP_USERNAME", "smtp_username"),
+    )
+    smtp_password: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias=AliasChoices("SMTP_PASS", "SMTP_PASSWORD", "smtp_password"),
+    )
+    smtp_from: str = Field(
+        default="", validation_alias=AliasChoices("MAIL_FROM", "SMTP_FROM", "smtp_from")
+    )
     diagnostic_log_directory: Path = Path(__file__).resolve().parents[2] / ".logs"
     diagnostic_log_max_bytes: int = Field(default=5_000_000, ge=100_000, le=100_000_000)
     diagnostic_log_backups: int = Field(default=5, ge=1, le=30)

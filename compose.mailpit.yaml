@@ -1,0 +1,43 @@
+# Local SMTP inbox only: captured messages are visible at http://localhost:8025.
+# This does not deliver messages to Outlook or other external inboxes.
+x-demo-mail: &demo-mail
+  MAIL_MODE: smtp
+  SMTP_HOST: mailpit
+  SMTP_PORT: "1025"
+  SMTP_USER: ""
+  SMTP_PASS: ""
+  MAIL_FROM: "ChronoCampus <no-reply@chronocampus.local>"
+  FRONTEND_URL: http://localhost:3000
+
+services:
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    restart: unless-stopped
+  backend:
+    environment: *demo-mail
+  io:
+    build: ./backend
+    image: chronocampus-backend
+    env_file: ./backend/.env
+    volumes:
+      - ./backend:/app
+    environment:
+      <<: *demo-mail
+      WORKER_ROLE: io
+      SQL_POOL_SIZE: "2"
+    command: ["python", "-m", "app.jobs.io_worker"]
+    restart: unless-stopped
+  coordinator:
+    build: ./backend
+    image: chronocampus-backend
+    env_file: ./backend/.env
+    volumes:
+      - ./backend:/app
+    environment:
+      WORKER_ROLE: coordinator
+      SQL_POOL_SIZE: "3"
+    command: ["python", "-m", "app.jobs.coordinator"]
+    restart: unless-stopped
