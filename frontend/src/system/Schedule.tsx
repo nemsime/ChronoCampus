@@ -32,7 +32,7 @@ export function LessonList({
   };
   const visible = useMemo(
     () =>
-      serverPage ? rows : rows
+      (serverPage ? rows : rows
         .filter((row) =>
           Object.entries(filters).every(
             ([key, value]) =>
@@ -43,7 +43,8 @@ export function LessonList({
                   ? row.day <= value
                   : String(row[key]) === value),
           ),
-        )
+        ))
+        .slice()
         .sort((a, b) => a.day.localeCompare(b.day) || a.slot - b.slot),
     [rows, filters, serverPage],
   );
@@ -68,11 +69,9 @@ export function LessonList({
   }, new Map<string, Row[]>()));
   return (
     <>
-      {!serverPage && <>
-      <div className="schedule-filter-bar">
-        <h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}</h2>
+      {!serverPage && <details className="timeline-filter-details">
+      <summary>{t("filtersHeading")}{Object.values(filters).some(Boolean) && <span className="badge">{Object.values(filters).filter(Boolean).length}</span>}</summary>
         {Object.values(filters).some(Boolean) && <button className="link" onClick={() => setFilters({})}>{t("clearFilters")}</button>}
-      </div>
       <div className="filters">
         <label>
           {t("starts_on")}
@@ -115,7 +114,7 @@ export function LessonList({
             </select>
           </label>
         ))}
-      </div></>}
+      </div></details>}
       <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
       {pagination}
       <div className="lesson-list lesson-list-grouped">
@@ -129,6 +128,7 @@ export function LessonList({
             className={`lesson ${row.cancelled ? "cancelled" : ""}`}
             key={row.occurrence_id}
           >
+            <span className="timeline-dot" aria-hidden="true" />
             <div className="lesson-time">
               <strong>
                 {String(row.starts_at).slice(0, 5)}–

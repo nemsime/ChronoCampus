@@ -7,13 +7,13 @@
 - Evidence reviewed: `docs/requirements.md`, `frontend/src/system/*`, existing local desktop/mobile screenshots. `src/App.tsx` uses `system/Application`; older prototype components are not active.
 
 ## Brand
-- Calm, precise university workspace. Retain the dark teal navigation and restrained teal actions.
+- Calm, precise university workspace. The user-selected palette is pale sage `#EEF1EA`, forest text `#1F2D26`, terracotta `#B84A24` and peach `#F6DCCB`.
 - Trust comes from readable data, explicit publication state and clear feedback.
 - Avoid gradients, decorative dashboards, invented metrics, oversized cards, marketing copy and animation for its own sake.
 
 ## Product goals
 - Help students/lecturers find lessons and notes; help administrators prepare, inspect and publish schedules confidently.
-- Improve hierarchy, legibility and responsive navigation without changing business rules, API contracts, permissions or database data.
+- Improve hierarchy, legibility and responsive navigation without changing business rules, API contracts or permissions. Demo-only account additions are documented separately.
 - Success: primary actions and current selection are clear; loading differs from empty/error; forms and tables remain usable at 360px and on desktop.
 
 ## Personas and jobs
@@ -27,6 +27,8 @@
 - Semester setup uses Calendar & dates, Teaching load, Availability & exceptions. Keep the selected semester visible; scope period/load/exception rows to it and explicitly identify shared calendars and overlapping availability.
 - Support is a normal navigation item. Do not restore the promotional help/contact box.
 - New drafts follow Semester → Groups → Review → Generate. Review shows the actual selected inputs; advanced solver controls are collapsed. Generating never publishes automatically.
+- Login, registration and recovery use one centered card below a compact brand/language header. Do not restore a split-page illustration or half-page panel. Clear successful forms and start each auth mode with fresh fields; retain failed submissions for correction.
+- The schedule defaults to a chronological vertical timeline with terracotta dots. Keep the week grid as an explicit alternative and remember the user's view choice. Secondary timeline filters are collapsed; primary group/lecturer/room controls remain visible.
 - Generated drafts open with a compact result summary and the timetable first. Review issues expands the hours/unresolved-lesson report. Publication remains a separate, server-validated action.
 - Persistent desktop sidebar can collapse to a labelled icon rail; remember the choice locally. Mobile navigation remains a separate full-label disclosure.
 - Keep one page scroll, with a compact sticky header and section links on long planner/diagnostic pages. Do not stack large sticky panels or hide critical generation/error status behind tabs.
@@ -40,10 +42,10 @@
 - Keep existing native controls and lightweight shared components; no new UI dependencies.
 
 ## Visual language
-- Colors: slate text on an off-white canvas, white surfaces, dark teal navigation, teal primary/focus, restrained semantic green/amber/red.
-- Typography: local system sans-serif with Armenian fallback; body 14px, inputs 14px (16px mobile), headings 26–30px, metadata at least 12px.
+- Colors: exact sage/forest/terracotta/peach palette above, warm white surfaces and neutral top/side toolbars. Use peach for selected navigation and terracotta for primary actions/focus; retain distinct semantic green/amber/red.
+- Typography: locally hosted Bricolage Grotesque headlines and Inter body, with Armenian/system fallbacks; body 14px, inputs 14px (16px mobile), headings 26–32px, metadata at least 12px. Font files and SIL licenses are in `frontend/public/fonts`.
 - Spacing: 4px base, 8/12/16/24/32 rhythm; 24px surface padding, 16px on phones; constrained content width.
-- Shape: 8px controls, 12px panels; thin borders and subtle shadows.
+- Shape: pill buttons, 8px inputs, 16–24px panels; thin borders and restrained shadows.
 - Motion: short hover/focus transitions and busy indicator; respect reduced motion.
 - Icons: existing Lucide icons, 16–20px, meaningful uses only; decorative icons hidden from assistive technology.
 
@@ -51,7 +53,7 @@
 - Extend existing `common.tsx`, `LanguageSwitch` and `styles.css` rather than introducing another design system.
 - Shared loading/empty states, labelled password visibility, native dialog close control, consistent toolbar and button treatments.
 - Explicit hover, focus, selected, busy, disabled, empty and error states.
-- Tokens and responsive layout owned by `frontend/src/system/styles.css`; UI strings by `uiWords.ts` merged into existing i18n.
+- Base layout lives in `styles.css`, shared palette tokens in `workspace.css`, and the selected typography/timeline/auth treatment in `theme.css`; UI strings merge through existing i18n.
 
 ## Accessibility
 - Aim for WCAG 2.2 AA contrast and keyboard operation; do not claim certification.
@@ -84,5 +86,5 @@
 - The connected browser surface is unavailable. Native headless Chrome is available for isolated source/UI checks with a separate profile; distinguish API fixtures from live database acceptance and report actual verification boundaries.
 
 ## Open questions
-- No additional brand assets supplied; retain the existing mark and palette.
+- Preserve the existing calendar mark. Fonts were obtained from the official Google Fonts repository with their licenses; future palette/layout changes should follow user direction.
 - Fresh desktop/mobile checks can use native headless Chrome; signed-in production flows, print and accessibility acceptance must be reported separately.

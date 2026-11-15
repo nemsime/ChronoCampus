@@ -1,8 +1,8 @@
-import { FormEvent, useEffect, useId, useState } from "react";
+import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Account, api, setCsrf } from "./api";
 import { ErrorBox, PasswordInput, useAction } from "./common";
 import { LanguageSwitch, useLanguage } from "./i18n";
-import { ArrowRight, CalendarDays, Check, LockKeyhole } from "lucide-react";
+import { ArrowRight, CalendarDays, LockKeyhole } from "lucide-react";
 export function useAuthLink() {
   const read = () => {
     const params = new URLSearchParams(location.hash.slice(1));
@@ -44,7 +44,8 @@ export function PasswordForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        const f = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const f = new FormData(form);
         void run(async () => {
           if (f.get("password") !== f.get("confirmation"))
             throw new Error("password_mismatch");
@@ -58,6 +59,7 @@ export function PasswordForm({
                   password: f.get("password"),
                 },
           );
+          form.reset();
           clearAuthLink();
           onDone();
         });
@@ -109,11 +111,14 @@ export function PasswordForm({
 export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Account) => void; onSessionEnded: () => void; authLink: { token: string; verification: boolean } }) {
   const { t } = useLanguage();
   const passwordId = useId();
+  const form = useRef<HTMLFormElement>(null);
   const { busy, error, setError, run } = useAction();
   const [mode, setMode] = useState<"login" | "reset" | "register">("login");
   const [message, setMessage] = useState("");
   const { token, verification } = authLink;
+  useEffect(() => { form.current?.reset(); }, [mode, token]);
   function navigate(next: "login" | "reset" | "register") {
+    form.current?.reset();
     clearAuthLink();
     setMode(next);
     setMessage("");
@@ -121,19 +126,23 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
   }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
+    const submittedForm = e.currentTarget;
+    const f = new FormData(submittedForm);
     void run(async () => {
       if (mode === "reset") {
         await api("/auth/forgot-password", "POST", { email: f.get("email") });
+        submittedForm.reset();
         setMessage("reset_requested");
       } else if (mode === "register") {
         await api("/auth/register", "POST", { email: f.get("email"), display_name: f.get("display_name") });
+        submittedForm.reset();
         setMessage("registration_requested");
       } else {
         const response = await api("/auth/login", "POST", {
           email: f.get("email"),
           password: f.get("password"),
         });
+        submittedForm.reset();
         setCsrf(response.csrf_token);
         onLogin(response.user);
       }
@@ -141,22 +150,13 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
   }
   return (
     <div className="auth-shell">
-      <section className="auth-story">
+      <header className="auth-header">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true"><CalendarDays size={24} strokeWidth={1.7} /></span><span>Chrono<span className="brand-light">Campus</span></span>
         </div>
-        <div className="auth-story-content">
-          <h2>{t("authHeadline")}</h2>
-          <div className="auth-schedule-art" aria-hidden="true">
-            <div className="auth-art-header"><CalendarDays size={19} /><span>{t("authArtTitle")}</span><span className="art-dot" /></div>
-            <div className="auth-art-grid">{Array.from({ length: 20 }, (_, index) => <span className={`art-cell art-cell-${index}`} key={index}><i /><i /></span>)}</div>
-            <div className="auth-art-label"><span><Check size={14} /></span>{t("authArtBadge")}</div>
-          </div>
-        </div>
-        <small>{t("authFooter")}<span>ChronoCampus © {new Date().getFullYear()}</span></small>
-      </section>
-      <section className="auth-panel">
         <LanguageSwitch />
+      </header>
+      <section className="auth-panel">
         <div className="auth-card">
           <header className="auth-card-header">
             <span className="auth-lock"><LockKeyhole size={22} strokeWidth={1.5} aria-hidden="true" /></span>
@@ -193,14 +193,14 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
             <button className="link" type="button" onClick={() => navigate("login")}>{t("login")}</button>
             </div>
           ) : (
-            <form onSubmit={submit} className="form-stack" aria-busy={busy}>
-              {mode === "register" && <label>{t("registrationName")}<input name="display_name" autoComplete="name" required maxLength={150} /></label>}
+            <form key={mode} ref={form} onSubmit={submit} className="form-stack" aria-busy={busy} autoComplete="off">
+              {mode === "register" && <label>{t("registrationName")}<input name="display_name" autoComplete="off" required maxLength={150} /></label>}
               <label>
                 {t("email")}
                 <input
                   name="email"
                   type="email"
-                  autoComplete="username"
+                  autoComplete="off"
                   required
                   maxLength={255}
                 />
@@ -211,7 +211,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                   <PasswordInput
                     id={passwordId}
                     name="password"
-                    autoComplete="current-password"
+                    autoComplete="off"
                     required
                     maxLength={256}
                   />
@@ -226,7 +226,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                 )}
                 {!busy && <ArrowRight size={17} aria-hidden="true" />}
               </button>
-              <button
+              <div className="auth-form-links"><button
                 className="link"
                 type="button"
                 disabled={busy}
@@ -237,9 +237,9 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                 {t(mode === "login" ? "forgot" : "login")}
               </button>
               {mode !== "register" && <button className="link" type="button" disabled={busy} onClick={() => navigate("register")}>{t("register")}</button>}
+              </div>
             </form>
           )}
-          <p className="auth-access-note"><LockKeyhole size={13} aria-hidden="true" />{t("registrationAccessHelp")}</p>
         </div>
       </section>
     </div>

@@ -11,7 +11,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const { outputFiles } = buildSync({
   stdin: {
-    contents: 'export { localDay, addDays, weekStart } from "./src/system/common"; export { WeekGrid } from "./src/system/WeekGrid"; export { LanguageProvider } from "./src/system/i18n";',
+    contents: 'export { localDay, addDays, weekStart } from "./src/system/common"; export { WeekGrid, useScheduleView } from "./src/system/WeekGrid"; export { LessonList } from "./src/system/Schedule"; export { LanguageProvider } from "./src/system/i18n";',
     resolveDir: root,
     loader: "tsx",
   },
@@ -24,7 +24,39 @@ const { outputFiles } = buildSync({
 });
 const bundled = { exports: {} };
 new Function("require", "module", "exports", outputFiles[0].text)(createRequire(import.meta.url), bundled, bundled.exports);
-const { localDay, addDays, weekStart, WeekGrid, LanguageProvider } = bundled.exports;
+const { localDay, addDays, weekStart, WeekGrid, useScheduleView, LessonList, LanguageProvider } = bundled.exports;
+
+test("timeline defaults on desktop and mobile while remembering an explicit grid choice", () => {
+  function Preference() { return React.createElement("span", null, useScheduleView()[0]); }
+  try {
+    for (const matches of [true, false]) {
+      globalThis.window = { localStorage: { getItem: () => null }, matchMedia: () => ({ matches }) };
+      assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>list</span>");
+    }
+    globalThis.window.localStorage.getItem = () => "grid";
+    assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>grid</span>");
+    globalThis.window.localStorage.getItem = () => { throw new Error("storage unavailable"); };
+    assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>list</span>");
+  } finally { delete globalThis.window; }
+});
+
+test("server-page timelines order lessons by day and time without mutating their input", () => {
+  const rows = [
+    { occurrence_id: 2, day: "2026-11-17", slot: 1, starts_at: "09:30", ends_at: "10:50", subject: "Later day", lesson_type: "lecture" },
+    { occurrence_id: 3, day: "2026-11-16", slot: 2, starts_at: "11:00", ends_at: "12:20", subject: "Later slot", lesson_type: "lab" },
+    { occurrence_id: 1, day: "2026-11-16", slot: 1, starts_at: "09:30", ends_at: "10:50", subject: "First lesson", lesson_type: "lecture", cancelled: true },
+  ];
+  globalThis.localStorage = { getItem: () => "en" };
+  try {
+    const html = renderToStaticMarkup(React.createElement(LanguageProvider, null,
+      React.createElement(LessonList, { rows, serverPage: true })));
+    assert.ok(html.indexOf("First lesson") < html.indexOf("Later slot"));
+    assert.ok(html.indexOf("Later slot") < html.indexOf("Later day"));
+    assert.equal((html.match(/timeline-dot/g) || []).length, 3);
+    assert.match(html, /Cancelled/);
+    assert.deepEqual(rows.map(row => row.occurrence_id), [2, 3, 1]);
+  } finally { delete globalThis.localStorage; }
+});
 
 test("local day at 01:00 in Yerevan uses the current date", () => {
   const OriginalDate = globalThis.Date;

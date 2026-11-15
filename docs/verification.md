@@ -1,5 +1,49 @@
 # Verification
 
+## Dean demo, authentication and visual refresh — 15 November 2026
+
+Applied the requested sage `#EEF1EA`, forest text `#1F2D26`, terracotta `#B84A24`
+and peach `#F6DCCB`, locally hosted Bricolage Grotesque/Inter, and pill buttons.
+Top and side navigation use neutral warm white surfaces. Authentication now has
+one centered card and a compact brand/language header; the split illustration
+column was removed. Successful auth submissions reset their forms, switching
+modes remounts fresh fields, and entry fields opt out of automatic restoration.
+Failed submissions retain their input for correction.
+
+Schedules default to a chronological vertical timeline with dots; Grid remains
+available and an explicit choice is remembered with a new view preference key.
+Timeline sorting does not mutate server rows, and secondary planner filters stay
+collapsed. Existing note, edit and suggestion actions remain attached to lessons.
+
+- TypeScript and the production build passed. All frontend suites passed:
+  **26 tests** (9 dean, 9 admin workspace, 8 timetable/timeline).
+- Full backend suite in the development container passed: **222 passed,
+  22 skipped**, with the existing Starlette/httpx deprecation warning. Skips are
+  platform-specific and opt-in isolated SQL Server acceptance tests. Ruff
+  correctness and Git whitespace checks passed. No migration or schema change.
+- Actual React browser fixtures passed **25 assertions at desktop and 25 at
+  360px**: fresh registration/recovery/login fields, retained failed input,
+  login/logout/login, centered card without a side panel, RU/HY/EN auth fit,
+  font loading, exact palette, pill buttons, timeline order/dots, lecturer scope,
+  grid switching and Armenian schedule fit. Browser profiles and screenshots
+  stay ignored under `.runtime/dean-demo-refresh/`. These are isolated API
+  fixtures, not a claim about browser extensions or password-manager behavior.
+- The existing admin wizard/browser fixture was rechecked with the new styles;
+  it still searches tables, scopes semester inputs, generates one fixture draft,
+  opens its timetable and explicitly reviews issues without publishing.
+- Added `seed-demo-deans` for older demo databases. On the live isolated
+  `ChronoCampus_Development`, it added the two missing demo deans while preserving
+  **20 existing accounts**, their password hashes and sessions, **6 versions**
+  and **1,158 assignments**. No generation, publication or academic data change.
+  The repeat-run regression verifies credentials, scopes, schedules and shared
+  revision preservation; other database names are rejected.
+- Live API login/read/logout checks passed for both new deans: the university
+  dean saw 6 versions and 57 lessons in the sample week; the FIA dean saw 5
+  versions, 42 lessons and only `DEMO-1-26`, `DEMO-2-26`, `DEMO-5-26` groups.
+  Both were denied administrator catalogs (403). Passwords are saved only in
+  ignored `backend/.demo-credentials.json`. Live Vite checks returned 200 for
+  the single-card source, both fonts and the proxied API readiness endpoint.
+
 ## Guided admin workspace — 15 November 2026
 
 Implemented the agreed navigation and workflow: Support stays a normal menu item

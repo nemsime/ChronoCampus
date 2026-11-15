@@ -201,61 +201,9 @@ small {
   font-weight: 500;
 }
 .auth-shell {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
-}
-.auth-story {
-  padding: 48px 10%;
-  background: var(--sidebar);
-  color: white;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   min-height: 100vh;
-}
-.auth-story h2 {
-  font-size: clamp(32px, 3.5vw, 46px);
-  max-width: 440px;
-  line-height: 1.12;
-}
-.auth-story p {
-  color: #b8d1dc;
-  max-width: 400px;
-  margin: 22px 0;
-  font-size: 17px;
-}
-.auth-story .eyebrow {
-  font-size: 10px;
-  color: #8cc9cf;
-}
-.auth-story small {
-  color: #8fb4c4;
-}
-.clock-art {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  margin-top: 45px;
-  background: #ffffff0c;
-  border: 1px solid #ffffff20;
-  border-radius: 16px;
-  padding: 22px;
-  font-size: 22px;
-}
-.clock-art i {
-  flex: 1;
-  height: 2px;
-  background: #6e9daa;
-}
-.clock-art b {
-  background: #69bda9;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
 }
 .auth-panel {
   padding: 28px 40px;
@@ -264,12 +212,7 @@ small {
   justify-content: center;
   position: relative;
 }
-.auth-panel > .language,
-.auth-panel > select {
-  position: absolute;
-  right: 28px;
-  top: 28px;
-}
+
 .auth-card {
   max-width: 390px;
   width: 100%;
@@ -961,7 +904,6 @@ tbody tr:last-child td { border-bottom: none; }
 .password-toggle { position: absolute; right: 1px; top: 50%; transform: translateY(-50%); min-height: 40px; width: 40px; padding: 7px; }
 .auth-card .form-stack > button:not(.link) { width: 100%; }
 .auth-card .form-stack > .link { align-self: center; }
-.auth-story small { font-size: 12px; }
 .thread-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px 16px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
 .thread-list-heading h2 { font-size: 14px; }
 .thread-list > .empty { padding: 24px 12px; font-size: 13px; }
@@ -1024,17 +966,6 @@ body:has(dialog[open]) { overflow: hidden; }
   }
 }
 @media (max-width: 760px) {
-  .auth-shell {
-    grid-template-columns: 1fr;
-  }
-  .auth-story {
-    min-height: 0;
-    padding: 26px;
-  }
-  .auth-story > div:not(.brand),
-  .auth-story > small {
-    display: none;
-  }
   .auth-panel {
     padding: 100px 25px 40px;
     min-height: 75vh;

@@ -41,6 +41,7 @@ import "./styles.css";
 import "./workspace.css";
 import "./dean.css";
 import "./adminWorkspace.css";
+import "./theme.css";
 
 export function navigationForRole(role: Account["role"]) {
   return [

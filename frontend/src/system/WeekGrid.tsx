@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, FlaskConical, LayoutGrid, List, MapPin, Pin, Users, UserRound } from "lucide-react";
 import { type Row } from "./api";
 import { addDays, dateLabel, localDay, weekStart as mondayOf } from "./common";
@@ -22,28 +22,18 @@ export interface WeekGridProps {
   onSelect(row: Row): void;
 }
 
-const preferenceKey = "chronocampus.schedule-view";
+// A new preference key gives the redesigned timeline its own default while
+// continuing to remember an explicit grid choice within this design.
+const preferenceKey = "chronocampus.schedule-view.v2";
 export function useScheduleView(): [ScheduleView, (view: ScheduleView) => void] {
   const [view, setView] = useState<ScheduleView>(() => {
     try {
       const saved = window.localStorage.getItem(preferenceKey);
       if (saved === "grid" || saved === "list") return saved;
     } catch { /* Storage is optional in private browsing. */ }
-    return typeof window !== "undefined" && window.matchMedia("(min-width: 760px)").matches ? "grid" : "list";
+    return "list";
   });
-  const changed = useRef(false);
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 760px)");
-    const adapt = () => {
-      let saved: string | null = null;
-      try { saved = window.localStorage.getItem(preferenceKey); } catch { /* optional */ }
-      if (!changed.current && saved !== "grid" && saved !== "list") setView(media.matches ? "grid" : "list");
-    };
-    media.addEventListener("change", adapt);
-    return () => media.removeEventListener("change", adapt);
-  }, []);
   return [view, (next) => {
-    changed.current = true;
     setView(next);
     try { window.localStorage.setItem(preferenceKey, next); } catch { /* optional */ }
   }];
@@ -52,11 +42,11 @@ export function useScheduleView(): [ScheduleView, (view: ScheduleView) => void] 
 export function ScheduleViewToggle({ value, onChange }: { value: ScheduleView; onChange: (view: ScheduleView) => void }) {
   const { t } = useLanguage();
   return <div className="schedule-view-toggle" role="group" aria-label={t("scheduleView")}>
-    <button type="button" className="secondary" aria-pressed={value === "grid"} onClick={() => onChange("grid")}>
-      <LayoutGrid size={16} aria-hidden="true" />{t("gridView")}
-    </button>
     <button type="button" className="secondary" aria-pressed={value === "list"} onClick={() => onChange("list")}>
       <List size={16} aria-hidden="true" />{t("listView")}
+    </button>
+    <button type="button" className="secondary" aria-pressed={value === "grid"} onClick={() => onChange("grid")}>
+      <LayoutGrid size={16} aria-hidden="true" />{t("gridView")}
     </button>
   </div>;
 }

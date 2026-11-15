@@ -102,6 +102,14 @@ After migrations, from `backend`:
 
 The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records and regenerate passwords for all seeded demo accounts, invalidating their previous passwords and sessions. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Current random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`. University-wide dean: `dean.demo@example.invalid`; first-faculty dean: `dean.faculty1.demo@example.invalid`.
 
+For an older demo database that already has groups and timetables, run
+`python -m app.manage seed-demo-deans` from `backend` to add only the missing dean
+accounts. This preserves existing passwords, sessions, drafts and published
+schedules. The faculty dean can review `DEMO-1-26`, `DEMO-2-26` and `DEMO-5-26`;
+the university dean can review all faculties. Open **Timetables**, choose an
+existing version and group, then select a lesson to try a suggestion. Both dean
+passwords are in the same ignored credentials file.
+
 Demo teaching dates and academic-hour settings are illustrative. Real university calendars remain unconfirmed until an administrator enters the missing facts. See [data provenance](docs/demo-data.md).
 
 ## Prepare and publish a semester
