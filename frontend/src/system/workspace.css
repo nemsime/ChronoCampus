@@ -78,7 +78,8 @@ small { color: var(--muted); }
 .topbar select { background: transparent; border: 0; color: var(--muted); font-size: 12px; padding: 7px 22px 7px 8px; min-height: 34px; max-width: 128px; }
 .topbar-date { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin-right: 14px; }
 .topbar-separator { width: 1px; height: 21px; background: var(--sage); }
-.main-area main { padding: 35px 38px 80px; max-width: 1580px; }
+.main-area main { padding: 35px 38px 80px; max-width: 1580px; min-width: 0; }
+.main-area main > * { min-width: 0; }
 .page-heading { margin-bottom: 28px; align-items: center; }
 .page-heading p:not(.eyebrow) { font-size: 12px; line-height: 1.7; margin-top: 9px; max-width: 620px; }
 .page-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }

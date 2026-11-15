@@ -6,9 +6,10 @@
 .sidebar-top { margin-bottom: 24px; }
 .sidebar-footer strong { font-size: 12px; }
 .sidebar-footer small { font-size: 12px; }
-.admin-management { display: grid; gap: 16px; min-width: 0; }
-.admin-area-tabs, .admin-resource-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.admin-area-tabs button { min-height: 44px; padding: 11px 16px; font-size: 14px; }
+.admin-management { display: grid; gap: 16px; min-width: 0; margin-top: 8px; }
+.admin-area-tabs, .admin-resource-tabs { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.admin-area-tabs button, .admin-resource-tabs button { min-width: 0; min-height: 44px; text-align: center; }
+.admin-area-tabs button { padding: 11px 16px; font-size: 14px; }
 .admin-area-tabs button.active { background: var(--accent); color: var(--muted); }
 .admin-resource-tabs { margin: 18px 0; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .admin-resource-tabs button { font-size: 13px; }
@@ -22,10 +23,12 @@
 .admin-management .catalog-content td { font-size: 14px; }
 .admin-management .catalog-content td button { font-size: 13px; }
 .admin-management .catalog-editor .field > label { font-size: 14px; }
-.semester-context { display: grid; grid-template-columns: minmax(180px, 300px) minmax(0, 1fr) auto; gap: 20px; align-items: end; }
-.semester-context label { font-size: 14px; }
-.semester-context p { font-size: 13px; color: var(--text); line-height: 1.6; }
-.semester-context button { align-self: end; }
+.semester-context { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: center; min-width: 0; max-width: 860px; }
+.semester-context > * { min-width: 0; }
+.semester-context label { width: 100%; font-size: 14px; }
+.semester-context select { width: 100%; }
+.semester-context p { min-width: 0; font-size: 13px; color: var(--text); line-height: 1.6; text-align: center; overflow-wrap: anywhere; }
+.semester-context button { justify-self: center; }
 .draft-wizard-modal { width: min(760px, calc(100vw - 32px)); }
 .draft-wizard-heading { margin-bottom: 22px; }
 .draft-wizard-heading > p:last-child { margin-top: 10px; color: var(--text); line-height: 1.6; }
@@ -84,7 +87,7 @@
 .planner-panel .planner-readiness { font-size: 14px; }
 @media (max-width: 1000px) {
   .planner-result-summary { grid-template-columns: minmax(0, 1fr); }
-  .semester-context { grid-template-columns: minmax(180px, 1fr) auto; }
+  .semester-context { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .semester-context p { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (max-width: 760px) {
