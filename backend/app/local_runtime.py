@@ -1,15 +1,15 @@
 """Local start/status/stop, with an owning detached supervisor."""
 import argparse
-from contextlib import contextmanager
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import socket
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
+from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
 from uuid import uuid4
@@ -104,6 +104,7 @@ def _ready_url(url):
 
 def _worker_ready(instance):
     from sqlalchemy import select
+
     from app.db.session import get_engine
     from app.jobs.models import WorkerHeartbeat
 
@@ -113,6 +114,7 @@ def _worker_ready(instance):
 
 def _preflight():
     from sqlalchemy.orm import Session
+
     from app.core.config import get_settings
     from app.db.session import get_engine
     from app.observability.router import database_probe

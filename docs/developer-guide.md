@@ -54,7 +54,7 @@ API не запускает расчёт в своём потоке и не сб
 
 Сначала определить, относится ли значение к настройкам вуза, календарю, семестру или компоненту нагрузки. Не добавлять реальные правила университета как константы интерфейса.
 
-При изменении хранения обновить модель и добавить следующую миграцию в [backend/alembic/versions](../backend/alembic/versions/). Применённые миграции `0001`–`0004` не переписывать. Их определения схемы зафиксированы и не должны зависеть от будущих изменений ORM-моделей. Проверять миграцию на пустой БД и на восстановленной копии прежней схемы; исходную БД сохранять отдельно. Архивный `db/ChronoCampus.sql` удаляет и создаёт БД заново и не используется для обновления данных.
+При изменении хранения обновить модель и добавить следующую миграцию в [backend/alembic/versions](../backend/alembic/versions/). Применённые миграции `0001`–`0004` не переписывать. Их определения схемы зафиксированы и не должны зависеть от будущих изменений ORM-моделей. Проверять миграцию на пустой БД и на восстановленной копии прежней схемы; исходную БД сохранять отдельно. Архивный `backend/db/ChronoCampus.sql` удаляет и создаёт БД заново и не используется для обновления данных.
 
 Затем изменить Pydantic-схему, регистрацию ресурса и предметную проверку в `academics`, соответствующие поля `catalogSchema.ts`, подписи на трёх языках и тесты. Связи, вместимость, доступ и допустимость значений проверяет сервер, даже если форма уже ограничивает ввод.
 
@@ -132,3 +132,9 @@ API не запускает расчёт в своём потоке и не сб
 `review/` содержит безопасные чтения версий, diff и предложения. `/dean/*` не использует административные мутации; `/admin/suggestions/{id}/check` переиспользует `scheduling/moves.py`, как и ручной перенос. Предложения берут `lock_revision(changed=False)` и не меняют расписание или его ревизии. При изменении доступа проверить смешанную версию с группами разных факультетов, смену факультета во время чтения и курсор от другой версии.
 
 Регрессионные проверки: `test_dean.py`, `test_dean_review.py`, существующие `test_schedule_queries.py` и `test_workspace.py`. Клиентские проверки без новых зависимостей: `node frontend/tests/week-grid.test.mjs` и `node frontend/tests/dean.test.mjs` из корня. Они используют существующий компилятор Vite и серверный рендеринг React; не заменяют браузерную проверку клавиатуры, печати и мобильной вёрстки.
+
+## Archived frontend and UTC timestamps
+
+The maintained frontend is `frontend/src/system/`, loaded through `src/main.tsx` and `src/App.tsx`. The former Figma prototype is archived outside `src/` in [frontend/legacy](../frontend/legacy/README.md); it is excluded from the active build and checks.
+
+Python application timestamps are timezone-aware UTC. Use `app.db.utc.utc_now()` for the host clock. Queue and recovery code use the database clock and normalize its result with `as_utc()`. ORM timestamp columns use `UTCDateTime`, which converts to naive UTC only at the storage boundary to preserve the existing SQL Server schema and restores UTC awareness on reads. Historical naive timestamps are interpreted as UTC. No database migration is needed for this conversion.

@@ -7,7 +7,6 @@ from sqlalchemy import inspect, select, true
 from sqlalchemy.orm import Session
 
 from app.accounts.roles import LECTURER
-
 from app.calendar.rules import required_pairs
 from app.db import models as m
 

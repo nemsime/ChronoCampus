@@ -1,6 +1,7 @@
 """Add email verification without locking out existing provisioned accounts."""
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "0005_email_registration"

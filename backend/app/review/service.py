@@ -1,6 +1,5 @@
 """Shared review policy and explicit, privacy-safe response projections."""
 
-from datetime import datetime
 
 from fastapi import HTTPException
 from sqlalchemy import and_, case, func, or_, select
@@ -8,6 +7,7 @@ from sqlalchemy import and_, case, func, or_, select
 from app.accounts.roles import ADMIN, DEAN
 from app.calendar.rules import lesson_slot, parity
 from app.db import models as m
+from app.db.utc import utc_now
 from app.observability.audit import record_audit
 from app.review.schemas import SuggestionInput
 from app.scheduling import queries as q
@@ -333,10 +333,10 @@ def transition(db, suggestion, actor, expected, status, *, note=None, version_id
             raise HTTPException(404, "version_not_found", headers=q.PRIVATE)
         suggestion.implemented_in_version_id = version_id
     if status != "withdrawn":
-        suggestion.decided_by, suggestion.decided_at = actor.id, datetime.utcnow()
+        suggestion.decided_by, suggestion.decided_at = actor.id, utc_now()
         if note is not None:
             suggestion.decision_note = note
-    suggestion.status, suggestion.updated_at = status, datetime.utcnow()
+    suggestion.status, suggestion.updated_at = status, utc_now()
     action = {"implemented": "suggestion.implemented", "withdrawn": "suggestion.withdrawn"}.get(
         status, "suggestion.decided")
     record_audit(db, actor, action, "suggestions", suggestion.id,
@@ -347,7 +347,7 @@ def add_comment(db, suggestion, actor, content):
     if suggestion.status == "withdrawn":
         raise HTTPException(409, "suggestion_closed", headers=q.PRIVATE)
     comment = m.SuggestionComment(suggestion_id=suggestion.id, author_id=actor.id, content=content)
-    suggestion.updated_at = datetime.utcnow()
+    suggestion.updated_at = utc_now()
     db.add(comment)
     db.flush()
     return {**record(comment), "author": actor.display_name}

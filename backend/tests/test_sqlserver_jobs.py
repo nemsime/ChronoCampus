@@ -1,17 +1,18 @@
 """Real queue locking tests; only uniquely named isolated SQL databases are allowed."""
-from concurrent.futures import ThreadPoolExecutor
-from datetime import date, time, timedelta
 import json
 import os
-from pathlib import Path
 import re
 import subprocess
 import sys
 import threading
 import time as monotonic_time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date, time, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from conftest import HASH, PASSWORD
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, func, select, text, update
 from sqlalchemy.engine import URL
@@ -20,12 +21,18 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.db import models as m
 from app.db.session import get_db, lock_revision
-from app.jobs.generation import apply_result, execute_claim, prepare, enqueue_generation
+from app.jobs.generation import apply_result, enqueue_generation, execute_claim, prepare
 from app.jobs.models import BackgroundJob, JobAttempt
-from app.jobs.queue import claim_job, database_now, enqueue_job, finish_job, recover_expired, renew_lease
+from app.jobs.queue import (
+    claim_job,
+    database_now,
+    enqueue_job,
+    finish_job,
+    recover_expired,
+    renew_lease,
+)
 from app.main import app
 from app.scheduling.router import GenerateInput
-from conftest import HASH, PASSWORD
 
 
 @pytest.fixture(params=json.loads(os.getenv("CHRONOCAMPUS_QUEUE_TEST_DATABASES", "[null]")))

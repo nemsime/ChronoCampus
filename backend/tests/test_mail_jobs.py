@@ -4,6 +4,10 @@ from email import policy
 from email.parser import BytesParser
 
 import pytest
+from conftest import HASH
+from sqlalchemy import create_engine, event, func, select
+from sqlalchemy.orm import Session
+
 from app.accounts.mail import (
     MailError,
     decrypt_payload,
@@ -24,9 +28,6 @@ from app.db.models import (
 )
 from app.jobs.io_worker import process_once
 from app.jobs.models import BackgroundJob, JobAttempt, MailOutbox, MaintenanceSchedule
-from conftest import HASH
-from sqlalchemy import create_engine, event, func, select
-from sqlalchemy.orm import Session
 
 RAW = "secret-reset-token-that-must-not-be-logged"
 
@@ -48,7 +49,7 @@ def queued(db, settings, *, raw=RAW):
     token = ResetToken(
         user_id=1,
         token=token_hash(raw),
-        expires_at=datetime.now(UTC).replace(tzinfo=None) + timedelta(minutes=30),
+        expires_at=datetime.now(UTC) + timedelta(minutes=30),
     )
     job = enqueue_reset(db, db.get(Account, 1), raw, token, settings)
     db.commit()
@@ -123,7 +124,7 @@ def test_invalid_reset_never_delivered(database, mail_runtime, tmp_path, invalid
     identifier = queued(database, mail_runtime)
     token = database.scalar(select(ResetToken))
     if invalid == "expired":
-        token.expires_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+        token.expires_at = datetime.now(UTC) - timedelta(seconds=1)
     elif invalid == "used":
         token.used = True
     elif invalid == "inactive":
@@ -180,7 +181,7 @@ def test_missing_old_key_retries_then_erases(database, mail_runtime, tmp_path):
         if attempt + 1 < mail_runtime.job_max_attempts:
             assert job.state == "retry_wait"
             assert database.scalar(select(MailOutbox)).encrypted_payload is not None
-            job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(
+            job.available_at = datetime.now(UTC) - timedelta(
                 seconds=1
             )
             database.commit()
@@ -212,7 +213,7 @@ def test_retry_and_redaction(database, mail_runtime, monkeypatch):
         )
     ]
     assert RAW not in repr(events) and "admin@example.invalid" not in repr(events)
-    job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
     database.commit()
     monkeypatch.setattr("app.jobs.io_worker.send_reset", send_reset)
     process_once(database.get_bind(), "retry-new-instance")
@@ -267,24 +268,20 @@ def test_file_replay_uses_one_stable_name(mail_runtime, tmp_path):
 def test_maintenance_is_bounded_and_preserves_active_references(database, mail_runtime):
     queued(database, mail_runtime)
     outbox = database.scalar(select(MailOutbox))
-    database.scalar(select(ResetToken)).expires_at = datetime.now(UTC).replace(
-        tzinfo=None
-    ) - timedelta(seconds=1)
-    database.get(BackgroundJob, outbox.job_id).available_at = datetime.now(UTC).replace(
-        tzinfo=None
-    ) + timedelta(hours=1)
+    database.scalar(select(ResetToken)).expires_at = datetime.now(UTC) - timedelta(seconds=1)
+    database.get(BackgroundJob, outbox.job_id).available_at = datetime.now(UTC) + timedelta(hours=1)
     for number in range(620):
         database.add(
             UserSession(
                 user_id=1,
                 session_token=f"expired-{number}",
-                expires_at=datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1),
+                expires_at=datetime.now(UTC) - timedelta(days=1),
             )
         )
     database.add(
         RateLimit(
             key="expired-rate",
-            started_at=datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1),
+            started_at=datetime.now(UTC) - timedelta(hours=1),
             attempts=1,
         )
     )
@@ -323,12 +320,12 @@ def test_crash_after_file_write_replays_without_duplicate(
     assert database.scalar(select(MailOutbox)).encrypted_payload is not None
     assert len(list(tmp_path.glob("*.eml"))) == 1
     monkeypatch.setattr(io_worker, "_finish", original_finish)
-    job.lease_until = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.lease_until = datetime.now(UTC) - timedelta(seconds=1)
     database.commit()
     process_once(database.get_bind(), "recover-io")
     refresh(database)
     job = database.get(BackgroundJob, identifier)
-    job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
     database.commit()
     process_once(database.get_bind(), "replay-io")
     refresh(database)
@@ -419,9 +416,7 @@ def test_exhausted_crash_recovery_erases_ciphertext_immediately(database, mail_r
     claim = claim_job(database.get_bind(), "mail", "dead-owner")
     assert claim.job_id == identifier
     refresh(database)
-    database.get(BackgroundJob, identifier).lease_until = datetime.now(UTC).replace(
-        tzinfo=None
-    ) - timedelta(seconds=1)
+    database.get(BackgroundJob, identifier).lease_until = datetime.now(UTC) - timedelta(seconds=1)
     database.commit()
     process_once(database.get_bind(), "recovered-io")
     refresh(database)

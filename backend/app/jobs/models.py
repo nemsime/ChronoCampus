@@ -4,7 +4,6 @@ from datetime import datetime
 
 from sqlalchemy import (
     JSON,
-    DateTime,
     ForeignKey,
     Index,
     String,
@@ -15,6 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.models import Base
+from app.db.utc import UTCDateTime, utc_now
 
 
 class BackgroundJob(Base):
@@ -26,18 +26,18 @@ class BackgroundJob(Base):
     state: Mapped[str] = mapped_column(String(20), default="queued")
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     priority: Mapped[int] = mapped_column(default=0)
-    available_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime)
-    deadline_at: Mapped[datetime | None] = mapped_column(DateTime)
+    available_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    started_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    finished_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    deadline_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     owner_id: Mapped[str | None] = mapped_column(String(100))
-    lease_until: Mapped[datetime | None] = mapped_column(DateTime)
+    lease_until: Mapped[datetime | None] = mapped_column(UTCDateTime)
     lease_generation: Mapped[int] = mapped_column(default=0)
     attempt_count: Mapped[int] = mapped_column(default=0)
     max_attempts: Mapped[int] = mapped_column(default=3)
-    cancel_requested_at: Mapped[datetime | None] = mapped_column(DateTime)
+    cancel_requested_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     actor_id: Mapped[int | None]
     request_id: Mapped[str | None] = mapped_column(String(32))
     error_code: Mapped[str | None] = mapped_column(String(80))
@@ -51,9 +51,9 @@ class JobAttempt(Base):
     attempt_number: Mapped[int]
     lease_generation: Mapped[int]
     worker_instance: Mapped[str] = mapped_column(String(100))
-    started_at: Mapped[datetime] = mapped_column(DateTime)
-    deadline_at: Mapped[datetime] = mapped_column(DateTime)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime)
+    started_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    deadline_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    finished_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     outcome: Mapped[str | None] = mapped_column(String(30))
     error_code: Mapped[str | None] = mapped_column(String(80))
     input_hash: Mapped[str | None] = mapped_column(String(64))
@@ -89,7 +89,7 @@ class WorkerHeartbeat(Base):
     instance_id: Mapped[str] = mapped_column(String(100), primary_key=True)
     role: Mapped[str] = mapped_column(String(30))
     pid: Mapped[int]
-    last_seen_at: Mapped[datetime] = mapped_column(DateTime)
+    last_seen_at: Mapped[datetime] = mapped_column(UTCDateTime)
     status: Mapped[str] = mapped_column(String(30))
     current_job_id: Mapped[int | None] = mapped_column(ForeignKey("BackgroundJob.id"))
 
@@ -101,7 +101,7 @@ class MailOutbox(Base):
     reset_token_id: Mapped[int] = mapped_column(ForeignKey("PasswordResetToken.id"))
     encrypted_payload: Mapped[str | None] = mapped_column(UnicodeText)
     key_id: Mapped[str] = mapped_column(String(100))
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
     delivery_state: Mapped[str] = mapped_column(String(30))
     message_id: Mapped[str] = mapped_column(String(255))
 
@@ -111,7 +111,7 @@ class MaintenanceSchedule(Base):
     __table_args__ = (UniqueConstraint("task_kind", "due_bucket"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     task_kind: Mapped[str] = mapped_column(String(40))
-    due_bucket: Mapped[datetime] = mapped_column(DateTime)
+    due_bucket: Mapped[datetime] = mapped_column(UTCDateTime)
 
 
 Index(

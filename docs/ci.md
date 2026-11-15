@@ -4,9 +4,9 @@
 
 | Check | Environment | Validation |
 | --- | --- | --- |
-| Backend (ubuntu-24.04) | Ubuntu 24.04, Python 3.11 | Ruff 0.17.2 correctness rules (`E4,E7,E9,F`), backend pytest suite with isolated SQLite fixtures and Linux solver-process checks |
+| Backend (ubuntu-24.04) | Ubuntu 24.04, Python 3.11 | Ruff 0.17.2 correctness, import ordering, and Python modernization rules (`E4,E7,E9,F,I,UP`), backend pytest suite with isolated SQLite fixtures and Linux solver-process checks |
 | Backend (windows-2022) | Windows Server 2022, Python 3.11 | The same suite, including native Windows process ownership and parent-death tests |
-| Frontend | Ubuntu 24.04, Node 24 | `npm ci` from the lockfile, strict TypeScript check, production build |
+| Frontend | Ubuntu 24.04, Node 24 | `npm ci` from the lockfile, Node frontend tests, strict TypeScript check, production build |
 | CI | Depends on the backend matrix and frontend | Fails unless all three prerequisite jobs succeeded, including when a prerequisite failed, was skipped, or was cancelled |
 | Local delivery bundle | After successful CI, on `main` push/manual run | Packages the exact tested source commit and the frontend artifact from the same run; no deployment |
 
@@ -44,8 +44,9 @@ If recreating the repository, configure the same rule in **Settings → Branches
 Run from the repository root after installing the README prerequisites:
 
 ```powershell
-uvx --from ruff==0.17.2 ruff check --isolated --select E4,E7,E9,F backend/app backend/tests backend/alembic
+uvx --from ruff==0.17.2 ruff check backend/app backend/tests backend/alembic
 backend/.venv/Scripts/python.exe -m pytest backend/tests -q
+npm --prefix frontend test
 npm --prefix frontend run typecheck
 npm --prefix frontend run build
 git diff --check

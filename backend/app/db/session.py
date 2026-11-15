@@ -1,9 +1,9 @@
+import time
 from collections.abc import Iterator
 from functools import lru_cache
-import time
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine, update, event
+from sqlalchemy import create_engine, event, update
 from sqlalchemy.engine import URL, Engine, make_url
 from sqlalchemy.orm import Session
 

@@ -43,7 +43,7 @@ npm --prefix frontend ci
 
 Configure `backend/.env`. Use an isolated database such as `ChronoCampus_Development`. For an existing database, back it up and restore a development copy before migrations. For a fresh installation, create an empty database. The migration account needs schema modification permissions; the running application needs SELECT/INSERT/UPDATE/DELETE on its tables. Keep credentials out of Git.
 
-`db/ChronoCampus.sql` is an archived destructive bootstrap script. **Do not use it to upgrade retained data.** Alembic now owns incremental schema changes. Legacy catalogs are preserved; prototype user records do not automatically acquire application roles.
+`backend/db/ChronoCampus.sql` is an archived destructive bootstrap script. **Do not use it to upgrade retained data.** Alembic now owns incremental schema changes. Legacy catalogs are preserved; prototype user records do not automatically acquire application roles.
 
 ```powershell
 Set-Location backend
@@ -160,7 +160,7 @@ The local launcher supports native Windows and Linux. Use `compose.mailpit.yaml`
 
 ## Verification
 
-[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis on Ubuntu and Windows, plus frontend types/build, for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. Successful `main` runs produce a [local delivery bundle](docs/delivery.md); they do not deploy or update your computer. See [CI setup, repository migration, main protection, and coverage limits](docs/ci.md).
+[GitHub Actions CI](.github/workflows/ci.yml) checks backend tests/static analysis on Ubuntu and Windows, plus frontend tests/types/build, for pull requests to `main` and pushes to `main`. The aggregate check is named **CI**. Successful `main` runs produce a [local delivery bundle](docs/delivery.md); they do not deploy or update your computer. See [CI setup, repository migration, main protection, and coverage limits](docs/ci.md).
 
 From `backend`:
 
@@ -195,3 +195,5 @@ Live acceptance: administrator login, generation and publication, student/lectur
 - `backend/app/db`: models, transactions, revision lock; `backend/alembic`: migrations.
 - `frontend/src/system`: active interface through `App.tsx`. Earlier prototype components outside this import graph are retained as reference and are not mounted.
 - [Requirements](docs/requirements.md), [architecture](docs/architecture.md), [Git workflow](skills/repo-workflow/SKILL.md).
+
+Archived design source is labeled in [frontend/legacy](frontend/legacy/README.md). Original Word timetable samples are described in [source documents](docs/source-documents.md).

@@ -4,14 +4,13 @@ from pydantic import ValidationError
 from sqlalchemy import delete, func, inspect, select
 from sqlalchemy.orm import Session
 
-from app.accounts.roles import ADMIN, LECTURER, STUDENT, DEAN
-
+from app.academics import schemas as s
 from app.accounts.dependencies import administrator, public_account
+from app.accounts.roles import ADMIN, DEAN, LECTURER, STUDENT
 from app.accounts.router import EmailInput, revoke_sessions
 from app.core.security import password_hash
 from app.db import models as m
 from app.db.session import get_db, lock_revision
-from app.academics import schemas as s
 from app.observability.audit import record_audit
 
 router = APIRouter(

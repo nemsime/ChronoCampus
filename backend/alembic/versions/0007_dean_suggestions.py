@@ -3,8 +3,9 @@
 Frozen DDL: deliberately independent of the current application models.
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "0007_dean_suggestions"
 down_revision = "0006_smtp_password_reset"

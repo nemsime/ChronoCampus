@@ -1,15 +1,18 @@
 """Dean account, authorization foundation, notes and overview regressions."""
 
-from datetime import time
 import importlib.util
+import re
+from datetime import time
 from io import StringIO
 from pathlib import Path
-import re
 
 import pytest
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
+from conftest import HASH, PASSWORD
 from sqlalchemy import event, func, select
+from test_workflow import campus as campus
+from test_workflow import draft, login
 
 from app import demo
 from app.db import models as m
@@ -17,8 +20,6 @@ from app.main import app
 from app.notes.router import NoteInput, save_note
 from app.observability.router import database_probe
 from app.observability.telemetry import ERROR_CODES
-from conftest import HASH, PASSWORD
-from test_workflow import campus as campus, draft, login
 
 
 @pytest.fixture

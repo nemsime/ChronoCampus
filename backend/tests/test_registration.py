@@ -1,17 +1,18 @@
-from datetime import datetime, timedelta
+import re
+from datetime import timedelta
 from email import policy
 from email.parser import BytesParser
-import re
 
+from conftest import PASSWORD
 from sqlalchemy import select
 
-from app.accounts.mail import decrypt_payload
 from app.accounts import router as auth
+from app.accounts.mail import decrypt_payload
 from app.core.security import token_hash
 from app.db.models import Account, ResetToken
+from app.db.utc import utc_now
 from app.jobs.io_worker import process_once
 from app.jobs.models import MailOutbox
-from conftest import PASSWORD
 
 
 def register(client, email="manearakelyantt319@polytechnic.am", **extra):
@@ -155,7 +156,7 @@ def test_expired_disabled_and_short_password_verification(client, database):
     database.commit()
     assert client.post("/api/auth/verify-email", json=body).status_code == 400
     account.is_active = True
-    token.expires_at = datetime.utcnow() - timedelta(seconds=1)
+    token.expires_at = utc_now() - timedelta(seconds=1)
     database.commit()
     assert client.post("/api/auth/verify-email", json=body).status_code == 400
     assert not account.email_verified

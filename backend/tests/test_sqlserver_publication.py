@@ -1,12 +1,13 @@
 """Opt-in real SQL Server race test; only an explicitly named isolated test DB is allowed."""
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import date, time
 import os
 import re
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date, time
 
 import pytest
+from conftest import HASH, PASSWORD
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import URL
@@ -16,7 +17,6 @@ from app.core.config import get_settings
 from app.db import models as m
 from app.db.session import get_db
 from app.main import app
-from conftest import HASH, PASSWORD
 
 
 @pytest.mark.skipif(

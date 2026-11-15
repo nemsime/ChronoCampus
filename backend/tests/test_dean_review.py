@@ -1,16 +1,18 @@
 """Review privacy, suggestion invariants and proposal checks on an isolated DB."""
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, time, timedelta
 
 import pytest
+from conftest import HASH
 from sqlalchemy import select, update
+from test_workflow import campus as campus
+from test_workflow import login
 
 from app.db import models as m
+from app.db.utc import utc_now
 from app.scheduling import queries as q
 from app.scheduling.snapshot import build_snapshot, record
 from app.scheduling.validation import validate
-from conftest import HASH
-from test_workflow import campus as campus, login
 
 
 @pytest.fixture
@@ -32,7 +34,7 @@ def review(campus):
     university_dean = add(m.Account, email="dean.all@example.invalid", display_name="University dean",
                           password_hash=HASH, role="dean", must_change_password=False)
     published = add(m.ScheduleVersion, term_id=campus["term"].id, name="Published", status="published",
-                    cohort_ids=[campus["group"].id], published_at=datetime.utcnow())
+                    cohort_ids=[campus["group"].id], published_at=utc_now())
     snapshot = build_snapshot(db, published, materialize=True)
     published.configuration = {"term": snapshot["term"], "calendar": snapshot["calendar"]}
     assignments = []

@@ -47,14 +47,14 @@ def test_retry_recovery_exhaustion_and_stale_owner(database):
     db.commit()
     db.refresh(job)
     assert job.state == "retry_wait" and job.finished_at is None
-    job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
     db.commit()
     second = claim_job(db.bind, "mail", "second")
     assert second.lease_generation > first.lease_generation
     assert not finish_job(db, first, "succeeded")
     db.rollback()
     db.refresh(job)
-    job.lease_until = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.lease_until = datetime.now(UTC) - timedelta(seconds=1)
     db.commit()
     assert not renew_lease(db.bind, second)
     recover_expired(db.bind, "mail")
@@ -76,7 +76,7 @@ def test_generation_global_slot_independent_mail_and_cancel_lease(database):
     assert claim_job(db.bind, "generation", "two", job_id=b.id) is None
     assert claim_job(db.bind, "mail", "io", job_id=mail.id)
     db.refresh(a)
-    a.cancel_requested_at = datetime.now(UTC).replace(tzinfo=None)
+    a.cancel_requested_at = datetime.now(UTC)
     db.commit()
     assert not renew_lease(db.bind, first)
     assert lock_owned(db, first)  # cancellation can still finalize with live fence
@@ -92,7 +92,7 @@ def test_deadline_cannot_be_extended_by_heartbeat(database):
     database.commit()
     claim = claim_job(database.bind, "mail", "owner")
     database.refresh(job)
-    job.deadline_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.deadline_at = datetime.now(UTC) - timedelta(seconds=1)
     database.commit()
     assert not renew_lease(database.bind, claim)
     assert not finish_job(database, claim, "succeeded")
@@ -108,7 +108,7 @@ def test_lock_owned_rechecks_time_after_lock_wait(database, monkeypatch):
     enqueue_job(database, "mail", {})
     database.commit()
     claim = claim_job(database.bind, "mail", "owner")
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = datetime.now(UTC)
     values = iter([now, now + timedelta(seconds=120)])
     monkeypatch.setattr(queue, "database_now", lambda db: next(values))
     assert lock_owned(database, claim) is None

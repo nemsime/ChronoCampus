@@ -1,23 +1,23 @@
 """Two-week pattern search with stable dated occurrences and independent validation."""
 
+import random
+import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-import random
-import time
 
 from ortools.sat.python import cp_model
 
 from app.calendar.rules import (
+    allowed_slots,
     as_date,
     audience_leaves,
+    audiences_overlap,
     lesson_slot,
     minutes,
     resource_rule_matches,
     teaching_dates,
     week_index,
-    allowed_slots,
-    audiences_overlap,
 )
 from app.scheduling.validation import placement_errors, validate, validation_context
 

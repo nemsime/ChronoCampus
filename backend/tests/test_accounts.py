@@ -1,11 +1,12 @@
 import re
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from conftest import PASSWORD
 from sqlalchemy import select
 
 from app.core.security import token_hash, verify_password
 from app.db.models import Account, ResetToken, UserSession
-from conftest import PASSWORD
+from app.db.utc import utc_now
 
 
 def test_server_role_and_cookie_and_csrf(admin_client, database):
@@ -128,7 +129,7 @@ def test_expired_reset_token_and_foreign_origin(client, database):
         ResetToken(
             user_id=1,
             token=token_hash("x" * 32),
-            expires_at=datetime.utcnow() - timedelta(seconds=1),
+            expires_at=utc_now() - timedelta(seconds=1),
         )
     )
     database.commit()

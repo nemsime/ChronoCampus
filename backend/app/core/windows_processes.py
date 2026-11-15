@@ -1,12 +1,12 @@
 """Owned process trees and stop controls for the local supervisor."""
 import ctypes
-from ctypes import wintypes as w
 import os
-from pathlib import Path
 import signal
 import subprocess
 import sys
 import time
+from ctypes import wintypes as w
+from pathlib import Path
 
 
 def _linux_process_identity(pid):

@@ -3,13 +3,12 @@
 from datetime import date, datetime, time
 
 from sqlalchemy import (
-    CheckConstraint,
     CHAR,
-    Index,
-    Date,
-    DateTime,
-    ForeignKey,
     JSON,
+    CheckConstraint,
+    Date,
+    ForeignKey,
+    Index,
     Integer,
     String,
     Time,
@@ -18,6 +17,8 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, synonym
+
+from app.db.utc import UTCDateTime, utc_now
 
 
 class Base(DeclarativeBase):
@@ -126,8 +127,8 @@ class Account(Base):
     email: Mapped[str] = mapped_column(Unicode(255), unique=True)
     password_hash: Mapped[str] = mapped_column(Unicode(255))
     is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    last_login: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    last_login: Mapped[datetime | None] = mapped_column(UTCDateTime)
     display_name: Mapped[str | None] = mapped_column(Unicode(150))
     role: Mapped[str | None] = mapped_column(String(20))
     must_change_password: Mapped[bool] = mapped_column(default=True)
@@ -145,8 +146,8 @@ class UserSession(Base):
     session_token: Mapped[str] = mapped_column(Unicode(500), unique=True)
     ip_address: Mapped[str | None] = mapped_column(Unicode(45))
     user_agent: Mapped[str | None] = mapped_column(Unicode(500))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
     is_revoked: Mapped[bool] = mapped_column(default=False)
 
 
@@ -160,15 +161,15 @@ class ResetToken(Base):
     # Compatibility for verification/outbox callers; the SQL column is hash-only.
     token = synonym("token_hash")
     purpose: Mapped[str] = mapped_column(String(20), default="reset")
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
     used: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class RateLimit(Base):
     __tablename__ = "AuthRateLimit"
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime)
+    started_at: Mapped[datetime] = mapped_column(UTCDateTime)
     attempts: Mapped[int]
 
 
@@ -293,8 +294,8 @@ class ScheduleVersion(Base):
     status: Mapped[str] = mapped_column(String(20), default="draft")
     revision: Mapped[int] = mapped_column(default=1)
     cohort_ids: Mapped[list] = mapped_column(JSON)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    published_at: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    published_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     report: Mapped[dict] = mapped_column(JSON, default=dict)
     configuration: Mapped[dict] = mapped_column(JSON, default=dict)
 
@@ -360,10 +361,10 @@ class ScheduleSuggestion(Base):
     status: Mapped[str] = mapped_column(String(20), default="open")
     decision_note: Mapped[str | None] = mapped_column(Unicode(1000))
     decided_by: Mapped[int | None] = mapped_column(ForeignKey("User.id"))
-    decided_at: Mapped[datetime | None] = mapped_column(DateTime)
+    decided_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     implemented_in_version_id: Mapped[int | None] = mapped_column(ForeignKey("ScheduleVersion.id"))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class SuggestionComment(Base):
@@ -372,7 +373,7 @@ class SuggestionComment(Base):
     suggestion_id: Mapped[int] = mapped_column(ForeignKey("ScheduleSuggestion.id", ondelete="CASCADE"))
     author_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
     content: Mapped[str] = mapped_column(UnicodeText)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class GenerationRun(Base):
@@ -380,7 +381,7 @@ class GenerationRun(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     version_id: Mapped[int] = mapped_column(ForeignKey("ScheduleVersion.id"))
     job_id: Mapped[int | None] = mapped_column(ForeignKey("BackgroundJob.id"))
-    snapshot_created_at: Mapped[datetime | None] = mapped_column(DateTime)
+    snapshot_created_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     source_revision: Mapped[int]
     status: Mapped[str] = mapped_column(String(30))
     seed: Mapped[int]
@@ -389,10 +390,10 @@ class GenerationRun(Base):
     comparison_hash: Mapped[str | None] = mapped_column(String(64))
     snapshot: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime)
-    started_at: Mapped[datetime | None] = mapped_column(DateTime)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    finished_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    started_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    updated_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     request_id: Mapped[str | None] = mapped_column(String(32))
     actor_id: Mapped[int | None] = mapped_column(Integer)
     progress: Mapped[dict | None] = mapped_column(JSON)
@@ -401,7 +402,7 @@ class GenerationRun(Base):
 class AuditEvent(Base):
     __tablename__ = "AuditEvent"
     id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now, index=True)
     actor_id: Mapped[int | None] = mapped_column(Integer)
     request_id: Mapped[str | None] = mapped_column(String(32), index=True)
     action: Mapped[str] = mapped_column(String(60))
@@ -417,7 +418,7 @@ class Note(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
     occurrence_id: Mapped[int] = mapped_column(ForeignKey("LessonOccurrence.id"))
     content: Mapped[str] = mapped_column(UnicodeText)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class Feedback(Base):
@@ -426,7 +427,7 @@ class Feedback(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
     subject: Mapped[str] = mapped_column(Unicode(150))
     status: Mapped[str] = mapped_column(String(20), default="new")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class FeedbackMessage(Base):
@@ -435,7 +436,7 @@ class FeedbackMessage(Base):
     thread_id: Mapped[int] = mapped_column(ForeignKey("FeedbackThread.id"))
     author_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
     content: Mapped[str] = mapped_column(UnicodeText)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
 
 
 class DataRevision(Base):

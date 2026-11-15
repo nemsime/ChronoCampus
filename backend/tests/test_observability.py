@@ -1,14 +1,15 @@
 import json
 
-from app.db import models as m
-from app.jobs.queue import recover_expired
-from app.observability import telemetry as t
-from app.scheduling.router import execute_run
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from test_workflow import campus as campus
 from test_workflow import detail, draft, generate, login, queued_run
+
+from app.db import models as m
+from app.jobs.queue import recover_expired
+from app.observability import telemetry as t
+from app.scheduling.router import execute_run
 
 
 def test_unhandled_exception_is_correlated_and_secret_free():
@@ -317,9 +318,10 @@ def test_file_rotation_is_bounded_and_valid_json(tmp_path):
 
 def test_database_query_instrumentation_counts_failures(monkeypatch):
     import pytest
-    from app.db import session
     from sqlalchemy import text
     from sqlalchemy.exc import DBAPIError
+
+    from app.db import session
 
     session.get_engine.cache_clear()
     monkeypatch.setattr(session, "database_url", lambda: "sqlite://")

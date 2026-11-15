@@ -1,15 +1,16 @@
 import pytest
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
+
 from app.core.config import Settings
 from app.core.security import password_hash
 from app.db.models import Account, Base, DataRevision
 from app.db.session import get_db
 from app.jobs.models import QueueAdmission
 from app.main import app
-from fastapi import HTTPException
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
 
 PASSWORD = "Test-password-2026!"
 HASH = password_hash(PASSWORD)
@@ -67,8 +68,9 @@ def client(database, monkeypatch, tmp_path):
         diagnostic_log_directory=tmp_path / "logs",
     )
     # Capture only the reset SMTP transport in tests; production reset never writes raw tokens.
-    from app.accounts.mail import sendEmail
     from uuid import uuid4
+
+    from app.accounts.mail import sendEmail
 
     class CaptureSMTP:
         def __init__(self, *args, **kwargs):

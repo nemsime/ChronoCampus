@@ -1,9 +1,9 @@
 """Isolated read-path tests: never connect to or mutate the development SQL DB."""
 
-from datetime import date, datetime, time, timedelta
-from types import SimpleNamespace
 import base64
 import json
+from datetime import date, time, timedelta
+from types import SimpleNamespace
 
 import pytest
 from fastapi import FastAPI
@@ -14,6 +14,7 @@ from app.calendar.rules import audiences_overlap
 from app.core.security import token_hash
 from app.db import models as m
 from app.db.session import get_db
+from app.db.utc import utc_now
 from app.scheduling import queries as q
 from app.scheduling.router import assignment_view
 
@@ -60,7 +61,7 @@ def schedule(database):
         add(m.Assignment, version_id=version.id, occurrence_id=occurrence.id, day=date(2026, 9, 7), slot=1,
             starts_at=time(9), ends_at=time(10, 20), room_id=rooms[group].id, pinned=i == 0, cancelled=i == 1)
     for raw, user in [("student", student), ("other", outsider), ("teacher", teacher), ("admin", db.get(m.Account, 1))]:
-        add(m.UserSession, user_id=user.id, session_token=token_hash(raw), expires_at=datetime.utcnow() + timedelta(days=1))
+        add(m.UserSession, user_id=user.id, session_token=token_hash(raw), expires_at=utc_now() + timedelta(days=1))
     db.commit()
     app = FastAPI()
     app.include_router(q.router)
