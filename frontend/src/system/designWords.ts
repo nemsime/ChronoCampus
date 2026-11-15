@@ -27,6 +27,7 @@ export const designWords: Record<string, [string, string, string]> = {
   overviewNoLessonsHelp: ["На ближайшие семь дней нет опубликованных занятий. Можно выбрать другую неделю.", "Առաջիկա յոթ օրերին հրապարակված դասեր չկան։ Կարող եք ընտրել այլ շաբաթ։", "No published lessons in the next seven days. Try another week."],
   overviewPlanningTitle: ["Хорошая неделя начинается с плана.", "Լավ շաբաթը սկսվում է պլանից։", "A better week starts with a clear plan."],
   overviewPlanningText: ["Подготовьте семестр, проверьте детали и опубликуйте расписание, когда всё готово.", "Պատրաստեք կիսամյակը, ստուգեք մանրամասները և հրապարակեք պատրաստ դասացուցակը։", "Prepare your semester, refine the details, and publish when everything is ready."],
+  overviewPersonalTitle: ["Больше ясности в каждом дне.", "Ավելի հստակ՝ ամեն օր։", "Make space for what matters."],
   overviewPersonalText: ["Ваши занятия и личные заметки всегда под рукой.", "Ձեր դասերն ու անձնական նշումները միշտ ձեռքի տակ են։", "Keep your classes and personal lesson notes close at hand."],
   overviewOpenPlanner: ["Открыть генератор", "Բացել պլանավորիչը", "Open planner"],
   overviewVersions: ["Работа над расписанием", "Դասացուցակի պատրաստում", "Timetables in progress"],
