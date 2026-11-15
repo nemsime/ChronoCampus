@@ -39,6 +39,8 @@ def database_probe(db):
             ).limit(1)
         )
         db.execute(select(m.AuditEvent).limit(1))
+        db.execute(select(m.Account.email_verified).limit(1))
+        db.execute(select(m.ResetToken.purpose).limit(1))
         from app.jobs.models import BackgroundJob, JobAttempt, MailOutbox, WorkerHeartbeat, QueueAdmission
 
         db.execute(select(m.GenerationRun.job_id).limit(1))
@@ -50,7 +52,7 @@ def database_probe(db):
         admission = db.scalar(select(QueueAdmission.id).where(QueueAdmission.name == "generation"))
         return {
             "ready": revision is not None and admission is not None,
-            "schema": "0004_jobs",
+            "schema": "0005_email_registration",
             "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
         }
     except Exception as error:

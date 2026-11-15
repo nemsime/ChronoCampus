@@ -115,6 +115,29 @@ Holiday cancellations count separately from delivered hours and need no makeup. 
 
 ## Recovery and deployment
 
+Students can choose **Create account** on the sign-in screen, enter their name and
+university email, and follow an emailed verification link to choose a separate
+ChronoCampus password (12–256 characters). Only explicitly configured
+`UNIVERSITY_EMAIL_DOMAINS` are accepted; the example configuration includes
+`polytechnic.am` and the fictional demo domain `example.invalid`. No Microsoft app
+registration is needed for this email-based flow. Existing provisioned accounts
+keep their access after migration `0005_email_registration`.
+
+New accounts cannot sign in until verification succeeds. Registration always
+creates a student; an administrator assigns the academic group in **Data & rules**.
+The address format alone does not establish a group or grant staff privileges.
+Expired verification links can be replaced by submitting **Create account** again.
+Existing users can choose **Forgot password?** to receive a single-use reset link.
+Both links expire after `RESET_MINUTES` and are consumed only on successful form
+submission. Registration links cannot reset an existing account's password.
+
+For a local demonstration, initialize the mail key, apply migrations, and start
+the normal runtime (including the I/O worker). With `MAIL_MODE=file`, open the
+newest `.eml` in `backend/.mail` and copy its `#verify=` or `#reset=` URL into the
+browser. This demonstrates the real verification/reset flow without a mailbox;
+invented addresses do not create university mailboxes. To receive mail in a real
+inbox, configure an authorized outgoing SMTP service as described below.
+
 Configure actual university domains in `UNIVERSITY_EMAIL_DOMAINS`. Local `MAIL_MODE=file` writes messages to ignored `backend/.mail` and sends no email. To send, configure `MAIL_MODE=smtp`, STARTTLS host/port, sender, and credentials, then verify with the university mail service. Reset links expire, are single-use, and change passwords only after form submission. Administrators can issue a temporary password requiring a change.
 
 For hosting, build the frontend and serve it with `/api` behind one HTTPS origin; set `PUBLIC_URL`, `CORS_ORIGINS`, and `COOKIE_SECURE=true`. Local HTTP configuration is for development. Microsoft SSO is outside this version.

@@ -112,7 +112,15 @@ def enqueue_reset(db, account, raw_token, reset_token, settings):
     encrypted = (
         Fernet(keys["keys"][key_id].encode("ascii"))
         .encrypt(
-            json.dumps({"email": account.email, "token": raw_token}).encode("utf-8")
+            json.dumps(
+                {
+                    "email": account.email,
+                    "token": raw_token,
+                    **(
+                        {"purpose": "verify"} if reset_token.purpose == "verify" else {}
+                    ),
+                }
+            ).encode("utf-8")
         )
         .decode("ascii")
     )
@@ -153,8 +161,17 @@ def decrypt_payload(outbox, settings):
         raise MailError("mail_payload_invalid") from None
 
 
-def send_reset(email: str, token: str, *, job_id, message_id, settings=None,
-               deadline=None, cancelled=lambda: False) -> None:
+def send_reset(
+    email: str,
+    token: str,
+    *,
+    job_id,
+    message_id,
+    settings=None,
+    deadline=None,
+    cancelled=lambda: False,
+    purpose="reset",
+) -> None:
     settings = settings or get_settings()
 
     def remaining():
@@ -167,16 +184,31 @@ def send_reset(email: str, token: str, *, job_id, message_id, settings=None,
 
     remaining()
     message = EmailMessage()
-    message["Subject"] = "ChronoCampus — password reset"
+    verification = purpose == "verify"
+    message["Subject"] = (
+        "ChronoCampus — verify your email"
+        if verification
+        else "ChronoCampus — password reset"
+    )
     message["From"] = settings.smtp_from or "chronocampus@example.invalid"
     message["To"] = email
     message["Message-ID"] = message_id
     # SMTP acceptance followed by a worker crash may duplicate this one-use link.
-    link = settings.public_url.rstrip("/") + "/#reset=" + token
+    link = (
+        settings.public_url.rstrip("/")
+        + ("/#verify=" if verification else "/#reset=")
+        + token
+    )
     message.set_content(
-        "Open this link to choose a new password. Opening it does not change your password.\n"
-        "Откройте ссылку и задайте новый пароль. Сам переход пароль не меняет.\n"
-        "Բացեք հղումը և ընտրեք նոր գաղտնաբառ։ Միայն բացելը գաղտնաբառը չի փոխում։\n\n"
+        (
+            "Verify your university email and choose your ChronoCampus password.\n"
+            "Подтвердите почту и задайте пароль ChronoCampus.\n"
+            "Հաստատեք էլ․ փոստը և ընտրեք ChronoCampus-ի գաղտնաբառը։\n\n"
+            if verification
+            else "Open this link to choose a new password. Opening it does not change your password.\n"
+            "Откройте ссылку и задайте новый пароль. Сам переход пароль не меняет.\n"
+            "Բացեք հղումը և ընտրեք նոր գաղտնաբառ։ Միայն բացելը գաղտնաբառը չի փոխում։\n\n"
+        )
         + link
         + f"\n\nExpires in: {settings.reset_minutes} min."
     )

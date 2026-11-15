@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -47,12 +47,30 @@ class Settings(BaseSettings):
     solver_memory_mb: int = Field(default=2048, ge=256, le=16384)
     solver_input_max_bytes: int = Field(default=16_777_216, ge=1024, le=67_108_864)
     solver_output_max_bytes: int = Field(default=67_108_864, ge=1024, le=134_217_728)
-    mail_keys_file: Path = Path(__file__).resolve().parents[2] / ".secrets/mail-keys.json"
+    mail_keys_file: Path = (
+        Path(__file__).resolve().parents[2] / ".secrets/mail-keys.json"
+    )
+
+    @field_validator("university_email_domains")
+    @classmethod
+    def normalize_domains(cls, domains):
+        normalized = list(dict.fromkeys(domain.strip().lower() for domain in domains))
+        if any(
+            not domain
+            or "@" in domain
+            or "/" in domain
+            or any(c.isspace() for c in domain)
+            for domain in normalized
+        ):
+            raise ValueError("invalid_university_email_domain")
+        return normalized
 
     @model_validator(mode="after")
     def heartbeat_fits_lease(self):
         if self.job_heartbeat_seconds * 2 >= self.job_lease_seconds:
-            raise ValueError("job_heartbeat_seconds must be less than half job_lease_seconds")
+            raise ValueError(
+                "job_heartbeat_seconds must be less than half job_lease_seconds"
+            )
         return self
 
 

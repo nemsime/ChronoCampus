@@ -27,7 +27,7 @@ import {
 } from "./api";
 import { Diagnostics } from "./Diagnostics";
 import { DiagnosticBoundary } from "./DiagnosticBoundary";
-import { SignIn, PasswordForm } from "./Accounts";
+import { SignIn, PasswordForm, useAuthLink } from "./Accounts";
 import { Catalogs } from "./Catalogs";
 import { Planner } from "./Planner";
 import { PersonalSchedule } from "./Schedule";
@@ -39,6 +39,7 @@ import "./styles.css";
 import "./workspace.css";
 function Workspace() {
   const { t, lang } = useLanguage();
+  const authLink = useAuthLink();
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState("overview");
@@ -115,9 +116,10 @@ function Workspace() {
   }, []);
   if (!ready)
     return <div className="loading-screen"><span className="brand">ChronoCampus</span><LoadingState /></div>;
-  if (!account)
+  if (!account || authLink.token)
     return (
       <SignIn
+        onSessionEnded={() => { setAccount(null); setCsrf(""); }}
         onLogin={(user) => {
           setAccount(user);
           setMenuOpen(false);
