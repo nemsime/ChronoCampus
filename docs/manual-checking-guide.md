@@ -4,6 +4,37 @@ Use this guide to check the current application from installation through public
 
 The interface labels below use English. Select **English** in the language selector; a fresh browser otherwise defaults to Russian. The other supported languages are Russian and Armenian.
 
+## Revised admin flow — 15 November 2026
+
+Navigation references to the former **Data & rules** area below now mean
+**University** for shared records or **Semester setup** for planning inputs.
+Existing catalog validation and permission cases still apply.
+
+1. Check that the sidebar has a normal Support item and no promotional contact
+   box. University has searchable People, Academic structure, Rooms & equipment,
+   Subjects tabs; every original resource remains reachable in its area. Check
+   keyboard arrows/Home/End on the main tabs, search, pagination and editing.
+2. In Semester setup, switch semesters. Workloads, periods, holidays and extra
+   permissions must show only that semester; availability shows overlapping
+   intervals. Calendars and semester records remain explicitly shared/all-record
+   views. New interval records start with the selected semester and dates.
+3. Use Create draft from Semester setup: its selected semester should reach the
+   wizard. Follow Semester → Groups → Review → Generate. Check study-form group
+   filtering, search, required name, selected-group count and input-hour totals.
+   Algorithm/seed settings stay under Advanced generation settings.
+4. Generation must create one saved draft and then enqueue against its returned
+   revision with an idempotency key. A lost generation response must retry that
+   same draft/key. An uncertain draft-creation response must direct the user to
+   existing drafts rather than blindly creating another.
+5. The result opens on the timetable with a compact scope/status/hour summary.
+   Review issues opens the hours/unplaced report. Test partial, failed and
+   complete results; a finished run does not imply a complete timetable. No
+   generation action publishes automatically. Publication remains disabled for
+   partial/stale/busy results and is revalidated by the server.
+6. Recheck manual moves, pins, regeneration, cancellation, run details/history
+   and dean-suggestion links. Repeat the core flow in RU/HY/EN and at 360px and
+   desktop widths. Do not use production data for write/retry tests.
+
 ## Contents
 
 1. [Test records and completion rules](#1-test-records-and-completion-rules)

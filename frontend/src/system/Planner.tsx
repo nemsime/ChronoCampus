@@ -1,20 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, CalendarCheck, CalendarDays, CheckCircle2, CircleStop, Clock3, Play, Plus, RefreshCw, ShieldCheck, Upload } from "lucide-react";
+import { AlertCircle, CalendarDays, CheckCircle2, CircleStop, Play, Plus, RefreshCw, Upload } from "lucide-react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
-import { addDays, Dialog, EmptyState, ErrorBox, LoadingState, localDay, SectionLinks, useAction, weekStart } from "./common";
+import { addDays, Dialog, EmptyState, ErrorBox, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
-import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
+import { isRunActive, runStatusKey, RunCard, RunHistory } from "./Diagnostics";
+import { DraftWizard } from "./DraftWizard";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
-export function Planner({ initialVersionId = null }: { initialVersionId?: number | null } = {}) {
+export function Planner({ initialVersionId = null, createOnOpen = false, initialTermId = "", onOpenSetup }: {
+  initialVersionId?: number | null; createOnOpen?: boolean; initialTermId?: string; onOpenSetup?: () => void;
+} = {}) {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
   const [versions, setVersions] = useState<Row[]>([]);
   const [detail, setDetail] = useState<Row | null>(null);
   const [create, setCreate] = useState(false);
-  const [groups, setGroups] = useState<number[]>([]);
-  const [term, setTerm] = useState("");
+  const [showIssues, setShowIssues] = useState(false);
   const [runInfo, setRunInfo] = useState<Row | null>(null);
   const [algorithm, setAlgorithm] = useState("cp_sat");
   const [seed, setSeed] = useState(1);
@@ -39,6 +41,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
     } finally { setLoading(false); }
   };
   const open = async (id: number) => {
+    if (selection.current !== id) setShowIssues(false);
     selection.current = id;
     const ticket = ++loadSequence.current;
     const response = await api(`/admin/schedule/versions/${id}`);
@@ -51,12 +54,13 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
     void run(async () => {
       await refresh();
       if (initialVersionId !== null) await open(initialVersionId);
+      if (createOnOpen) setCreate(true);
     });
     return () => {
       selection.current = null;
       ++loadSequence.current;
     };
-  }, [initialVersionId]);
+  }, [initialVersionId, createOnOpen]);
   useEffect(() => {
     if (!runInfo || !isRunActive(runInfo)) return;
     let cancelled = false;
@@ -94,14 +98,6 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
     const calendar = version.configuration.calendar;
     setSlotOptions(await api(`/admin/calendar/${calendar.id}/slots?count=12`));
   }
-  const groupOptions = (data.groups || []).filter((g) => {
-    const selectedTerm = (data.terms || []).find((r) => String(r.id) === term);
-    const calendar = (data.calendars || []).find(
-      (c) => c.id === selectedTerm?.calendar_id,
-    );
-    const major = (data.majors || []).find((m) => m.id === g.major_id);
-    return !calendar || calendar.study_form === major?.study_form;
-  });
   const workloadLabel = (id: number) => {
     const c = (detail?.workloads || []).find((row: Row) => row.id === id);
     return c
@@ -113,7 +109,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
   const requiredHours = detail?.report.hours.reduce((total: number, row: Row) => total + row.required_hours, 0) || 0;
   const remainingHours = detail?.report.hours.reduce((total: number, row: Row) => total + row.remaining_hours, 0) || 0;
   return (
-    <>
+    <div className={`planner-workspace${detail ? " has-draft" : ""}`}>
       <div className="page-heading page-hero">
         <div className="page-hero-copy">
           <p className="eyebrow">{t("plannerEyebrow")}</p>
@@ -122,36 +118,34 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
         </div>
         <button disabled={busy} onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
       </div>
-      <ol className="planner-steps planner-stage-rail">
-        {[
-          { label: "plannerStepDraft", done: !!detail, current: !detail },
-          { label: "plannerStepGenerate", done: (complete && !searching) || published, current: !!detail && (!complete || searching) && !published },
-          { label: "plannerStepReview", done: published, current: complete && !searching && !published },
-        ].map((step, index) => <li key={step.label} className={step.done ? "planner-stage-complete" : step.current ? "planner-stage-current" : ""} aria-current={step.current ? "step" : undefined}>
-          <span className="planner-stage-number" aria-hidden="true">{step.done ? <CheckCircle2 size={19} /> : index + 1}</span>
-          <span>{t(step.label)}</span>
-        </li>)}
-      </ol>
       <ErrorBox error={error} />
       <ErrorBox error={pollError} />
       {!!pollError && <p className="notice warning">{t("staleData")}</p>}
-      {detail && <dl className="summary-strip planner-summary">
-        {[
-          { icon: CalendarCheck, label: "placedLessons", value: `${detail.assignments.length} / ${detail.occurrences.length}` },
-          { icon: Clock3, label: "semester_hours", value: requiredHours },
-          { icon: AlertCircle, label: "remaining_hours", value: remainingHours },
-          { icon: ShieldCheck, label: "publicationReadiness", value: t(published ? "published" : searching ? "running" : complete ? "readyToPublish" : "needsReview"), status: true },
-        ].map(({ icon: Icon, label, value, status }) => <div className={`summary-item${status && complete && !searching ? " state-ready" : ""}`} key={label}>
-          <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
-          <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className={`summary-item-value${status ? " summary-item-status" : ""}`}>{value}</dd></div>
-        </div>)}
-      </dl>}
-      {detail && <SectionLinks items={[
-        { id: "planner-controls", label: t("plannerControls") },
-        { id: "planner-report", label: t("plannerReport") },
-        { id: "planner-lessons", label: t("schedule") },
-        { id: "planner-history", label: t("runHistory") },
-      ]} />}
+      {detail && <section className="panel planner-result-summary" aria-label={t("draftResult")}>
+        <div className="planner-result-heading"><div><h2>{version.name}</h2><p>{data.terms?.find(row => row.id === version.term_id)?.name || version.configuration?.term?.name} · {(version.cohort_ids || []).map((id: number) => rowLabel(data.groups?.find(row => row.id === id) || { id })).join(", ")}</p></div><span className={`badge ${published || complete ? "success" : "warn"}`}>{t(published ? "published" : searching ? "running" : complete ? "readyToPublish" : "needsReview")}</span></div>
+        <dl className="planner-result-counts"><div><dt>{t("placedLessons")}</dt><dd>{detail.assignments.length} / {detail.occurrences.length}</dd></div><div><dt>{t("semester_hours")}</dt><dd>{requiredHours}</dd></div><div><dt>{t("remaining_hours")}</dt><dd>{remainingHours}</dd></div></dl>
+        <div className="planner-result-actions"><button className="secondary" onClick={() => { setShowIssues(true); requestAnimationFrame(() => { const target = document.getElementById("planner-report"); target?.focus({ preventScroll: true }); target?.scrollIntoView({ block: "start" }); }); }}><AlertCircle size={16} aria-hidden="true" />{t("reviewIssues")}</button>
+          {version.status === "draft" && (                <button
+                  className="planner-publish"
+                  disabled={busy || searching || !!pollError || !detail.report.complete}
+                  onClick={() => {
+                    if (confirm(t("publishConfirm")))
+                      void run(async () => {
+                        await api(
+                          `/admin/schedule/versions/${version.id}/publish`,
+                          "POST",
+                          { revision: version.revision },
+                        );
+                        await open(version.id);
+                        await refresh();
+                      });
+                  }}
+                >
+                  <Upload size={16} aria-hidden="true" />{t("publish")}
+                </button>)}
+          {onOpenSetup && <button className="link" onClick={onOpenSetup}>{t("reviewSemesterSetup")}</button>}
+        </div>
+      </section>}
       <section className="panel planner-panel">
         <div className="toolbar">
           <label className="toolbar-field">
@@ -166,6 +160,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
                 ++loadSequence.current;
                 launchIntent.current = null;
                 setRunInfo(null);
+                setShowIssues(false);
                 setDetail(null);
                 setPollError(null);
                 if (e.target.value) void run(() => open(Number(e.target.value)));
@@ -175,7 +170,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
               <option value="">{t("select")}</option>
               {versions.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.name} · {t(v.status)} · #{v.id}
+                  {v.name} · {t(v.status)} · {t("revision")} {v.revision}
                 </option>
               ))}
             </select>
@@ -199,8 +194,42 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
             <button onClick={() => setCreate(true)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>
           </EmptyState>
         )}
+            {runInfo && <div className="planner-progress">
+              <div role="status"><strong>{t(runInfo.job?.cancel_requested_at ? "cancellationPending" : runStatusKey(runInfo.status))}</strong>{searching && <span> · {t(runInfo.progress?.stage || "snapshotPending")}</span>}</div>
+              {runInfo.inputs_updated_since_enqueue && <p className="notice warning">{t("inputsUpdatedSinceEnqueue")}</p>}
+              <ErrorBox error={runInfo.result?.error || runInfo.job?.error_code} />
+              <details><summary>{t("generationDetails")}</summary><RunCard run={runInfo} /></details>
+            </div>}
+            {searching && (
+              <button
+                className="secondary"
+                disabled={busy || !!runInfo?.job?.cancel_requested_at}
+                onClick={() => void run(async () => {
+                  const ticket = loadSequence.current;
+                  const result = await api<Row>(`/admin/schedule/runs/${runInfo!.id}/cancel`, "POST");
+                  if (selection.current !== result.version_id || loadSequence.current !== ticket) return;
+                  setRunInfo(result);
+                  setPollError(null);
+                  if (!isRunActive(result)) {
+                    await open(result.version_id);
+                    await refresh();
+                  }
+                })}
+              >
+                <CircleStop size={16} aria-hidden="true" />{t(runInfo?.job?.cancel_requested_at ? "cancellationPending" : "cancelRun")}
+              </button>
+            )}
         {detail && (
           <>
+            <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
+            <h2 className="section-title">{t("schedule")}</h2>
+            <PlannerTimetable key={version.id} detail={detail} disabled={busy || searching}
+              onSelect={(row) => {
+                if (version.status === "draft") {
+                  if (!busy && !searching) void run(() => edit(row));
+                } else setInspecting(row);
+              }} />
+            </section>
             <section id="planner-controls" className="section-target" tabIndex={-1} aria-label={t("plannerControls")}>
             <div className="section-heading planner-version-heading">
               <div>
@@ -214,7 +243,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
               </span>
             </div>
             {version.status === "draft" && (
-              <div className="generation-controls">
+              <details className="planner-advanced"><summary>{t("advancedGeneration")}</summary><div className="generation-controls">
                 <label>
                   {t("algorithm")}
                   <select
@@ -267,46 +296,15 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
                 >
                   <Play size={16} aria-hidden="true" />{t("generate")}
                 </button>
-                <button
-                  className="secondary"
-                  disabled={busy || searching || !detail.report.complete}
-                  onClick={() => {
-                    if (confirm(t("publishConfirm")))
-                      void run(async () => {
-                        await api(
-                          `/admin/schedule/versions/${version.id}/publish`,
-                          "POST",
-                          { revision: version.revision },
-                        );
-                        await open(version.id);
-                        await refresh();
-                      });
-                  }}
-                >
-                  <Upload size={16} aria-hidden="true" />{t("publish")}
-                </button>
-              </div>
+
+              </div></details>
             )}
-            {runInfo && <RunCard run={runInfo} />}
-            {searching && (
-              <button
-                className="secondary"
-                disabled={busy || !!runInfo?.job?.cancel_requested_at}
-                onClick={() => void run(async () => {
-                  const ticket = loadSequence.current;
-                  const result = await api<Row>(`/admin/schedule/runs/${runInfo!.id}/cancel`, "POST");
-                  if (selection.current !== result.version_id || loadSequence.current !== ticket) return;
-                  setRunInfo(result);
-                  setPollError(null);
-                  if (!isRunActive(result)) {
-                    await open(result.version_id);
-                    await refresh();
-                  }
-                })}
-              >
-                <CircleStop size={16} aria-hidden="true" />{t(runInfo?.job?.cancel_requested_at ? "cancellationPending" : "cancelRun")}
-              </button>
-            )}
+            </section>
+            <section id="planner-report" className="section-target" tabIndex={-1} aria-label={t("plannerReport")}>
+            <details className="report" open={showIssues} onToggle={event => setShowIssues(event.currentTarget.open)}>
+              <summary>
+                {t("reviewIssues")} · {t("workloads")} {detail.report.hours.length}
+              </summary>
             <div
               className={`notice planner-readiness ${detail.report.complete ? "success" : "warning"}`}
             >
@@ -314,12 +312,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
               {t(detail.report.complete ? "complete" : "partial")}
             </div>
             <ErrorBox error={detail.report.issues} />
-            </section>
-            <section id="planner-report" className="section-target" tabIndex={-1} aria-label={t("plannerReport")}>
-            <details className="report" open={!detail.report.complete}>
-              <summary>
-                {t("workloads")} · {detail.report.hours.length}
-              </summary>
+
               <div className="table-scroll bounded-table" tabIndex={0} role="region" aria-label={t("plannerReport")}>
                 <table>
                   <thead>
@@ -404,17 +397,8 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
               )}
             </details>
             </section>
-            <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
-            <h2 className="section-title">{t("schedule")}</h2>
-            <PlannerTimetable key={version.id} detail={detail} disabled={busy || searching}
-              onSelect={(row) => {
-                if (version.status === "draft") {
-                  if (!busy && !searching) void run(() => edit(row));
-                } else setInspecting(row);
-              }} />
-            </section>
             <section id="planner-history" className="section-target" tabIndex={-1} aria-label={t("runHistory")}>
-            <RunHistory key={version.id} versionId={version.id} />
+            <details><summary>{t("runHistory")}</summary><RunHistory key={version.id} versionId={version.id} /></details>
             </section>
           </>
         )}
@@ -426,88 +410,15 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
         <p>{inspecting.teacher} · {inspecting.group} · {t("room_id")} {inspecting.room}</p>
         {inspecting.cancelled && <p className="notice warning">{t("cancelled")}</p>}
       </Dialog>}
-      {create && (
-        <Dialog labelledBy="draft-title" closeDisabled={busy} onClose={() => setCreate(false)}>
-          <h2 id="draft-title">{t("createDraft")}</h2>
-          <form
-            className="form-stack"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              void run(async () => {
-                const row = await api("/admin/schedule/versions", "POST", {
-                  term_id: Number(term),
-                  name: f.get("name"),
-                  cohort_ids: groups,
-                });
-                setVersions((current) => [row, ...current]);
-                setCreate(false);
-                setRunInfo(null);
-                setDetail(null);
-                launchIntent.current = null;
-                await open(row.id);
-                await refresh();
-              });
-            }}
-          >
-            <label>
-              {t("name")}
-              <input name="name" required maxLength={150} autoFocus />
-            </label>
-            <label>
-              {t("term_id")}
-              <select
-                required
-                value={term}
-                onChange={(e) => {
-                  setTerm(e.target.value);
-                  setGroups([]);
-                }}
-              >
-                <option value="">{t("select")}</option>
-                {(data.terms || []).map((row) => (
-                  <option key={row.id} value={row.id}>
-                    {row.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <fieldset>
-              <legend>{t("groups")}</legend>
-              {groupOptions.map((row) => (
-                <label className="check" key={row.id}>
-                  <input
-                    type="checkbox"
-                    checked={groups.includes(row.id)}
-                    onChange={(e) =>
-                      setGroups(
-                        e.target.checked
-                          ? [...groups, row.id]
-                          : groups.filter((id) => id !== row.id),
-                      )
-                    }
-                  />
-                  {rowLabel(row)}
-                </label>
-              ))}
-            </fieldset>
-            <ErrorBox error={error} />
-            <div className="actions">
-              <button disabled={busy || !groups.length}>
-                {t("createDraft")}
-              </button>
-              <button
-                type="button"
-                className="secondary"
-                disabled={busy}
-                onClick={() => setCreate(false)}
-              >
-                {t("cancel")}
-              </button>
-            </div>
-          </form>
-        </Dialog>
-      )}
+      {create && !loading && <DraftWizard data={data} initialTermId={initialTermId} onOpenSetup={onOpenSetup}
+        onClose={() => { setCreate(false); void run(refresh); }}
+        onCreated={row => setVersions(current => [row, ...current.filter(item => item.id !== row.id)])}
+        onOpenVersion={id => { setCreate(false); void run(async () => { await open(id); await refresh(); }); }}
+        onStarted={(row, result) => {
+          selection.current = row.id; ++loadSequence.current; launchIntent.current = null;
+          setShowIssues(false); setDetail(null); setRunInfo(result); setPollError(null); setCreate(false);
+          void run(() => open(row.id));
+        }} />}
       {editing && (
         <Dialog labelledBy="move-title" closeDisabled={busy} onClose={() => setEditing(null)}>
           <h2 id="move-title">{t("edit")}</h2>
@@ -636,7 +547,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
           )}
         </Dialog>
       )}
-    </>
+    </div>
   );
 }
 

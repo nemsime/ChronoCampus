@@ -63,6 +63,8 @@ export function setDiagnosticPage(page: string) {
 const sourceModules = new Set([
   "Application",
   "Planner",
+  "DraftWizard",
+  "adminFlow",
   "Diagnostics",
   "DiagnosticBoundary",
   "Accounts",

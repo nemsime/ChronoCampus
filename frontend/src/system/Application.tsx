@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
-  Database,
+  Landmark,
+  CalendarRange,
   MessageSquare,
   Settings,
   UserRound,
@@ -14,8 +15,6 @@ import {
   PanelLeftOpen,
   ArrowUp,
   LayoutDashboard,
-  ArrowUpRight,
-  CircleHelp,
   ShieldCheck,
   Lightbulb,
 } from "lucide-react";
@@ -41,6 +40,7 @@ import { dateLabel, ErrorBox, LoadingState, localDay, useAction } from "./common
 import "./styles.css";
 import "./workspace.css";
 import "./dean.css";
+import "./adminWorkspace.css";
 
 export function navigationForRole(role: Account["role"]) {
   return [
@@ -49,7 +49,8 @@ export function navigationForRole(role: Account["role"]) {
     ...(role === "dean" ? [{ id: "suggestions", icon: Lightbulb, group: "navigationMain" }] : []),
     ...(role === "admin" ? [
       { id: "planner", icon: Settings, group: "navigationMain" },
-      { id: "catalogs", icon: Database, group: "navigationAdmin" },
+      { id: "university", icon: Landmark, group: "navigationAdmin" },
+      { id: "semester", icon: CalendarRange, group: "navigationAdmin" },
       { id: "diagnostics", icon: Activity, group: "navigationAdmin" },
       { id: "suggestions", icon: Lightbulb, group: "navigationAdmin" },
     ] : []),
@@ -58,6 +59,7 @@ export function navigationForRole(role: Account["role"]) {
   ];
 }
 export function pageForRole(page: string, role: Account["role"]) {
+  if (page === "catalogs" && role === "admin") return "university";
   return navigationForRole(role).some(item => item.id === page) ? page : "overview";
 }
 
@@ -73,6 +75,7 @@ function Workspace() {
   const [openSuggestions, setOpenSuggestions] = useState(0);
   const [page, setPage] = useState("overview");
   const [plannerVersion, setPlannerVersion] = useState<number | null>(null);
+  const [plannerStart, setPlannerStart] = useState({ createDraft: false, termId: "" });
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("chronocampus.sidebarCollapsed") === "true"; }
@@ -96,8 +99,9 @@ function Workspace() {
   useEffect(() => {
     document.title = `${account ? t(activePage) : t("login")} · ChronoCampus`;
   }, [activePage, lang, account]);
-  const navigate = (next: string, versionId: number | null = null) => {
+  const navigate = (next: string, versionId: number | null = null, options: { createDraft?: boolean; termId?: string } = {}) => {
     setPlannerVersion(next === "planner" ? versionId : null);
+    setPlannerStart({ createDraft: next === "planner" && !!options.createDraft, termId: next === "planner" ? options.termId || "" : "" });
     setPage(next);
     setMenuOpen(false);
     requestAnimationFrame(() => {
@@ -218,11 +222,6 @@ function Workspace() {
             </button>
           ))}</div>)}
         </nav>
-        <div className="sidebar-help">
-          <CircleHelp size={21} aria-hidden="true" />
-          <strong>{t("workspaceHelpTitle")}</strong><p>{t("workspaceHelpText")}</p>
-          <button disabled={account.must_change_password} onClick={() => navigate("feedback")}>{t("workspaceHelpAction")}<ArrowUpRight size={14} aria-hidden="true" /></button>
-        </div>
         <div className="sidebar-footer">
           <span className="avatar">
             {account.display_name?.slice(0, 1) || "C"}
@@ -298,10 +297,10 @@ function Workspace() {
               </section>
               <aside className="panel account-security"><span className="security-icon"><ShieldCheck size={28} aria-hidden="true" /></span><h2>{t("accountSecurity")}</h2><p>{t("accountSecurityHelp")}</p><div className="security-rule"><span>12–256</span>{t("newPassword")}</div><p className="account-access-note">{t("authAccessHelp")}</p></aside></div>
               </>
-            ) : activePage === "catalogs" && account.role === "admin" ? (
-              <Catalogs />
+            ) : (activePage === "university" || activePage === "semester") && account.role === "admin" ? (
+              <Catalogs key={activePage} mode={activePage} onCreateDraft={termId => navigate("planner", null, { createDraft: true, termId })} />
             ) : activePage === "planner" && account.role === "admin" ? (
-              <Planner initialVersionId={plannerVersion} />
+              <Planner initialVersionId={plannerVersion} createOnOpen={plannerStart.createDraft} initialTermId={plannerStart.termId} onOpenSetup={() => navigate("semester")} />
             ) : activePage === "diagnostics" && account.role === "admin" ? (
               <Diagnostics />
             ) : activePage === "timetables" && account.role === "dean" ? (

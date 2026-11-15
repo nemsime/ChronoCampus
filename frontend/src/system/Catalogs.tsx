@@ -2,8 +2,9 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { BookOpen, Building2, CalendarDays, CalendarPlus, CalendarRange, Clock3, Database, DoorOpen, FlaskConical, GraduationCap, Landmark, Layers3, ListChecks, Monitor, Pencil, Plus, RefreshCw, Save, Search, SlidersHorizontal, Sun, Trash2, UserRound, Users, X, type LucideIcon } from "lucide-react";
 import { api, Row } from "./api";
 import { catalogSchema, Field, resourceNames } from "./catalogSchema";
-import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, PasswordInput, useAction } from "./common";
+import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, PasswordInput, useAction } from "./common";
 import { useLanguage } from "./i18n";
+import { adminAreas, catalogScope, type CatalogMode } from "./adminFlow";
 export type CatalogData = Record<string, Row[]>;
 export const rowLabel = (row: Row) =>
   row.display_name ||
@@ -22,11 +23,6 @@ export async function loadCatalogs(): Promise<CatalogData> {
   return Object.fromEntries(rows);
 }
 const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-const resourceGroups = [
-  { title: "catalogAcademic", resources: ["faculties", "majors", "groups", "subgroups", "lab-groups", "subjects", "users"] },
-  { title: "catalogSpaces", resources: ["buildings", "rooms", "equipment"] },
-  { title: "catalogPlanning", resources: ["terms", "calendars", "periods", "holidays", "extra-permissions", "availability", "workloads"] },
-];
 const resourceIcons: Record<string, LucideIcon> = {
   faculties: Landmark, majors: GraduationCap, groups: Users, subgroups: Layers3,
   "lab-groups": FlaskConical, buildings: Building2, rooms: DoorOpen, equipment: Monitor,
@@ -240,10 +236,12 @@ function FieldInput({
     </div>
   );
 }
-export function Catalogs() {
+export function Catalogs({ mode = "university", onCreateDraft }: { mode?: CatalogMode; onCreateDraft?: (termId: string) => void }) {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
-  const [resource, setResource] = useState("terms");
+  const areas = adminAreas[mode];
+  const [resource, setResource] = useState(areas[0].resources[0]);
+  const [termId, setTermId] = useState("");
   const [draft, setDraft] = useState<Row | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const [search, setSearch] = useState("");
@@ -253,6 +251,14 @@ export function Catalogs() {
   const results = useRef<HTMLElement>(null);
   const { busy, error, setError, run } = useAction();
   const ResourceIcon = resourceIcons[resource] || Database;
+  const area = areas.find(item => item.resources.includes(resource)) || areas[0];
+  const selectedTerm = data.terms?.find(row => String(row.id) === termId);
+  useEffect(() => {
+    if (data.terms?.length && !data.terms.some(row => String(row.id) === termId)) {
+      const sorted = [...data.terms].sort((a, b) => b.starts_on.localeCompare(a.starts_on));
+      setTermId(String((sorted.find(row => row.starts_on <= localDay() && row.ends_on >= localDay()) || sorted[0]).id));
+    }
+  }, [data.terms, termId]);
   const refresh = async () => {
     setLoading(true);
     try { setData(await loadCatalogs()); }
@@ -268,7 +274,9 @@ export function Catalogs() {
       Object.fromEntries(
         catalogSchema[resource].map((f) => [
           f.key,
-          row?.[f.key] ?? f.initial ?? (f.type === "boolean" ? false : null),
+          row?.[f.key] ?? (mode === "semester" && !row && selectedTerm && resource !== "terms"
+            ? f.key === "term_id" ? selectedTerm.id : ["starts_on", "ends_on"].includes(f.key) ? selectedTerm[f.key] : undefined
+            : undefined) ?? f.initial ?? (f.type === "boolean" ? false : null),
         ]),
       ),
     );
@@ -313,6 +321,7 @@ export function Catalogs() {
           : [...(current[resource] || []), saved],
       }));
       setDraft(null);
+      if (mode === "semester" && resource === "terms" && !editing) setTermId(String(saved.id));
       await refresh();
     });
   }
@@ -367,7 +376,8 @@ export function Catalogs() {
       : !["password", "breaks", "weights"].includes(f.type || ""),
   );
   const query = search.trim().toLocaleLowerCase();
-  const rows = (data[resource] || []).filter((row) =>
+  const scopedRows = mode === "semester" ? catalogScope(resource, data[resource] || [], selectedTerm) : data[resource] || [];
+  const rows = scopedRows.filter((row) =>
     [...Object.values(row), ...fields.map((field) => display(field, row)).filter((value) => typeof value === "string")]
       .join(" ").toLocaleLowerCase().includes(query),
   );
@@ -396,8 +406,8 @@ export function Catalogs() {
       <div className="page-heading page-hero">
         <div className="page-hero-copy">
           <p className="eyebrow">{t("catalogEyebrow")}</p>
-          <h1>{t("catalogs")}</h1>
-          <p>{t("catalogHelp")}</p>
+          <h1>{t(mode)}</h1>
+          <p>{t(mode === "university" ? "universityHelp" : "semesterHelp")}</p>
         </div>
         <button
           disabled={busy}
@@ -407,48 +417,30 @@ export function Catalogs() {
           <RefreshCw size={16} aria-hidden="true" />{t("refresh")}
         </button>
       </div>
-      <dl className="summary-strip catalog-summary">
-        {[
-          { icon: Database, label: "catalogTotalRecords", value: Object.values(data).reduce((total, rows) => total + rows.length, 0) },
-          { icon: Layers3, label: "catalogSections", value: resourceNames.length },
-          { icon: resourceIcons[resource] || Database, label: resource, value: data[resource]?.length || 0 },
-        ].map(({ icon: Icon, label, value }) => <div className="summary-item" key={label}>
-          <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
-          <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className="summary-item-value">{loading ? "—" : value}</dd></div>
-        </div>)}
-      </dl>
-      <div className="catalog-layout">
-        <label className="catalog-mobile-select">
-          {t("catalogResource")}
-          <select value={resource} onChange={(e) => selectResource(e.target.value)}>
-            {resourceGroups.map((group) => (
-              <optgroup key={group.title} label={t(group.title)}>
-                {group.resources.map((name) => <option key={name} value={name}>{t(name)}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <nav className="catalog-nav" aria-label={t("catalogs")}>
-          {resourceGroups.map((group) => (
-            <div className="catalog-nav-group" key={group.title}>
-              <h2 className="catalog-nav-heading">{t(group.title)}</h2>
-              {group.resources.map((name) => {
-                const Icon = resourceIcons[name] || Database;
-                return (
-                <button
-                  className={name === resource ? "active" : ""}
-                  aria-current={name === resource ? "page" : undefined}
-                  key={name}
-                  onClick={() => selectResource(name, true)}
-                >
-                  <span className="catalog-resource-label"><Icon className="catalog-resource-icon" size={16} aria-hidden="true" />{t(name)}</span>
-                  <small>{data[name]?.length ?? "—"}</small>
-                </button>
-              ); })}
-            </div>
-          ))}
-        </nav>
-        <section className="panel catalog-content results-anchor" ref={results} tabIndex={-1} aria-label={t(resource)}>
+      {mode === "semester" && <section className="panel semester-context">
+        <label>{t("term_id")}<select value={termId} disabled={loading || busy} onChange={event => { setTermId(event.target.value); setSearch(""); setPage(0); }}>
+          <option value="">{t("select")}</option>{(data.terms || []).map(row => <option key={row.id} value={row.id}>{row.name}</option>)}
+        </select></label>
+        <p>{t(!data.terms?.length ? "semesterFirst" : "semesterScopeHelp")}</p>
+        {onCreateDraft && <button disabled={busy || loading || !selectedTerm} onClick={() => onCreateDraft(termId)}><Plus size={16} aria-hidden="true" />{t("createDraft")}</button>}
+      </section>}
+      <div className="admin-management">
+        <div className="admin-area-tabs" role="tablist" aria-label={t(mode)} onKeyDown={event => {
+          const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          if (index < 0) return;
+          const next = event.key === "ArrowRight" ? (index + 1) % buttons.length : event.key === "ArrowLeft" ? (index + buttons.length - 1) % buttons.length : event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : -1;
+          if (next >= 0) { event.preventDefault(); buttons[next].click(); buttons[next].focus(); }
+        }}>
+          {areas.map(item => <button key={item.id} id={`${mode}-${item.id}`} role="tab" aria-selected={area.id === item.id} aria-controls={`${mode}-records`} tabIndex={area.id === item.id ? 0 : -1}
+            className={area.id === item.id ? "active" : "secondary"} disabled={busy} onClick={() => selectResource(item.resources[0])}>{t(`adminArea_${item.id}`)}</button>)}
+        </div>
+        <section id={`${mode}-records`} role="tabpanel" aria-labelledby={`${mode}-${area.id}`} className="panel catalog-content results-anchor" ref={results} tabIndex={-1}>
+          <p className="admin-area-help">{t(`adminAreaHelp_${area.id}`)}</p>
+          {area.resources.length > 1 && <div className="admin-resource-tabs" role="group" aria-label={t("catalogResource")}>
+            {area.resources.map(name => { const Icon = resourceIcons[name] || Database; return <button key={name} className="secondary" aria-pressed={resource === name} disabled={busy} onClick={() => selectResource(name)}><Icon size={16} aria-hidden="true" />{t(name)}</button>; })}
+          </div>}
+          {mode === "semester" && <p className="admin-scope-note">{t(resource === "calendars" ? "sharedCalendarsHelp" : resource === "availability" ? "sharedAvailabilityHelp" : resource === "terms" ? "semesterRecordsHelp" : "selectedSemesterOnly")}</p>}
           <div className="section-heading">
             <h2 className="catalog-resource-heading"><ResourceIcon size={21} aria-hidden="true" />{t(resource)}</h2>
             <button onClick={() => open()} disabled={busy}>
@@ -469,7 +461,7 @@ export function Catalogs() {
               </span>
             </label>
             {search && <button className="secondary search-clear" onClick={() => setSearch("")}><X size={16} aria-hidden="true" />{t("catalogClearSearch")}</button>}
-            {data[resource] && <span className="count-label" role="status">{t("catalogResults")}: {rows.length} / {data[resource].length}</span>}
+            {data[resource] && <span className="count-label" role="status">{t("catalogResults")}: {rows.length} / {scopedRows.length}</span>}
           </div>
           {!draft && <ErrorBox error={error} />}
           {draft && (

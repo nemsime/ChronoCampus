@@ -90,6 +90,8 @@ export function isRunActive(run: Row) {
   );
 }
 
+export const runStatusKey = (status: string) => status === "complete" ? "generationFinished" : status;
+
 function RunAttempts({ run }: { run: Row }) {
   const { t, lang } = useLanguage();
   const monitor = useMonitor(
@@ -177,7 +179,7 @@ export function RunCard({ run }: { run: Row }) {
         <span
           className={`badge ${run.status === "complete" ? "success" : "warn"}`}
         >
-          {t(cancelling ? "cancellationPending" : run.status)}
+          {t(cancelling ? "cancellationPending" : runStatusKey(run.status))}
         </span>
         <span>
           {t(run.algorithm)} · {t("seed")}: {run.seed}
@@ -186,7 +188,7 @@ export function RunCard({ run }: { run: Row }) {
       <div className="diagnostic-cards">
         <div>
           <small>{t("stage")}</small>
-          <strong>{t(cancelling ? "cancellationPending" : run.status === "running" ? progress.stage || run.status : run.status)}</strong>
+          <strong>{t(cancelling ? "cancellationPending" : run.status === "running" ? progress.stage || run.status : runStatusKey(run.status))}</strong>
         </div>
         <div>
           <small>{t("duration")}</small>
@@ -385,7 +387,7 @@ export function RunHistory({ versionId }: { versionId?: number }) {
             "interrupted",
           ].map((s) => (
             <option key={s} value={s}>
-              {t(s)}
+              {t(runStatusKey(s))}
             </option>
           ))}
         </select>
@@ -442,7 +444,7 @@ export function RunHistory({ versionId }: { versionId?: number }) {
                     <td>
                       {t(row.algorithm)} · {row.seed}
                     </td>
-                    <td>{t(isRunActive(row) && row.job?.cancel_requested_at ? "cancellationPending" : row.status)}{row.job && <small className="block">{t("attempts")}: {row.job.attempt_count} / {row.job.max_attempts}</small>}</td>
+                    <td>{t(isRunActive(row) && row.job?.cancel_requested_at ? "cancellationPending" : runStatusKey(row.status))}{row.job && <small className="block">{t("attempts")}: {row.job.attempt_count} / {row.job.max_attempts}</small>}</td>
                     <td>
                       {isRunActive(row)
                         ? `${row.progress?.placed ?? "—"} / ${row.progress?.total ?? "—"}`

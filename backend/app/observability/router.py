@@ -278,6 +278,8 @@ class ClientFrame(BaseModel):
     source: Literal[
         "Application",
         "Planner",
+        "DraftWizard",
+        "adminFlow",
         "Diagnostics",
         "DiagnosticBoundary",
         "Accounts",
@@ -305,6 +307,8 @@ class ClientError(BaseModel):
         "schedule",
         "planner",
         "catalogs",
+        "university",
+        "semester",
         "feedback",
         "account",
         "diagnostics",

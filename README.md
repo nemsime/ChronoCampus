@@ -106,11 +106,11 @@ Demo teaching dates and academic-hour settings are illustrative. Real university
 
 ## Prepare and publish a semester
 
-1. In **Data & rules**, configure faculties, majors, cohorts, subgroups, rooms/equipment, and users.
-2. Configure a calendar, semester boundaries, and explicit **teaching periods**. Exam months remain inside semester boundaries but outside teaching periods. Confirm hours per lesson and teaching-week count.
-3. Enter workload components: subject, cohort/subgroup, lecturer, lesson type, semester hours, assessment, equipment. Add holidays, unavailable intervals, preferences, and explicitly allowed extra slots.
-4. In **Planner**, create a draft for a semester and selected cohorts. Generate with a recorded seed. Review completeness, hours, unresolved lessons, and diagnostics.
-5. Move or pin lessons. Each change runs the same hard-constraint validation. Regeneration retains pins; changed inputs invalidate a running result instead of overwriting newer work.
+1. In **University**, manage People, Academic structure, Rooms & equipment and Subjects through their searchable tabs.
+2. In **Semester setup**, choose a semester. Under **Calendar & dates**, configure its calendar, semester boundaries and explicit **teaching periods**. Exam months remain inside semester boundaries but outside teaching periods. Confirm hours per lesson and teaching-week count. Shared calendar edits affect every linked semester.
+3. Under **Teaching load**, enter subject, cohort/subgroup, lecturer, lesson type, semester hours, assessment and equipment. Use **Availability & exceptions** for unavailable intervals, preferences and allowed extra slots. Semester-specific rows are scoped to the selected semester; shared availability shows overlapping intervals.
+4. In **Planner**, choose **Create draft** and follow Semester → Groups → Review → Generate. Review the selected scope and input totals; solver method and seed are under advanced settings. The saved draft opens on its timetable with a compact result summary. Generation does not publish.
+5. Use **Review issues** for missing hours and unresolved lessons. Move or pin lessons; each change runs the same hard-constraint validation. Advanced generation settings allow regeneration, retaining pins. Changed inputs invalidate a running result instead of overwriting newer work. A finished run can still leave a partial timetable.
 6. A dean can inspect the draft in **Timetables**, compare it with the current publication, and submit suggestions. In **Suggestions**, the administrator can check feasibility, accept or reject, apply an accepted change manually in Planner, and link the implemented version. Suggestions never edit the timetable themselves.
 7. Publish a complete valid draft. Students and lecturers see their latest published schedule. Create a new draft for subsequent changes. Personal notes follow the same lesson occurrence when it moves.
 

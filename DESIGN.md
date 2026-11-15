@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-10-24
+- Last refreshed: 2026-11-15
 - Primary product surfaces: local ChronoCampus sign-in, timetable, planner, catalogs, diagnostics, support and account.
 - Evidence reviewed: `docs/requirements.md`, `frontend/src/system/*`, existing local desktop/mobile screenshots. `src/App.tsx` uses `system/Application`; older prototype components are not active.
 
@@ -22,7 +22,12 @@
 - Context: local browser, Russian/Armenian/English, keyboard and touch.
 
 ## Information architecture
-- Preserve existing navigation and role visibility: timetable, planner, data/rules, diagnostics, support, account.
+- Preserve role visibility. Administrators have University management and Semester setup in place of Data & rules; timetable, planner, diagnostics, suggestions, support and account remain available to their authorized roles.
+- University management uses four searchable areas: People, Academic structure, Rooms & equipment, Subjects. Related child records stay within their area rather than a long second sidebar.
+- Semester setup uses Calendar & dates, Teaching load, Availability & exceptions. Keep the selected semester visible; scope period/load/exception rows to it and explicitly identify shared calendars and overlapping availability.
+- Support is a normal navigation item. Do not restore the promotional help/contact box.
+- New drafts follow Semester → Groups → Review → Generate. Review shows the actual selected inputs; advanced solver controls are collapsed. Generating never publishes automatically.
+- Generated drafts open with a compact result summary and the timetable first. Review issues expands the hours/unresolved-lesson report. Publication remains a separate, server-validated action.
 - Persistent desktop sidebar can collapse to a labelled icon rail; remember the choice locally. Mobile navigation remains a separate full-label disclosure.
 - Keep one page scroll, with a compact sticky header and section links on long planner/diagnostic pages. Do not stack large sticky panels or hide critical generation/error status behind tabs.
 - Paginate catalogs and lesson lists; place page controls above and below results. Open catalog editing in a modal so a row action never opens an unseen form far above it.
@@ -73,11 +78,11 @@
 - Translate new visible and accessible strings into RU/HY/EN. No raw API keys in labels.
 
 ## Implementation constraints
-- React 18, TypeScript, Vite, existing Lucide and plain CSS. No added dependencies, backend changes, API changes or production data changes.
+- React 18, TypeScript, Vite, existing Lucide and plain CSS. No added dependencies or changes to scheduling rules, domain API contracts, schema or production academic data. Register new UI pages/modules with the safe client-error allowlists.
 - Preserve solver controls, idempotency, cancellation, pagination and authorization behavior.
 - Validate TypeScript, production build, translated component rendering and targeted interactions where tooling permits.
-- Browser automation is currently unavailable through the connected browser surface. Earlier screenshots are baseline evidence only; report fresh visual verification separately and honestly.
+- The connected browser surface is unavailable. Native headless Chrome is available for isolated source/UI checks with a separate profile; distinguish API fixtures from live database acceptance and report actual verification boundaries.
 
 ## Open questions
 - No additional brand assets supplied; retain the existing mark and palette.
-- Fresh browser screenshots depend on an available authorized browser surface; this does not block source implementation and static/render verification.
+- Fresh desktop/mobile checks can use native headless Chrome; signed-in production flows, print and accessibility acceptance must be reported separately.

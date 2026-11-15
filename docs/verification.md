@@ -1,5 +1,49 @@
 # Verification
 
+## Guided admin workspace — 15 November 2026
+
+Implemented the agreed navigation and workflow: Support stays a normal menu item
+without its promotional box; University and Semester setup replace Data & rules.
+University has four searchable areas and Semester setup has three. Every existing
+catalog resource remains reachable. Semester-specific tables are scoped to the
+selected semester, while shared calendars and overlapping availability are
+identified explicitly. Existing CRUD schemas and server authorization remain in
+force; old internal `catalogs` links redirect to University for administrators.
+
+The new draft wizard follows Semester → Groups → Review → Generate, preselects
+the semester when opened from setup, filters compatible groups, and reviews real
+workload/hour totals. Advanced solver settings stay available under a disclosure.
+Generation opens the saved draft's timetable with a compact status/scope/hour
+summary. Review issues opens the full hours/unplaced-lesson report; publication
+stays separate, revision-checked and unavailable for partial, busy or stale reads.
+Generation details, cancellation, retries, manual moves, pins and history remain
+available. A finished generator run now says Generation finished rather than
+claiming every lesson was placed; completeness comes from the timetable report.
+
+- Frontend TypeScript, Vite build and all three Node suites passed: **24 tests**.
+  New cases cover navigation/role guards, reachability of all resources, semester
+  and availability scope, study-form eligibility, accurate review totals, safe
+  generation retries and RU/HY/EN rendering. A lost generation response reuses
+  the saved draft/revision/key. An uncertain or malformed draft-creation response
+  blocks blind duplication and directs the user to existing drafts.
+- Existing backend observability regressions passed: **13 tests** in isolated
+  SQLite fixtures, with the existing Starlette/httpx warning. The only backend
+  change is adding the new page/module names to safe client-error allowlists.
+  No migration, scheduling/business-rule or permission change was made.
+- Fresh headless Chrome checks run the actual React application against an
+  in-memory API fixture: **17 assertions at 1280px and 17 at 360px**, including
+  opening mobile navigation, table search, semester isolation, wizard steps,
+  exact create/enqueue ordering, idempotency/revision fields, timetable-first
+  order, explicit issue review, disabled publication for partial results and
+  no automatic publish call. The flow switches from English to Armenian and
+  checks horizontal document overflow. Desktop/mobile screenshots were inspected.
+  Browser profiles, fixture data and screenshots remain ignored under
+  `.runtime/admin-workspace-qa/`.
+- These browser writes stay inside the API fixture; no new timetable or
+  publication was created in the development database for acceptance. Live data
+  generation, print and a full accessibility audit are not claimed. Armenian
+  copy still benefits from native-speaker review.
+
 ## Timetable fit and lecturer default — 15 November 2026
 
 Timetable headers no longer inherit the catalog tables' `nowrap` rule. The shared
