@@ -42,9 +42,12 @@
 .draft-wizard-fields h3 { font-size: 18px; margin-bottom: 12px; }
 .draft-wizard-fields .form-stack > label, .draft-wizard-fields .form-grid > label { font-size: 14px; }
 .draft-wizard-fields input, .draft-wizard-fields select { font-size: 14px; }
+.draft-wizard-fields .search-field { flex-direction: row; }
 .draft-wizard-fields .search-field input { min-width: 0; }
+.draft-wizard-fields .search-field input:focus { border-color: var(--text); box-shadow: 0 0 0 3px #1f2d2614; }
+.draft-wizard-fields .search-field input:focus-visible { outline-color: var(--text); }
 .draft-group-list { display: grid; gap: 0; max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
-.draft-group-option { display: flex; align-items: center; gap: 14px; padding: 16px; border-bottom: 1px solid var(--border); min-height: 64px; }
+.draft-group-option { display: grid; grid-template-columns: 17px minmax(0, 1fr); align-items: center; gap: 14px; padding: 16px; border-bottom: 1px solid var(--border); min-height: 64px; }
 .draft-group-option:last-child { border-bottom: 0; }
 .draft-group-option input { flex-shrink: 0; }
 .draft-group-option > span { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
