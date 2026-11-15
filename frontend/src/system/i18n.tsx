@@ -43,6 +43,8 @@ const words: Record<string, [string, string, string]> = {
   logout: ["Выйти", "Դուրս գալ", "Sign out"],
   email: ["Университетская почта", "Համալսարանի էլ․ փոստ", "University email"],
   password: ["Пароль", "Գաղտնաբառ", "Password"],
+  authEmailPlaceholder: ["Введите университетскую почту", "Մուտքագրեք համալսարանական էլ․ փոստը", "Enter your university email"],
+  authPasswordPlaceholder: ["Введите пароль", "Մուտքագրեք գաղտնաբառը", "Enter your password"],
   current_password: ["Текущий пароль", "Ընթացիկ գաղտնաբառ", "Current password"],
   newPassword: [
     "Новый пароль (не менее 12 символов)",

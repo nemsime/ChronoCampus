@@ -125,7 +125,7 @@ export function PasswordInput(props: Omit<InputHTMLAttributes<HTMLInputElement>,
         title={t(visible ? "hidePassword" : "showPassword")}
         aria-pressed={visible} disabled={props.disabled}
         onClick={() => setVisible(!visible)}>
-        {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+        {visible ? <Eye size={18} aria-hidden="true" /> : <EyeOff size={18} aria-hidden="true" />}
       </button>
     </span>
   );
