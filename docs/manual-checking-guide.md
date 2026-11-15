@@ -4,6 +4,37 @@ Use this guide to check the current application from installation through public
 
 The interface labels below use English. Select **English** in the language selector; a fresh browser otherwise defaults to Russian. The other supported languages are Russian and Armenian.
 
+## Revised admin flow — 15 November 2026
+
+Navigation references to the former **Data & rules** area below now mean
+**University** for shared records or **Semester setup** for planning inputs.
+Existing catalog validation and permission cases still apply.
+
+1. Check that the sidebar has a normal Support item and no promotional contact
+   box. University has searchable People, Academic structure, Rooms & equipment,
+   Subjects tabs; every original resource remains reachable in its area. Check
+   keyboard arrows/Home/End on the main tabs, search, pagination and editing.
+2. In Semester setup, switch semesters. Workloads, periods, holidays and extra
+   permissions must show only that semester; availability shows overlapping
+   intervals. Calendars and semester records remain explicitly shared/all-record
+   views. New interval records start with the selected semester and dates.
+3. Use Create draft from Semester setup: its selected semester should reach the
+   wizard. Follow Semester → Groups → Review → Generate. Check study-form group
+   filtering, search, required name, selected-group count and input-hour totals.
+   Algorithm/seed settings stay under Advanced generation settings.
+4. Generation must create one saved draft and then enqueue against its returned
+   revision with an idempotency key. A lost generation response must retry that
+   same draft/key. An uncertain draft-creation response must direct the user to
+   existing drafts rather than blindly creating another.
+5. The result opens on the timetable with a compact scope/status/hour summary.
+   Review issues opens the hours/unplaced report. Test partial, failed and
+   complete results; a finished run does not imply a complete timetable. No
+   generation action publishes automatically. Publication remains disabled for
+   partial/stale/busy results and is revalidated by the server.
+6. Recheck manual moves, pins, regeneration, cancellation, run details/history
+   and dean-suggestion links. Repeat the core flow in RU/HY/EN and at 360px and
+   desktop widths. Do not use production data for write/retry tests.
+
 ## Contents
 
 1. [Test records and completion rules](#1-test-records-and-completion-rules)
@@ -407,18 +438,19 @@ Keep student/lecturer browsers open on the baseline while the admin prepares rep
 
 ### Timetable
 
-The active Timetable is a dated lesson list, paginated at 25 rows. Set a range of **1–31 inclusive days**; to inspect a longer semester, use adjacent ranges. Select 2026-09-07–2026-09-18 for the small fixture. Clear filters before verifying fixture totals.
+The active Timetable opens as a weekly grid on desktop and a list on mobile; the list paginates at 25 rows. Use the week selector to inspect adjacent weeks. For the small fixture, check the weeks starting 2026-09-07 and 2026-09-14. API reads accept **1–31 inclusive days**. Clear filters before verifying fixture totals.
 
 | ID | Steps | Expected result |
 | --- | --- | --- |
-| VIEW-01 | Compare admin, lecturer1, student A and student B against the same current publication. | Admin sees current publications; lecturer only assigned teaching; students see whole-cohort plus their subgroup/lab lessons. QA baseline counts: 6 / 6 / 6 / 2; unrelated lecturer sees none. |
+| VIEW-01 | Compare admin, lecturer1, student A and student B against the same current publication. Sign in and reload as a lecturer. | A lecturer opens directly on their own timetable, without a lecturer picker; only assigned teaching is returned. Admin sees current publications; students see whole-cohort plus their subgroup/lab lessons. QA baseline counts: 6 / 6 / 6 / 2; unrelated lecturer sees none. |
 | VIEW-02 | Inspect one lecture, practical and lab card. | Correct date/weekday, start/end, slot, numerator/denominator, type, subject, teacher, room, cohort and subgroup/lab; pinned/canceled badges match assignment. |
-| VIEW-03 | Filter by semester/cohort/lecturer/room/subject/type, combine filters, then clear. Use a subject occurring beyond the first page on a larger dataset. | Filters cover authorized published data across all pages; names/counts and results agree. Guessed filter IDs do not broaden access. |
+| VIEW-03 | Filter by semester/cohort/room/subject/type, combine filters, then clear. Admin/student can also filter their authorized rows by lecturer; lecturers have no lecturer picker. Replay an API read with another lecturer ID using a lecturer session. | Filters cover authorized published data across all pages; names/counts and results agree. A lecturer requesting another lecturer ID receives no lessons. Guessed filter IDs do not broaden access. |
 | VIEW-04 | Use same start/end, 31 inclusive days, 32 inclusive days, empty/reversed range. | First two are allowed; invalid range shows guidance and no misleading results. API rejects invalid date ranges with 422. |
 | VIEW-05 | On a dataset with more than 25 matches, use Next/Previous; change filters/date range while on a later page. | Stable ordering, no duplicates/omissions; filter/range changes reset pagination. Repeated next/previous does not mix earlier results. |
 | VIEW-06 | Leave timetable open, publish a replacement elsewhere, then use Refresh, window focus, and normal polling. | Latest publication appears. Normal timetable refresh is every 30 seconds and on focus; stale cursor resets safely to first page. |
 | VIEW-07 | Test before any publication, then a date/filter with no matching lessons after publication. Simulate a temporary read/network failure and retry. | No-publication, no-match and failure states are understandable; failure is not presented as a successful empty schedule. |
 | VIEW-08 | Change a student's membership as admin while its old timetable browser remains open; issue another read. | Old session is revoked; new login uses new membership and authorized facets. Responses do not expose old/unrelated rows. Check `Cache-Control: private, no-store` in Network. |
+| VIEW-09 | Check Grid in all roles and RU/HY/EN with long subjects, names, rooms, subgroups and badges, including extra/weekend slots. Repeat at 360px, tablet and desktop widths. | Labels and lesson content wrap within cells; the slot label/time remain readable. Wide grids scroll within their own region and do not widen the page. Mobile starts in List unless a different preference was saved. |
 
 ### Personal notes
 
@@ -604,3 +636,15 @@ Automated checks complement this manual pass. For a release/change validation, u
 Current boundaries: automatic exam scheduling, Word import, Microsoft SSO, general notifications, automatic alphabetical student allocation, and in-place revision of already materialized workloads are outside this version. The active UI also has no timetable export, attachment upload, theme switch, or drag-and-drop scheduling. University dates/academic units and part-time sessions require confirmation; demo values do not supply it.
 
 Source references for maintaining this guide: [catalog fields](../frontend/src/system/catalogSchema.ts), [active interface](../frontend/src/system/Application.tsx), [academic validation](../backend/app/academics/router.py), [scheduling operations](../backend/app/scheduling/router.py), [schedule reads](../backend/app/scheduling/queries.py), [durable generation](../backend/app/jobs/generation.py), [end-to-end regression tests](../backend/tests/test_workflow.py), [local runtime](local-runtime.md), and [requirements](requirements.md).
+
+## Декан, предложения и недельная сетка
+
+После резервной копии и миграции `0007_dean_suggestions` создайте декана через справочник пользователей либо запустите seed-demo в изолированной демонстрационной БД (повторный seed меняет все демонстрационные пароли). Возьмите пароли из локального ignored-файла; не добавляйте его в Git.
+
+1. Войдите как `dean.faculty1.demo@example.invalid`: видны Обзор, Расписания, Предложения, Поддержка и Аккаунт. Не видны генератор, справочники и диагностика. Опубликованные версии и черновики доступны только для FIA. Войдите как `dean.demo@example.invalid` и сравните область доступа со всеми факультетами.
+2. Под администратором подготовьте черновик и публикацию с группами двух факультетов. Под деканом FIA выберите черновик: проверьте баннер «студенты и преподаватели его не видят», ограниченные группы, преподавателей, аудитории и итоги. Прямые обращения к чужой версии дают 404, к административным мутациям — 403; студент/преподаватель не видит `/dean/*`.
+3. Переключите неделю, перспективу и Grid/List; проверьте даты, время из календаря, подгруппы, чётность, отменённые и дополнительные пары. Включите сравнение: переносы, смена аудитории и удалённые занятия должны быть видны в выбранной неделе.
+4. Откройте занятие и предложите перенос/аудиторию/отмену; создайте общее предложение. Расписание не меняется. Второй декан не видит это предложение. Добавьте комментарий, отзовите открытое предложение и проверьте блокировку дальнейших комментариев.
+5. Под администратором откройте входящие, фильтры и страницы сверху/снизу. Проверьте выполнимость против выбранного черновика: допустимый перенос и конфликт показывают соответствующий результат без изменения расписания. Примите предложение, внесите изменение вручную через генератор и отметьте выполненным со ссылкой на версию. Отклонение требует причины. Одновременное устаревшее решение должно вернуть `suggestion_state_changed`.
+6. Измените исходное занятие после создания предложения: детали помечаются как устаревшие. У декана нет личных заметок; поддержка и смена пароля работают как раньше.
+7. Повторите основные экраны в RU/HY/EN (армянские тексты требуют носительской проверки), на ширине 360 px и на desktop. На телефоне исходно выбран список; сетка прокручивается внутри области. Проверьте Tab/стрелки, Escape/возврат фокуса диалога и печать в альбомной ориентации. Серверные render-тесты не подтверждают эти браузерные взаимодействия.

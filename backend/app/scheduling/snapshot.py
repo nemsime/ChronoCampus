@@ -6,6 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import inspect, select, true
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import LECTURER
+
 from app.calendar.rules import required_pairs
 from app.db import models as m
 
@@ -101,7 +103,7 @@ def build_snapshot(
         ]
     snapshot["teachers"] = [
         {"id": a.id, "role": a.role, "is_active": a.is_active}
-        for a in db.scalars(select(m.Account).where(m.Account.role == "lecturer"))
+        for a in db.scalars(select(m.Account).where(m.Account.role == LECTURER))
     ]
     for key, model in (
         ("holidays", m.Holiday),

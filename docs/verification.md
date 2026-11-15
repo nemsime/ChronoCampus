@@ -1,4 +1,211 @@
-# Verification — 24 October 2026
+# Verification
+
+## Dean demo, authentication and visual refresh — 15 November 2026
+
+Applied the requested sage `#EEF1EA`, forest text `#1F2D26`, terracotta `#B84A24`
+and peach `#F6DCCB`, locally hosted Bricolage Grotesque/Inter, and pill buttons.
+Top and side navigation use neutral warm white surfaces. Authentication now has
+one centered card and a compact brand/language header; the split illustration
+column was removed. Successful auth submissions reset their forms, switching
+modes remounts fresh fields, and entry fields opt out of automatic restoration.
+Failed submissions retain their input for correction.
+
+Schedules default to a chronological vertical timeline with dots; Grid remains
+available and an explicit choice is remembered with a new view preference key.
+Timeline sorting does not mutate server rows, and secondary planner filters stay
+collapsed. Existing note, edit and suggestion actions remain attached to lessons.
+
+- TypeScript and the production build passed. All frontend suites passed:
+  **26 tests** (9 dean, 9 admin workspace, 8 timetable/timeline).
+- Full backend suite in the development container passed: **222 passed,
+  22 skipped**, with the existing Starlette/httpx deprecation warning. Skips are
+  platform-specific and opt-in isolated SQL Server acceptance tests. Ruff
+  correctness and Git whitespace checks passed. No migration or schema change.
+- Actual React browser fixtures passed **25 assertions at desktop and 25 at
+  360px**: fresh registration/recovery/login fields, retained failed input,
+  login/logout/login, centered card without a side panel, RU/HY/EN auth fit,
+  font loading, exact palette, pill buttons, timeline order/dots, lecturer scope,
+  grid switching and Armenian schedule fit. Browser profiles and screenshots
+  stay ignored under `.runtime/dean-demo-refresh/`. These are isolated API
+  fixtures, not a claim about browser extensions or password-manager behavior.
+- The existing admin wizard/browser fixture was rechecked with the new styles;
+  it still searches tables, scopes semester inputs, generates one fixture draft,
+  opens its timetable and explicitly reviews issues without publishing.
+- Added `seed-demo-deans` for older demo databases. On the live isolated
+  `ChronoCampus_Development`, it added the two missing demo deans while preserving
+  **20 existing accounts**, their password hashes and sessions, **6 versions**
+  and **1,158 assignments**. No generation, publication or academic data change.
+  The repeat-run regression verifies credentials, scopes, schedules and shared
+  revision preservation; other database names are rejected.
+- Live API login/read/logout checks passed for both new deans: the university
+  dean saw 6 versions and 57 lessons in the sample week; the FIA dean saw 5
+  versions, 42 lessons and only `DEMO-1-26`, `DEMO-2-26`, `DEMO-5-26` groups.
+  Both were denied administrator catalogs (403). Passwords are saved only in
+  ignored `backend/.demo-credentials.json`. Live Vite checks returned 200 for
+  the single-card source, both fonts and the proxied API readiness endpoint.
+
+## Guided admin workspace — 15 November 2026
+
+Implemented the agreed navigation and workflow: Support stays a normal menu item
+without its promotional box; University and Semester setup replace Data & rules.
+University has four searchable areas and Semester setup has three. Every existing
+catalog resource remains reachable. Semester-specific tables are scoped to the
+selected semester, while shared calendars and overlapping availability are
+identified explicitly. Existing CRUD schemas and server authorization remain in
+force; old internal `catalogs` links redirect to University for administrators.
+
+The new draft wizard follows Semester → Groups → Review → Generate, preselects
+the semester when opened from setup, filters compatible groups, and reviews real
+workload/hour totals. Advanced solver settings stay available under a disclosure.
+Generation opens the saved draft's timetable with a compact status/scope/hour
+summary. Review issues opens the full hours/unplaced-lesson report; publication
+stays separate, revision-checked and unavailable for partial, busy or stale reads.
+Generation details, cancellation, retries, manual moves, pins and history remain
+available. A finished generator run now says Generation finished rather than
+claiming every lesson was placed; completeness comes from the timetable report.
+
+- Frontend TypeScript, Vite build and all three Node suites passed: **24 tests**.
+  New cases cover navigation/role guards, reachability of all resources, semester
+  and availability scope, study-form eligibility, accurate review totals, safe
+  generation retries and RU/HY/EN rendering. A lost generation response reuses
+  the saved draft/revision/key. An uncertain or malformed draft-creation response
+  blocks blind duplication and directs the user to existing drafts.
+- Existing backend observability regressions passed: **13 tests** in isolated
+  SQLite fixtures, with the existing Starlette/httpx warning. The only backend
+  change is adding the new page/module names to safe client-error allowlists.
+  No migration, scheduling/business-rule or permission change was made.
+- Fresh headless Chrome checks run the actual React application against an
+  in-memory API fixture: **17 assertions at 1280px and 17 at 360px**, including
+  opening mobile navigation, table search, semester isolation, wizard steps,
+  exact create/enqueue ordering, idempotency/revision fields, timetable-first
+  order, explicit issue review, disabled publication for partial results and
+  no automatic publish call. The flow switches from English to Armenian and
+  checks horizontal document overflow. Desktop/mobile screenshots were inspected.
+  Browser profiles, fixture data and screenshots remain ignored under
+  `.runtime/admin-workspace-qa/`.
+- These browser writes stay inside the API fixture; no new timetable or
+  publication was created in the development database for acceptance. Live data
+  generation, print and a full accessibility audit are not claimed. Armenian
+  copy still benefits from native-speaker review.
+
+## Timetable fit and lecturer default — 15 November 2026
+
+Timetable headers no longer inherit the catalog tables' `nowrap` rule. The shared
+grid defines its slot column explicitly and reserves space per weekday, wraps
+long labels/names/badges inside their cells and keeps horizontal scrolling within
+the grid region. Student, lecturer, dean and Planner views share this component.
+
+Lecturers now land on their own timetable after login and session restoration,
+without a lecturer picker. Their timetable explains its scope in RU/HY/EN and
+uses the lecturer perspective so their own name is not repeated on every card.
+The existing server predicate still enforces ownership independently of filters;
+no schema, database data or backend runtime code changed.
+
+- TypeScript and the Vite production build passed; the two frontend Node suites
+  passed **15 tests**. Added checks cover lecturer default navigation, removal of
+  the lecturer picker, scoped text in all three languages and long Armenian grid
+  content. Timetable API regressions passed **29 tests**, including a second
+  lecturer whose lessons remain inaccessible through page, legacy and facet
+  reads. Ruff correctness checks and Git whitespace checks passed.
+- Fresh headless Chrome layout checks used the real shared grid markup and app
+  styles, with six fixtures combining RU/HY/EN and five/seven weekdays. Long
+  Armenian subjects, lecturer names, rooms, subgroups and badges produced **zero
+  text rectangles outside their cells** at CSS viewport widths **360, 800 and
+  1264 px**, and no horizontal document overflow. A 360px iframe provided the
+  mobile viewport because the installed Windows Chrome's top-level headless
+  window has a 500px minimum. Inspected mobile/tablet screenshots; temporary
+  fixture files, isolated profiles and screenshots remain ignored under
+  `.runtime/grid-fit-qa/`. These are layout checks, not full signed-in browser,
+  keyboard or print acceptance.
+- Live API check with an existing demo lecturer's unchanged password passed:
+  login 200, nine published lessons in the selected week all belonging to the
+  signed-in lecturer, only that lecturer in facets, and zero results when a
+  different lecturer ID was supplied. Logged out only the test session. The
+  running Vite frontend serves the updated grid and default-page code, and
+  proxied readiness remains 200.
+
+## Database runtime repair — 15 November 2026
+
+This supersedes the unverified/unapplied migration limitation in the dean
+implementation record below. The reload-enabled development backend had loaded
+the new account model while SQL Server remained at `0006_smtp_password_reset`.
+Login queried the missing `User.faculty_id` column, and readiness returned 503.
+
+- Used the local SQL Server administrator credential through an in-memory pipe
+  for isolated migration checks and backup operations; it was not printed,
+  persisted in scripts, or substituted for the application's runtime account.
+- Full Alembic upgrade passed on an empty disposable SQL Server database.
+  Created a native COPY_ONLY/CHECKSUM development backup, passed RESTORE VERIFYONLY,
+  restored it into a second disposable database and successfully upgraded that
+  copy from 0006 to 0007. Both disposable databases were removed. The verified
+  pre-upgrade backup remains outside Git in the SQL Server data directory.
+- With zero active jobs, stopped the API/coordinator/I/O containers, applied
+  `alembic upgrade head` through a one-off Compose backend using the configured
+  application database permissions, and restarted the original containers.
+  No reset-token purge, seed, password reset or account recreation was performed.
+- Restored-copy and live post-migration counts matched: User 20, Faculty 3,
+  CourseGroup 6, ScheduleVersion 5, LessonAssignment 1038, LessonOccurrence 848,
+  PublishedGroupSchedule 3, GenerationRun 16 and PersonalLessonNote 2.
+- Live schema reports `0007_dean_suggestions`; API readiness and readiness through
+  the frontend proxy return 200. Existing `admin.demo@example.invalid` login,
+  catalog reads and version review reads return 200 using its unchanged locally
+  stored password. Logged out only the verification session (204). No password
+  or session secret was included in verification output.
+
+These checks establish SQL Server schema compatibility and API login recovery;
+fresh browser/mobile/keyboard/print acceptance remains unverified.
+
+## Dean role and weekly timetable — 15 November 2026
+
+Implemented the dean role, nullable faculty scope, safe published/draft version
+reads and diff, non-binding suggestion lifecycle and admin dry runs, dean/admin
+screens, server-derived weekly grids for all four roles, the local-date fix,
+scoped overview counts, fictional dean seed accounts and additive migration
+`0007_dean_suggestions`. P1/P2 roadmap items and optional design upgrades in the
+implementation plan remain separate work.
+
+- Full backend suite, executed with
+  `docker exec chronocampus-backend-1 python -m pytest tests -q -rs` in the existing
+  Linux/Python 3.11 container: **219 passed, 22 skipped**, 106.36 seconds. Tests
+  isolate their SQLite state; the running development database was not migrated
+  or seeded. The upstream Starlette/httpx deprecation warning remains.
+- Skips: one Windows containment test, seven native Windows launcher tests,
+  seven SQL Server queue cases (including Windows hard-death acceptance), six
+  SQL Server password-recovery cases, and one concurrent-publication SQL Server
+  case. Required isolated SQL databases were not configured. These are not passed
+  SQL Server or Windows checks.
+- New tests cover the administrator route matrix for dean/student/lecturer,
+  mixed-faculty version privacy, revocation/scope revalidation, version/revision
+  cursors, diffs, all proposal kinds, validation/quota/ownership, lifecycle and
+  comments, expected-status races, audit privacy, shared dry-run/manual-move
+  conflict codes, schedule/revision immutability, dean accounts/passwords,
+  student-only registration, overview, bounded note authorization, probe and
+  idempotent demo scopes. Route discovery uses the resolved OpenAPI paths to
+  account for the installed FastAPI's deferred included routers.
+- `npm --prefix frontend run typecheck` and `npm --prefix frontend run build`
+  passed. `node frontend/tests/week-grid.test.mjs` passed five checks;
+  `node frontend/tests/dean.test.mjs` passed seven. They cover local 01:00 UTC+4,
+  semantic/server-timed grids, occupied extra/weekend slots, subgroup/parity and
+  cancellation text, RU/HY/EN rendering, role navigation/guards, conditional dean
+  scope, proposal bounds and the read-only review source boundary. No new runtime
+  or development dependencies were added.
+- Ruff correctness rules (`E4,E7,E9,F`) and `git diff --check` passed. Published
+  page reads still use three SELECTs for both 7 and 517 lessons. Facets now use
+  ten SELECTs, adding one constant-count calendar metadata query. Note saves use
+  one bounded authorization/note SELECT plus the existing revision-lock SELECT.
+- Migration frozen DDL passed a SQL Server-dialect compilation check, including
+  the additive faculty FK/index, suggestion/comment tables and refused downgrade.
+  **Live empty-database and restored-copy migration verification is unchecked**:
+  the isolated-database attempt was denied with SQL Server error 262 (`CREATE
+  DATABASE` permission denied in `master`). It failed before creating a database
+  or backup. The live database remains at `0006_smtp_password_reset`; apply and
+  verify 0007 with an authorized migration account before running this revision.
+- No fresh browser, 360px layout, keyboard interaction, native-dialog focus or
+  print acceptance was performed. Server rendering does not establish these.
+  Armenian copy needs native-speaker review. See the new manual checking
+  scenarios before demonstration or release. No push, PR or deployment was made.
+
+## Earlier verification — 24 October 2026
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 

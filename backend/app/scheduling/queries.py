@@ -10,7 +10,8 @@ from sqlalchemy import and_, false, func, or_, select, true
 from sqlalchemy.orm import Session
 
 from app.accounts.dependencies import COOKIE
-from app.calendar.rules import parity
+from app.accounts.roles import ADMIN, DEAN, LECTURER, ROLES, STUDENT
+from app.calendar.rules import lesson_slot, parity
 from app.core.security import token_hash
 from app.db import models as m
 from app.db.session import get_db
@@ -24,6 +25,13 @@ V, T = m.ScheduleVersion.__table__, m.Term.__table__
 S, U = m.Subject.__table__, m.Account.__table__
 G, R = m.CourseGroup.__table__, m.Room.__table__
 SG, LG = m.SmallGroup.__table__, m.LabGroup.__table__
+M, C = m.Major.__table__, m.CalendarConfig.__table__
+
+
+def account_scope(account):
+    return {key: getattr(account, key, None) for key in (
+        "id", "role", "course_group_id", "small_group_id", "lab_group_id", "faculty_id"
+    )}
 
 
 def fresh_scope(db, request):
@@ -33,14 +41,14 @@ def fresh_scope(db, request):
     sessions = m.UserSession.__table__
     row = db.execute(
         select(U.c.id, U.c.role, U.c.course_group_id, U.c.small_group_id,
-               U.c.lab_group_id, U.c.must_change_password,
+               U.c.lab_group_id, U.c.faculty_id, U.c.must_change_password,
                select(m.DataRevision.revision).where(m.DataRevision.id == 1)
                .scalar_subquery().label("revision"))
         .join(sessions, sessions.c.user_id == U.c.id)
         .where(sessions.c.session_token == token_hash(request.cookies.get(COOKIE, "")),
                sessions.c.is_revoked == false(), sessions.c.expires_at > datetime.utcnow(),
                U.c.is_active == true(), U.c.email_verified == true(),
-               U.c.role.in_(["admin", "lecturer", "student"]))
+               U.c.role.in_(ROLES))
     ).mappings().first()
     if row is None:
         raise HTTPException(401, "authentication_required", headers=PRIVATE)
@@ -51,12 +59,23 @@ def fresh_scope(db, request):
     return dict(row)
 
 
-def authorized(scope):
-    if scope["role"] == "admin":
+def dean_scope_predicate(scope):
+    if scope.get("faculty_id") is None:
         return true()
-    if scope["role"] == "lecturer":
+    return W.c.course_group_id.in_(
+        select(G.c.id).join(M, M.c.id == G.c.major_id)
+        .where(M.c.faculty_id == scope["faculty_id"])
+    )
+
+
+def authorized(scope):
+    if scope["role"] == ADMIN:
+        return true()
+    if scope["role"] == DEAN:
+        return dean_scope_predicate(scope)
+    if scope["role"] == LECTURER:
         return W.c.teacher_id == scope["id"]
-    if scope["role"] != "student" or not scope["course_group_id"]:
+    if scope["role"] != STUDENT or not scope["course_group_id"]:
         return false()
     predicate = W.c.course_group_id == scope["course_group_id"]
     if scope["small_group_id"]:
@@ -68,13 +87,19 @@ def authorized(scope):
     return predicate
 
 
-def source(scope):
-    return (A.join(Occurrences, A.c.occurrence_id == Occurrences.c.id)
-            .join(W, Occurrences.c.component_id == W.c.id)
-            .join(P, and_(P.c.version_id == A.c.version_id,
-                          P.c.course_group_id == W.c.course_group_id,
-                          P.c.term_id == W.c.term_id))
-            .join(V, V.c.id == A.c.version_id).join(T, T.c.id == V.c.term_id)
+def source(scope, version_id=None):
+    joined = (A.join(Occurrences, A.c.occurrence_id == Occurrences.c.id)
+              .join(W, Occurrences.c.component_id == W.c.id))
+    if version_id is None:
+        joined = joined.join(P, and_(P.c.version_id == A.c.version_id,
+                                    P.c.course_group_id == W.c.course_group_id,
+                                    P.c.term_id == W.c.term_id))
+        joined = joined.join(V, V.c.id == A.c.version_id)
+    else:
+        joined = joined.join(V, and_(V.c.id == A.c.version_id,
+                                     V.c.id == version_id,
+                                     W.c.term_id == V.c.term_id))
+    return (joined.join(T, T.c.id == V.c.term_id)
             .join(S, S.c.id == W.c.subject_id).join(U, U.c.id == W.c.teacher_id)
             .join(G, G.c.id == W.c.course_group_id).join(R, R.c.id == A.c.room_id)
             .outerjoin(SG, SG.c.id == W.c.small_group_id)
@@ -90,7 +115,7 @@ def filters(start: date | None = None, end: date | None = None,
                 lesson_type=lesson_type)
 
 
-def selection(scope, values):
+def selection(scope, values, version_id=None):
     statement = select(*A.c, W.c.id.label("component_id"), W.c.term_id,
                        T.c.name.label("term"), W.c.subject_id, S.c.name.label("subject"),
                        W.c.teacher_id, U.c.display_name.label("teacher"),
@@ -98,7 +123,9 @@ def selection(scope, values):
                        W.c.small_group_id, W.c.lab_group_id, SG.c.label.label("small_group"),
                        LG.c.label.label("lab_group"), R.c.room_number.label("room"),
                        W.c.lesson_type, V.c.configuration, T.c.starts_on)
-    statement = statement.select_from(source(scope)).where(authorized(scope))
+    statement = statement.select_from(source(scope, version_id)).where(authorized(scope))
+    if values.get("_cohort_ids") is not None:
+        statement = statement.where(W.c.course_group_id.in_(values["_cohort_ids"]))
     for key in FILTERS:
         if values.get(key) is not None:
             statement = statement.where((A.c[key] if key == "room_id" else W.c[key]) == values[key])
@@ -109,8 +136,8 @@ def selection(scope, values):
     return statement
 
 
-def fingerprint(scope, values):
-    return hashlib.sha256(json.dumps([scope, values], sort_keys=True, default=str).encode()).hexdigest()
+def fingerprint(scope, values, version_id=None):
+    return hashlib.sha256(json.dumps([scope, values, version_id], sort_keys=True, default=str).encode()).hexdigest()
 
 
 def decode_cursor(cursor, expected):
@@ -133,9 +160,9 @@ def decode_cursor(cursor, expected):
         raise HTTPException(422, "invalid_cursor", headers=PRIVATE) from None
 
 
-def materialize(db, scope, values, limit, cursor=None):
-    signature = fingerprint(scope, values)
-    statement = selection(scope, values)
+def materialize(db, scope, values, limit, cursor=None, version_id=None):
+    signature = fingerprint(scope, values, version_id)
+    statement = selection(scope, values, version_id)
     columns = (A.c.day, A.c.starts_at, A.c.occurrence_id, A.c.id)
     if cursor is not None:
         last = decode_cursor(cursor, signature)
@@ -205,26 +232,80 @@ def published_schedule(request: Request, response: Response, values: dict = Depe
     return consistent(db, request, response, read)
 
 
+def grid_configuration(calendar, occupied_slots=()):
+    """Calendar-derived display metadata, including extra slots actually in use."""
+    ordinary = calendar.get("ordinary_slots", 0)
+    numbers = sorted(set(range(1, ordinary + 1)) | set(occupied_slots))
+    slots = []
+    for number in numbers:
+        try:
+            start, end = lesson_slot(calendar, number)
+        except (ValueError, KeyError, TypeError):
+            continue
+        slots.append({"slot": number, "starts_at": start, "ends_at": end})
+    return {"weekdays": calendar.get("weekdays", []), "ordinary_slots": ordinary,
+            "slots": slots}
+
+
+def facets(db, scope, version_id=None):
+    choices = {}
+    joined = source(scope, version_id)
+    allowed = authorized(scope)
+    if version_id is not None:
+        cohorts = db.scalar(select(V.c.cohort_ids).where(V.c.id == version_id)) or []
+        allowed = and_(allowed, W.c.course_group_id.in_(cohorts))
+    for key, identifier, label in (
+        ("term_id", W.c.term_id, T.c.name),
+        ("course_group_id", W.c.course_group_id, G.c.group_code),
+        ("teacher_id", W.c.teacher_id, U.c.display_name),
+        ("room_id", A.c.room_id, R.c.room_number),
+        ("subject_id", W.c.subject_id, S.c.name),
+        ("lesson_type", W.c.lesson_type, W.c.lesson_type),
+    ):
+        ordering = (label,) if label is identifier else (label, identifier)
+        statement = (select(identifier.label("id"), label.label("label"))
+                     .select_from(joined).where(allowed).distinct()
+                     .order_by(*ordering))
+        choices[key] = [dict(row) for row in db.execute(statement).mappings()]
+    bounds = db.execute(select(func.min(A.c.day), func.max(A.c.day))
+                        .select_from(joined).where(allowed)).one()
+    # One joined query for calendar metadata; never fetch calendars per lesson.
+    columns = [column.label("calendar_" + column.name) for column in C.c]
+    metadata = db.execute(
+        select(T.c.id.label("term_id"), V.c.configuration, A.c.slot, *columns)
+        .select_from(joined.join(C, C.c.id == T.c.calendar_id))
+        .where(allowed).distinct().order_by(T.c.id, A.c.slot)
+    ).mappings()
+    grid = {}
+    for row in metadata:
+        calendar = {column.name: row["calendar_" + column.name] for column in C.c}
+        calendar = (row["configuration"] or {}).get("calendar") or calendar
+        key = str(row["term_id"])
+        existing = grid.get(key, {})
+        occupied = [slot["slot"] for slot in existing.get("slots", [])] + [row["slot"]]
+        grid[key] = grid_configuration(calendar, occupied)
+    # An empty draft still needs a term, group and calendar for general proposals.
+    if version_id is not None and not grid:
+        row = db.execute(
+            select(T.c.id.label("term_id"), T.c.name.label("term"), V.c.configuration,
+                   V.c.cohort_ids, *columns)
+            .select_from(V.join(T, T.c.id == V.c.term_id).join(C, C.c.id == T.c.calendar_id))
+            .where(V.c.id == version_id)
+        ).mappings().first()
+        if row:
+            calendar = {column.name: row["calendar_" + column.name] for column in C.c}
+            calendar = (row["configuration"] or {}).get("calendar") or calendar
+            grid[str(row["term_id"])] = grid_configuration(calendar)
+            choices["term_id"] = [{"id": row["term_id"], "label": row["term"]}]
+            groups = select(G.c.id, G.c.group_code.label("label")).join(M, M.c.id == G.c.major_id)
+            groups = groups.where(G.c.id.in_(row["cohort_ids"] or []))
+            if scope["role"] == DEAN and scope.get("faculty_id") is not None:
+                groups = groups.where(M.c.faculty_id == scope["faculty_id"])
+            choices["course_group_id"] = [dict(item) for item in db.execute(groups).mappings()]
+    return {"filters": choices, "date_bounds": {"start": bounds[0], "end": bounds[1]},
+            "grid": grid, "revision": scope["revision"]}
+
+
 @router.get("/schedule/facets")
 def schedule_facets(request: Request, response: Response, db: Session = Depends(get_db)):
-    def read(scope):
-        choices = {}
-        for key, identifier, label in (
-            ("term_id", W.c.term_id, T.c.name),
-            ("course_group_id", W.c.course_group_id, G.c.group_code),
-            ("teacher_id", W.c.teacher_id, U.c.display_name),
-            ("room_id", A.c.room_id, R.c.room_number),
-            ("subject_id", W.c.subject_id, S.c.name),
-            ("lesson_type", W.c.lesson_type, W.c.lesson_type),
-        ):
-            ordering = (label,) if label is identifier else (label, identifier)
-            statement = (select(identifier.label("id"), label.label("label"))
-                         .select_from(source(scope)).where(authorized(scope)).distinct()
-                         .order_by(*ordering))
-            choices[key] = [dict(row) for row in db.execute(statement).mappings()]
-        bounds = db.execute(select(func.min(A.c.day), func.max(A.c.day))
-                            .select_from(source(scope)).where(authorized(scope))).one()
-        return {"filters": choices, "date_bounds": {"start": bounds[0], "end": bounds[1]},
-                "revision": scope["revision"]}
-
-    return consistent(db, request, response, read)
+    return consistent(db, request, response, lambda scope: facets(db, scope))

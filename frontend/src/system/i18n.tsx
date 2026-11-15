@@ -11,6 +11,8 @@ import { runtimeWords } from "./runtimeWords";
 import { scheduleWords } from "./scheduleWords";
 import { uiWords } from "./uiWords";
 import { designWords } from "./designWords";
+import { deanWords } from "./deanWords";
+import { adminWords } from "./adminWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   ...ruleMessages,
@@ -19,6 +21,8 @@ const words: Record<string, [string, string, string]> = {
   ...scheduleWords,
   ...uiWords,
   ...designWords,
+  ...deanWords,
+  ...adminWords,
   register: ["Создать аккаунт", "Ստեղծել հաշիվ", "Create account"],
   registrationName: ["Имя и фамилия", "Անուն և ազգանուն", "Full name"],
   verifyEmail: ["Подтвердите почту", "Հաստատեք էլ․ փոստը", "Verify your email"],
@@ -30,7 +34,6 @@ const words: Record<string, [string, string, string]> = {
   university_email_required: ["Используйте разрешённый университетский адрес.", "Օգտագործեք թույլատրված համալսարանական էլ․ հասցե։", "Use an approved university email address."],
   invalid_verification_token: ["Ссылка недействительна или устарела. Запросите новую.", "Հղումն անվավեր է կամ ժամկետանց։ Պահանջեք նորը։", "This verification link is invalid or expired. Request a new link."],
   requestNewLink: ["Запросить новую ссылку", "Պահանջել նոր հղում", "Request a new link"],
-  registrationAccessHelp: ["Пароль ChronoCampus отличается от пароля почты. Администратор назначает учебную группу.", "ChronoCampus-ի գաղտնաբառը տարբերվում է էլ․ փոստի գաղտնաբառից։ Ադմինիստրատորը նշանակում է ուսումնական խումբը։", "Your ChronoCampus password is separate from your email password. Your administrator assigns your academic group."],
   schedule: ["Расписание", "Դասացուցակ", "Timetable"],
   catalogs: ["Данные и правила", "Տվյալներ և կանոններ", "Data & rules"],
   planner: ["Генератор", "Գեներատոր", "Planner"],

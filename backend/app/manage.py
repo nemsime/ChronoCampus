@@ -8,6 +8,8 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN
+
 from app.accounts.router import EmailInput
 from app.core.security import password_hash
 from app.db.models import Account
@@ -21,6 +23,10 @@ def main():
         "seed-demo",
         help="Populate isolated development DB; write random credentials to ignored local file",
     )
+    commands.add_parser(
+        "seed-demo-deans",
+        help="Add missing demo deans to existing demo groups; preserve all existing passwords and schedules",
+    )
     admin = commands.add_parser(
         "create-admin",
         help="Create a local administrator without changing existing accounts",
@@ -28,12 +34,12 @@ def main():
     admin.add_argument("email")
     admin.add_argument("--name", required=True)
     args = parser.parse_args()
-    if args.command == "seed-demo":
-        from app.demo import seed_demo
+    if args.command in {"seed-demo", "seed-demo-deans"}:
+        from app.demo import seed_demo, seed_demo_deans
 
         print(
             json.dumps(
-                seed_demo(
+                (seed_demo_deans if args.command == "seed-demo-deans" else seed_demo)(
                     Path(__file__).resolve().parents[1] / ".demo-credentials.json"
                 )
             )
@@ -53,7 +59,7 @@ def main():
                 Account(
                     email=email,
                     display_name=args.name,
-                    role="admin",
+                    role=ADMIN,
                     password_hash=password_hash(password),
                     must_change_password=True,
                 )

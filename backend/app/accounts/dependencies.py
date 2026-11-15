@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy import false, select
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN, DEAN, ROLES, SCHEDULE_VIEW_ALL
 from app.core.config import get_settings
 from app.core.security import csrf_token, token_hash
 from app.db.models import Account, UserSession
@@ -36,7 +37,7 @@ def authenticated(request: Request, db: Session = Depends(get_db)) -> Account:
         not account
         or not account.is_active
         or not account.email_verified
-        or account.role not in {"admin", "lecturer", "student"}
+        or account.role not in ROLES
     ):
         raise HTTPException(401, "authentication_required")
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
@@ -55,8 +56,20 @@ def current_user(account: Account = Depends(authenticated)) -> Account:
 
 
 def administrator(account: Account = Depends(current_user)) -> Account:
-    if account.role != "admin":
+    if account.role != ADMIN:
         raise HTTPException(403, "administrator_required")
+    return account
+
+
+def dean(account: Account = Depends(current_user)) -> Account:
+    if account.role != DEAN:
+        raise HTTPException(403, "dean_required")
+    return account
+
+
+def schedule_reader(account: Account = Depends(current_user)) -> Account:
+    if account.role not in SCHEDULE_VIEW_ALL:
+        raise HTTPException(403, "forbidden")
     return account
 
 
@@ -73,5 +86,6 @@ def public_account(account: Account) -> dict:
             "course_group_id",
             "small_group_id",
             "lab_group_id",
+            "faculty_id",
         )
     }

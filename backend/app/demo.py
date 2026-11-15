@@ -44,9 +44,46 @@ def _seed_account(db, credentials, email, name, role, **membership):
 
     row.password_hash = password_hash(secret)
     row.must_change_password = False
+    for key, value in membership.items():
+        setattr(row, key, value)
     credentials[email] = {"password": secret, "name": name, "role": role}
     db.flush()
     return row
+
+
+def seed_demo_deans(credentials_path: Path):
+    """Add missing demo deans to existing demo groups without rotating any login."""
+    credentials = json.loads(credentials_path.read_text(encoding="utf-8")) if credentials_path.exists() else {}
+    created = []
+    with Session(get_engine(), expire_on_commit=False) as db:
+        if db.scalar(text("SELECT DB_NAME()")) != "ChronoCampus_Development":
+            raise RuntimeError("Demo seed requires the isolated ChronoCampus_Development database")
+        lock_revision(db, changed=False)
+        faculty = db.scalar(select(m.Faculty).where(m.Faculty.code == "FIA"))
+        groups = list(db.scalars(select(m.CourseGroup).join(m.Major).where(
+            m.Major.faculty_id == faculty.id,
+            m.CourseGroup.group_code.like("DEMO-%"),
+        ))) if faculty else []
+        if not groups:
+            raise RuntimeError("Seed the demo faculties and groups with seed-demo first")
+        for email, name, faculty_id in (
+            ("dean.demo@example.invalid", "Demo University Dean", None),
+            ("dean.faculty1.demo@example.invalid", "Demo Faculty Dean", faculty.id),
+        ):
+            existing = db.scalar(select(m.Account).where(m.Account.email == email))
+            if existing:
+                if existing.role != "dean":
+                    raise RuntimeError(f"Demo account {email} exists with an unexpected role")
+                continue
+            _seed_account(db, credentials, email, name, "dean", faculty_id=faculty_id)
+            created.append(email)
+        if created:
+            lock_revision(db)
+        db.commit()
+    credentials_path.parent.mkdir(parents=True, exist_ok=True)
+    credentials_path.write_text(json.dumps(credentials, ensure_ascii=False, indent=2), encoding="utf-8")
+    return {"created": created, "faculty_groups": [group.group_code for group in groups],
+            "credentials_file": str(credentials_path)}
 
 
 def seed_demo(credentials_path: Path):
@@ -70,6 +107,9 @@ def seed_demo(credentials_path: Path):
                 ("FCS", "Faculty of Computer Science"),
             )
         ]
+        account("dean.demo@example.invalid", "Demo University Dean", "dean", faculty_id=None)
+        account("dean.faculty1.demo@example.invalid", "Demo Faculty Dean", "dean",
+                faculty_id=faculties[0].id)
         specifications = [
             (900101, "Software Engineering", 0, "present"),
             (900102, "Automation and Robotics", 0, "present"),

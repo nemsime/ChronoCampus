@@ -33,6 +33,10 @@ password values belong in logs or Git.
 
 ## Migration and explicit deletion approval
 
+The current application schema is `0007_dean_suggestions`. Its additive dean
+tables do not change password recovery. The approval requirement below applies
+when upgrading through `0006_smtp_password_reset` with retained tokens.
+
 Stop the API and workers, take a native SQL Server backup, verify it, and test on
 a restored copy first. Migration `0006_smtp_password_reset` refuses to proceed
 when tokens exist unless deletion has been explicitly approved. It removes

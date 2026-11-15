@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.accounts.roles import Role
 
 class Input(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -68,12 +69,13 @@ class SubjectInput(Input):
 class AccountInput(Input):
     email: str = Field(min_length=3, max_length=255)
     display_name: str = Field(min_length=1, max_length=150)
-    role: Literal["admin", "lecturer", "student"]
+    role: Role
     is_active: bool = True
     password: str | None = Field(default=None, min_length=12, max_length=256)
     course_group_id: int | None = None
     small_group_id: int | None = None
     lab_group_id: int | None = None
+    faculty_id: int | None = Field(default=None, gt=0)
 
 
 class CalendarInput(Input):

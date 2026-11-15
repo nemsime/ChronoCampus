@@ -1,0 +1,172 @@
+/* Local fonts: SIL Open Font License, included beside the font files. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/BricolageGrotesque-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Sage, forest and terracotta; shared by every role and the entry screens. */
+h1, h2, h3, h4, .brand { font-family: var(--font-heading); color: var(--text); }
+h1 { font-weight: 650; letter-spacing: -.8px; }
+h2, h3, h4 { font-weight: 600; }
+button { border-radius: 999px; box-shadow: none; }
+button:hover:not(:disabled) { box-shadow: none; }
+button.secondary { color: var(--text); border-color: var(--border); }
+button.secondary:hover { color: var(--accent-hover); border-color: var(--accent); background: var(--peach); }
+button.link, .heading-period { color: var(--accent); }
+button.icon-button { color: var(--muted); border-radius: 50%; }
+button.icon-button:hover { color: var(--accent); background: var(--peach); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible { outline-color: var(--accent); }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #b84a2414; }
+input::placeholder, textarea::placeholder { color: #6a776e; }
+.panel, .overview-metric, .summary-strip, .run-card { border-radius: 18px; box-shadow: none; background: var(--surface); }
+.eyebrow { letter-spacing: 1.3px; font-size: 11px; }
+.topbar { background: var(--surface); backdrop-filter: none; }
+.section-links, .generation-controls, .schedule-view-toggle { background: var(--surface); }
+.page-heading p:not(.eyebrow), .page-hero-copy > p { font-size: 14px; }
+.overview-heading h1 { font-family: var(--font-heading); font-weight: 650; }
+.overview-metric > strong { color: var(--text); }
+.overview-panel-heading h2, .campus-panel h2 { font-size: 18px; }
+.overview-metric > span, .overview-date-row > p, .overview-panel-heading p:not(.eyebrow),
+.upcoming-description p, .upcoming-place, .version-copy small, .activity-list time { font-size: 12px; }
+.version-copy strong, .activity-list strong { font-size: 14px; color: var(--text); }
+.planning-feature { background: var(--peach); border-color: #e8c4ac; }
+.planning-feature h2 { font-family: var(--font-heading); font-weight: 600; max-width: 100%; }
+.planning-feature > button { background: var(--accent); color: white; font-size: 13px; }
+.planning-feature > button:hover { background: var(--accent-hover); }
+.planning-feature > p:not(.eyebrow) { color: var(--text); font-size: 13px; }
+.feature-grid-art { display: none; }
+.feature-icon, .metric-icon, .page-hero-icon, .summary-item-icon { background: var(--peach); color: var(--accent); }
+.week-day { border-radius: 14px; }
+.week-day.selected { background: var(--peach); border-color: #dbad8e; color: var(--text); }
+.week-day.selected .week-day-marks i, .note-dot { background: var(--accent); }
+.badge { font-size: 12px; border-radius: 999px; }
+.badge.lecture { color: #8e3518; background: var(--peach); }
+.badge.practical { color: #70521a; background: #f6eacb; }
+.badge.lab { color: #345b42; background: #e0eadb; }
+.badge.draft { color: #70462f; background: #f4e6d9; }
+.notice { font-size: 13px; color: var(--text); background: var(--sage); }
+.admin-area-tabs button.active { background: var(--accent); color: white; }
+.admin-resource-tabs button[aria-pressed="true"] { background: var(--peach); border-color: #dbad8e; color: #843315; }
+.draft-wizard-steps li[aria-current="step"] { color: var(--accent-hover); }
+.draft-wizard-steps li[aria-current="step"] > span { color: white; }
+.draft-wizard-steps li.done > span { background: var(--peach); color: var(--text); }
+.schedule-view-toggle button { border-radius: 999px; }
+.schedule-view-toggle button[aria-pressed="true"] { background: var(--peach); color: #843315; border-color: #dbad8e; }
+.week-grid .grid-today { background: #f9eee5; }
+.grid-lesson { border-radius: 10px; }
+.grid-lesson:focus-visible { outline-color: var(--accent); }
+.table-scroll th { background: var(--sage); color: var(--muted); font-size: 12px; }
+.table-scroll td { font-size: 14px; color: var(--text); }
+.table-scroll tbody tr:hover { background: #f7f8f3; }
+
+/* Neutral navigation keeps the page frame quiet; selection carries the accent. */
+.sidebar { color: var(--text); border-right: 1px solid var(--border); }
+.sidebar .brand { color: var(--text); }
+.brand-mark { background: var(--peach); color: var(--accent); border-color: #e8c4ac; }
+.brand-name small, .nav-group-label { color: var(--muted); }
+.brand-name small { font-size: 9px; letter-spacing: .9px; }
+.nav-group-label { font-size: 10px; }
+.sidebar nav button { color: var(--muted); border-radius: 999px; font-size: 13px; }
+.sidebar nav button:hover:not(:disabled) { background: var(--sage); color: var(--text); }
+.sidebar nav button.active { background: var(--peach); border-color: var(--peach); color: var(--text); }
+.sidebar nav button.active > svg { color: var(--accent); }
+.nav-active-dot { background: var(--accent); }
+.sidebar-footer { border-color: var(--border); }
+.sidebar-footer strong { color: var(--text); }
+.sidebar-footer small { color: var(--muted); }
+.sidebar-footer .avatar { background: var(--peach); color: var(--text); }
+.sidebar .sidebar-account { color: var(--text) !important; }
+.nav-count { background: var(--peach); color: #843315; }
+.sidebar .mobile-menu { color: var(--text); }
+
+/* A quiet entry page with readable fields and the same primary action. */
+.auth-shell { display: flex; flex-direction: column; min-height: 100svh; background: var(--sage); }
+.auth-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 40px; }
+.auth-header .brand { font-size: 22px; color: var(--text); gap: 10px; }
+.auth-header select { background: var(--surface); font-size: 13px; }
+.auth-panel { flex: 1; width: 100%; min-height: 0; padding: 32px 24px 72px; align-items: center; }
+.auth-lock { color: var(--accent); background: var(--peach); border-color: #e8c4ac; }
+.auth-card { max-width: 460px; padding: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; }
+.auth-card h1 { color: var(--text); font-size: 32px; font-weight: 650; }
+.auth-card-header .eyebrow, .auth-description, .auth-card label, .auth-access-note { color: var(--muted); }
+.auth-card label, .auth-description { font-size: 14px; }
+.auth-card input { font-size: 15px; min-height: 48px; border-color: #c5cebf; background: var(--surface); }
+.auth-card .form-stack > button:not(.link) { background: var(--accent); color: white; min-height: 48px; padding-inline: 24px; font-size: 14px; }
+.auth-card .form-stack > button:not(.link):hover { background: var(--accent-hover); }
+.auth-card .form-stack > button:not(.link) svg { margin-left: 10px; }
+.auth-card .form-stack > .link { color: var(--accent-hover); font-size: 13px; }
+.auth-form-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
+.auth-form-links button.link { color: var(--accent-hover); font-size: 13px; }
+.auth-access-note { font-size: 12px; }
+.timeline-filter-details { margin: 12px 0; }
+.timeline-filter-details > summary { padding-block: 12px; color: var(--muted); cursor: pointer; }
+.timeline-filter-details > summary .badge { margin-left: 10px; }
+
+/* One chronological column: a continuous line, a dot and a lesson card. */
+.lesson-list-grouped { max-width: 980px; }
+.lesson-date-group { position: relative; padding-bottom: 6px; }
+.lesson-date-heading { border: 0; padding: 16px 0; margin-bottom: 4px; }
+.lesson-date-heading h3 { font-size: 15px; color: var(--text); }
+.lesson-date-count { font-size: 12px; }
+.lesson-list-grouped .lesson {
+  position: relative; display: grid; grid-template-columns: 135px minmax(0, 1fr) auto;
+  align-items: start; gap: 24px; margin: 0 0 14px 30px; padding: 22px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+}
+.lesson-list-grouped .lesson::before { content: ""; position: absolute; left: -25px; top: -15px; bottom: -15px; border-left: 2px solid #cdd6c6; }
+.lesson-list-grouped .lesson:first-of-type::before { top: 28px; }
+.lesson-list-grouped .lesson:last-child::before { bottom: calc(100% - 28px); }
+.lesson-list-grouped .lesson .timeline-dot { position: absolute; top: 25px; left: -30px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sage); box-shadow: 0 0 0 2px var(--accent); }
+.lesson-list-grouped .lesson:hover { border-color: #bfcbb8; background: var(--surface); }
+.lesson-list-grouped .lesson-time { min-width: 0; max-width: none; border: 0; padding: 0; }
+.lesson-list-grouped .lesson-time strong { color: var(--text); font-size: 15px; white-space: nowrap; }
+.lesson-list-grouped .lesson-time small { font-size: 12px; line-height: 1.6; }
+.lesson-list-grouped .lesson-main h4 { font-size: 18px; margin: 10px 0; }
+.lesson-list-grouped .lesson-details, .lesson-list-grouped .lesson-audience { font-size: 13px; }
+.lesson-list-grouped .lesson-action button { font-size: 13px; min-height: 40px; }
+.lesson-list-grouped .lesson.cancelled .timeline-dot { background: #778275; box-shadow: 0 0 0 2px #778275; }
+@media (max-width: 1000px) {
+  .lesson-list-grouped .lesson { grid-template-columns: 115px minmax(0, 1fr); gap: 18px; }
+  .lesson-list-grouped .lesson-action { grid-column: 2; margin-left: 0; }
+}
+@media (max-width: 760px) {
+  .auth-header { gap: 12px; padding: 20px 18px; }
+  .auth-header .brand { font-size: 19px; }
+  .auth-header .brand-mark { width: 32px; height: 32px; }
+  .auth-header select { max-width: 105px; padding: 8px; font-size: 12px; }
+  .auth-panel { padding: 20px 16px 40px; }
+  .auth-card { padding: 26px 22px; border-radius: 20px; }
+  .auth-card input { font-size: 16px; }
+  .auth-card h1 { font-size: 29px; }
+  .schedule-week-selector { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; width: 100%; }
+  .schedule-week-selector > label { grid-column: 2; grid-row: 1; min-width: 0; }
+  .schedule-week-selector input { width: 100%; }
+  .schedule-week-selector > button:last-child { grid-column: 3; grid-row: 1; }
+  .schedule-week-selector > .schedule-week-label { grid-column: 1 / -1; grid-row: 2; text-align: center; }
+  .lesson-list-grouped .lesson { grid-template-columns: minmax(0, 1fr); margin-left: 22px; padding: 18px; gap: 12px; }
+  .lesson-list-grouped .lesson::before { left: -18px; }
+  .lesson-list-grouped .lesson .timeline-dot { left: -23px; top: 22px; }
+  .lesson-list-grouped .lesson:first-of-type::before { top: 25px; }
+  .lesson-list-grouped .lesson:last-child::before { bottom: calc(100% - 25px); }
+  .lesson-list-grouped .lesson-time { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .lesson-list-grouped .lesson-action { grid-column: 1; }
+  .lesson-list-grouped .lesson-action button { gap: 7px; padding: 9px 14px; min-height: 44px; }
+  .lesson-list-grouped .lesson-main h4 { font-size: 17px; }
+  .lesson-date-heading { gap: 8px; }
+  .lesson-date-heading h3 { font-size: 14px; }
+  .lesson-date-count { font-size: 11px; }
+}
+@media print {
+  .lesson-list-grouped .lesson { box-shadow: none; border-color: #aaa; }
+}

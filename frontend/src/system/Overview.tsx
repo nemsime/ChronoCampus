@@ -5,7 +5,7 @@ import {
   NotebookPen, RefreshCw, UsersRound, type LucideIcon,
 } from "lucide-react";
 import { Account, api, Row } from "./api";
-import { dateLabel, EmptyState, ErrorBox, timestampLabel } from "./common";
+import { dateLabel, EmptyState, ErrorBox, localDay, timestampLabel } from "./common";
 import { useLanguage } from "./i18n";
 
 interface OverviewData {
@@ -16,10 +16,6 @@ interface OverviewData {
   versions: { id: number; name: string; status: string; term: string; report_complete: boolean | null }[];
   activity: { id: number; action: string; resource: string; created_at: string }[];
   support: { new: number; in_progress: number; closed: number };
-}
-
-export function localDay(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function shiftedDay(day: string, amount: number) {
@@ -49,6 +45,8 @@ export function Overview({ account, onNavigate }: {
   const [reload, setReload] = useState(0);
   const locale = lang === "hy" ? "hy-AM" : lang;
   const admin = account.role === "admin";
+  const dean = account.role === "dean";
+  const schedulePage = dean ? "timetables" : "schedule";
   const current = data?.date === day ? data : null;
 
   useEffect(() => {
@@ -83,6 +81,12 @@ export function Overview({ account, onNavigate }: {
        { key: "published_cohorts", label: "overviewPublished", icon: CalendarCheck2, tone: "blue" },
        { key: "draft_versions", label: "overviewDrafts", icon: Layers3, tone: "sand" },
        { key: "open_requests", label: "overviewRequests", icon: MessageSquare, tone: "rose" }]
+    : dean ? [{ key: "today_lessons", label: "overviewToday", icon: CalendarDays, tone: "sage" },
+       { key: "week_lessons", label: "overviewWeek", icon: BookOpen, tone: "blue" },
+       { key: "published_cohorts_in_scope", label: "deanPublishedCohorts", icon: CalendarCheck2, tone: "sage" },
+       { key: "draft_versions_in_scope", label: "deanDraftVersions", icon: Layers3, tone: "sand" },
+       { key: "my_open_suggestions", label: "deanOpenSuggestions", icon: MessageSquare, tone: "rose" },
+       { key: "my_accepted_suggestions", label: "deanAcceptedSuggestions", icon: MessageSquare, tone: "blue" }]
     : [{ key: "today_lessons", label: "overviewToday", icon: CalendarDays, tone: "sage" },
        { key: "week_lessons", label: "overviewWeek", icon: BookOpen, tone: "blue" },
        { key: "personal_notes", label: "overviewNotes", icon: NotebookPen, tone: "sand" },
@@ -129,24 +133,24 @@ export function Overview({ account, onNavigate }: {
             </div>
           </section>
           <section className="panel upcoming-panel">
-            <div className="overview-panel-heading"><div><h2>{t("overviewUpcoming")}</h2><p>{t("overviewUpcomingHelp")}</p></div><button className="link panel-action" onClick={() => onNavigate("schedule")}>{t("viewAll")}<ArrowUpRight size={16} aria-hidden="true" /></button></div>
+            <div className="overview-panel-heading"><div><h2>{t("overviewUpcoming")}</h2><p>{t("overviewUpcomingHelp")}</p></div><button className="link panel-action" onClick={() => onNavigate(schedulePage)}>{t("viewAll")}<ArrowUpRight size={16} aria-hidden="true" /></button></div>
             {current.upcoming.length ? <div className="upcoming-list">{current.upcoming.map(lesson => <article className={`upcoming-lesson ${lesson.lesson_type}`} key={lesson.occurrence_id}>
               <div className="upcoming-time"><strong>{String(lesson.starts_at).slice(0, 5)}</strong><span>{String(lesson.ends_at).slice(0, 5)}</span></div>
               <div className="upcoming-description"><span className={`badge ${lesson.lesson_type}`}>{t(lesson.lesson_type)}</span><h3>{lesson.subject}</h3><p>{lesson.teacher}</p></div>
               <div className="upcoming-place"><span><CalendarDays size={13} aria-hidden="true" />{dateLabel(lesson.day, lang)}</span><span><MapPin size={13} aria-hidden="true" />{lesson.room}</span></div>
-            </article>)}</div> : <EmptyState icon={CalendarDays} title={t("overviewNoLessons")} description={t("overviewNoLessonsHelp")}><button className="secondary" onClick={() => onNavigate("schedule")}>{t("overviewViewSchedule")}</button></EmptyState>}
+            </article>)}</div> : <EmptyState icon={CalendarDays} title={t("overviewNoLessons")} description={t("overviewNoLessonsHelp")}><button className="secondary" onClick={() => onNavigate(schedulePage)}>{t("overviewViewSchedule")}</button></EmptyState>}
           </section>
           {admin && <section className="panel activity-panel"><div className="overview-panel-heading"><h2>{t("overviewActivity")}</h2><button className="link panel-action" onClick={() => onNavigate("diagnostics")}>{t("viewAll")}<ArrowUpRight size={16} aria-hidden="true" /></button></div>
             {current.activity.length ? <ol className="activity-list">{current.activity.map(item => <li key={item.id}><span className="activity-dot" aria-hidden="true" /><div><strong>{t(activityLabels[item.action] || "activityRecorded")}</strong><small>{t(item.resource) === item.resource ? t("academicWorkspace") : t(item.resource)}</small></div><time dateTime={`${item.created_at}Z`}>{timestampLabel(item.created_at, lang)}</time></li>)}</ol> : <EmptyState icon={Clock3} title={t("overviewNoActivity")} description={t("overviewActivityHelp")} />}
           </section>}
         </div>
         <aside className="overview-side-column">
-          <section className="planning-feature"><span className="feature-icon"><CalendarCheck2 size={24} aria-hidden="true" /></span><p className="eyebrow">ChronoCampus</p><h2>{t(admin ? "overviewPlanningTitle" : "overviewPersonalTitle")}</h2><p>{t(admin ? "overviewPlanningText" : "overviewPersonalText")}</p><button onClick={() => onNavigate(admin ? "planner" : "schedule")}>{t(admin ? "overviewOpenPlanner" : "overviewViewSchedule")}<ArrowRight size={16} aria-hidden="true" /></button><div className="feature-grid-art" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div></section>
+          <section className="planning-feature"><span className="feature-icon"><CalendarCheck2 size={24} aria-hidden="true" /></span><p className="eyebrow">ChronoCampus</p><h2>{t(admin ? "overviewPlanningTitle" : dean ? "deanOverviewTitle" : "overviewPersonalTitle")}</h2><p>{t(admin ? "overviewPlanningText" : dean ? "deanOverviewText" : "overviewPersonalText")}</p><button onClick={() => onNavigate(admin ? "planner" : schedulePage)}>{t(admin ? "overviewOpenPlanner" : dean ? "openTimetables" : "overviewViewSchedule")}<ArrowRight size={16} aria-hidden="true" /></button><div className="feature-grid-art" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div></section>
           {admin ? <>
             <section className="panel versions-panel"><div className="overview-panel-heading"><h2>{t("overviewVersions")}</h2><Layers3 size={18} aria-hidden="true" /></div>
               {current.versions.length ? <div className="version-list">{current.versions.map(version => <button key={version.id} className="version-link" onClick={() => onNavigate("planner", version.id)}><span className="version-icon"><CalendarDays size={18} aria-hidden="true" /></span><span className="version-copy"><strong>{version.name}</strong><small>{version.term}</small></span><span className={`badge ${version.status === "published" ? "success" : version.report_complete ? "ready" : "draft"}`}>{t(version.status)}</span></button>)}</div> : <EmptyState icon={Layers3} title={t("overviewNoVersions")} description={t("overviewNoVersionsHelp")}><button className="secondary" onClick={() => onNavigate("planner")}>{t("createDraft")}</button></EmptyState>}
             </section>
-            <section className="panel campus-panel"><h2>{t("overviewCampus")}</h2><dl>{[{ key: "total_cohorts", label: "groups", icon: UsersRound }, { key: "total_rooms", label: "rooms", icon: Building2 }, { key: "active_users", label: "overviewActiveUsers", icon: UsersRound }, { key: "active_runs", label: "overviewActiveRuns", icon: Clock3 }].map(({ key, label, icon: Icon }) => <div key={key}><dt><Icon size={16} aria-hidden="true" />{t(label)}</dt><dd>{current.stats[key] ?? 0}</dd></div>)}</dl><button className="link panel-action" onClick={() => onNavigate("catalogs")}>{t("catalogs")}<ArrowUpRight size={15} aria-hidden="true" /></button></section>
+            <section className="panel campus-panel"><h2>{t("overviewCampus")}</h2><dl>{[{ key: "total_cohorts", label: "groups", icon: UsersRound }, { key: "total_rooms", label: "rooms", icon: Building2 }, { key: "active_users", label: "overviewActiveUsers", icon: UsersRound }, { key: "active_runs", label: "overviewActiveRuns", icon: Clock3 }].map(({ key, label, icon: Icon }) => <div key={key}><dt><Icon size={16} aria-hidden="true" />{t(label)}</dt><dd>{current.stats[key] ?? 0}</dd></div>)}</dl><button className="link panel-action" onClick={() => onNavigate("university")}>{t("university")}<ArrowUpRight size={15} aria-hidden="true" /></button></section>
           </> : <section className="panel support-overview"><span className="metric-icon"><MessageSquare size={20} aria-hidden="true" /></span><h2>{t("overviewSupportTitle")}</h2><p>{t("overviewSupportHelp")}</p><div className="support-counts"><span>{t("new")}<strong>{current.support.new}</strong></span><span>{t("in_progress")}<strong>{current.support.in_progress}</strong></span></div><button className="secondary" onClick={() => onNavigate("feedback")}>{t("feedback")}<ArrowRight size={16} aria-hidden="true" /></button></section>}
         </aside>
       </div>

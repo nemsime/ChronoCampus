@@ -6,6 +6,8 @@ University timetable generation with manual corrections and explicit publication
 
 Includes local accounts and roles, administrative catalogs, configurable calendars, semester workloads, automatic generation, pins, conflict checking, publication, personal dated notes, and private feedback. Interface languages: Russian, Armenian, English. Full-time and part-time calendars are independent.
 
+Roles are administrator, lecturer, student and dean. Deans review published timetables and drafts within an optional faculty scope and submit non-binding suggestions; administrators triage and apply changes manually. All roles have a shared weekly grid alongside the list view. Schema `0007_dean_suggestions` is required for these features; apply Alembic migrations before starting the updated backend.
+
 ## Documentation for the team
 
 | Document | Start here when you need to… |
@@ -98,18 +100,27 @@ After migrations, from `backend`:
 .venv/Scripts/python.exe -m app.manage seed-demo
 ```
 
-The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records and regenerate passwords for all seeded demo accounts, invalidating their previous passwords and sessions. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Current random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`.
+The command accepts only `ChronoCampus_Development`. Repeated runs reuse its named records and regenerate passwords for all seeded demo accounts, invalidating their previous passwords and sessions. It creates two faculties with several majors, four full-time cohorts and one part-time cohort, nested student groups, rooms, equipment, workloads, and fictional users. Current random passwords are stored in ignored `backend/.demo-credentials.json`; they are not printed or committed. Administrator: `admin.demo@example.invalid`. University-wide dean: `dean.demo@example.invalid`; first-faculty dean: `dean.faculty1.demo@example.invalid`.
+
+For an older demo database that already has groups and timetables, run
+`python -m app.manage seed-demo-deans` from `backend` to add only the missing dean
+accounts. This preserves existing passwords, sessions, drafts and published
+schedules. The faculty dean can review `DEMO-1-26`, `DEMO-2-26` and `DEMO-5-26`;
+the university dean can review all faculties. Open **Timetables**, choose an
+existing version and group, then select a lesson to try a suggestion. Both dean
+passwords are in the same ignored credentials file.
 
 Demo teaching dates and academic-hour settings are illustrative. Real university calendars remain unconfirmed until an administrator enters the missing facts. See [data provenance](docs/demo-data.md).
 
 ## Prepare and publish a semester
 
-1. In **Data & rules**, configure faculties, majors, cohorts, subgroups, rooms/equipment, and users.
-2. Configure a calendar, semester boundaries, and explicit **teaching periods**. Exam months remain inside semester boundaries but outside teaching periods. Confirm hours per lesson and teaching-week count.
-3. Enter workload components: subject, cohort/subgroup, lecturer, lesson type, semester hours, assessment, equipment. Add holidays, unavailable intervals, preferences, and explicitly allowed extra slots.
-4. In **Planner**, create a draft for a semester and selected cohorts. Generate with a recorded seed. Review completeness, hours, unresolved lessons, and diagnostics.
-5. Move or pin lessons. Each change runs the same hard-constraint validation. Regeneration retains pins; changed inputs invalidate a running result instead of overwriting newer work.
-6. Publish a complete valid draft. Students and lecturers see their latest published schedule. Create a new draft for subsequent changes. Personal notes follow the same lesson occurrence when it moves.
+1. In **University**, manage People, Academic structure, Rooms & equipment and Subjects through their searchable tabs.
+2. In **Semester setup**, choose a semester. Under **Calendar & dates**, configure its calendar, semester boundaries and explicit **teaching periods**. Exam months remain inside semester boundaries but outside teaching periods. Confirm hours per lesson and teaching-week count. Shared calendar edits affect every linked semester.
+3. Under **Teaching load**, enter subject, cohort/subgroup, lecturer, lesson type, semester hours, assessment and equipment. Use **Availability & exceptions** for unavailable intervals, preferences and allowed extra slots. Semester-specific rows are scoped to the selected semester; shared availability shows overlapping intervals.
+4. In **Planner**, choose **Create draft** and follow Semester → Groups → Review → Generate. Review the selected scope and input totals; solver method and seed are under advanced settings. The saved draft opens on its timetable with a compact result summary. Generation does not publish.
+5. Use **Review issues** for missing hours and unresolved lessons. Move or pin lessons; each change runs the same hard-constraint validation. Advanced generation settings allow regeneration, retaining pins. Changed inputs invalidate a running result instead of overwriting newer work. A finished run can still leave a partial timetable.
+6. A dean can inspect the draft in **Timetables**, compare it with the current publication, and submit suggestions. In **Suggestions**, the administrator can check feasibility, accept or reject, apply an accepted change manually in Planner, and link the implemented version. Suggestions never edit the timetable themselves.
+7. Publish a complete valid draft. Students and lecturers see their latest published schedule. Create a new draft for subsequent changes. Personal notes follow the same lesson occurrence when it moves.
 
 Holiday cancellations count separately from delivered hours and need no makeup. Emergency cancellations require an explicitly permitted extra slot on the original date. Permission never overrides room, teacher, or student conflicts.
 

@@ -21,6 +21,7 @@ from app.accounts.dependencies import (
 )
 from app.accounts.mail import MailError, enqueue_reset, validate_configuration
 from app.accounts.recovery import GENERIC_NOTICE, consume_reset, request_reset
+from app.accounts.roles import ROLES, STUDENT
 from app.core.config import get_settings
 from app.core.security import (
     csrf_token,
@@ -146,7 +147,7 @@ def login(
         or not account
         or not account.is_active
         or not account.email_verified
-        or account.role not in {"admin", "lecturer", "student"}
+        or account.role not in ROLES
     ):
         raise HTTPException(401, "invalid_credentials")
     raw = new_token()
@@ -290,7 +291,7 @@ def register(body: RegistrationInput, request: Request, db: Session = Depends(ge
             email=body.email,
             display_name=body.display_name,
             password_hash=password_hash(new_token()),
-            role="student",
+            role=STUDENT,
             email_verified=False,
             must_change_password=False,
         )

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
-  Database,
+  Landmark,
+  CalendarRange,
   MessageSquare,
   Settings,
   UserRound,
@@ -14,9 +15,8 @@ import {
   PanelLeftOpen,
   ArrowUp,
   LayoutDashboard,
-  ArrowUpRight,
-  CircleHelp,
   ShieldCheck,
+  Lightbulb,
 } from "lucide-react";
 import {
   Account,
@@ -31,19 +31,52 @@ import { SignIn, PasswordForm, useAuthLink } from "./Accounts";
 import { Catalogs } from "./Catalogs";
 import { Planner } from "./Planner";
 import { PersonalSchedule } from "./Schedule";
-import { Overview, localDay } from "./Overview";
+import { Overview } from "./Overview";
+import { DeanTimetables } from "./Dean";
+import { Suggestions } from "./Suggestions";
 import { Feedback } from "./Feedback";
 import { LanguageProvider, LanguageSwitch, useLanguage } from "./i18n";
-import { dateLabel, ErrorBox, LoadingState, useAction } from "./common";
+import { dateLabel, ErrorBox, LoadingState, localDay, useAction } from "./common";
 import "./styles.css";
 import "./workspace.css";
+import "./dean.css";
+import "./adminWorkspace.css";
+import "./theme.css";
+
+export function navigationForRole(role: Account["role"]) {
+  return [
+    { id: "overview", icon: LayoutDashboard, group: "navigationMain" },
+    { id: role === "dean" ? "timetables" : "schedule", icon: CalendarDays, group: "navigationMain" },
+    ...(role === "dean" ? [{ id: "suggestions", icon: Lightbulb, group: "navigationMain" }] : []),
+    ...(role === "admin" ? [
+      { id: "planner", icon: Settings, group: "navigationMain" },
+      { id: "university", icon: Landmark, group: "navigationAdmin" },
+      { id: "semester", icon: CalendarRange, group: "navigationAdmin" },
+      { id: "diagnostics", icon: Activity, group: "navigationAdmin" },
+      { id: "suggestions", icon: Lightbulb, group: "navigationAdmin" },
+    ] : []),
+    { id: "feedback", icon: MessageSquare, group: "navigationPersonal" },
+    { id: "account", icon: UserRound, group: "navigationPersonal" },
+  ];
+}
+export function pageForRole(page: string, role: Account["role"]) {
+  if (page === "catalogs" && role === "admin") return "university";
+  return navigationForRole(role).some(item => item.id === page) ? page : "overview";
+}
+
+export function defaultPageForRole(role: Account["role"]) {
+  return role === "lecturer" ? "schedule" : "overview";
+}
+
 function Workspace() {
   const { t, lang } = useLanguage();
   const authLink = useAuthLink();
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
+  const [openSuggestions, setOpenSuggestions] = useState(0);
   const [page, setPage] = useState("overview");
   const [plannerVersion, setPlannerVersion] = useState<number | null>(null);
+  const [plannerStart, setPlannerStart] = useState({ createDraft: false, termId: "" });
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem("chronocampus.sidebarCollapsed") === "true"; }
@@ -53,7 +86,7 @@ function Workspace() {
   const menuButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const { busy, error, run } = useAction();
-  const activePage = account?.must_change_password ? "account" : page;
+  const activePage = account?.must_change_password ? "account" : account ? pageForRole(page, account.role) : "overview";
   useEffect(() => {
     try { localStorage.setItem("chronocampus.sidebarCollapsed", String(sidebarCollapsed)); }
     catch { /* Navigation still works when browser storage is unavailable. */ }
@@ -67,8 +100,9 @@ function Workspace() {
   useEffect(() => {
     document.title = `${account ? t(activePage) : t("login")} · ChronoCampus`;
   }, [activePage, lang, account]);
-  const navigate = (next: string, versionId: number | null = null) => {
+  const navigate = (next: string, versionId: number | null = null, options: { createDraft?: boolean; termId?: string } = {}) => {
     setPlannerVersion(next === "planner" ? versionId : null);
+    setPlannerStart({ createDraft: next === "planner" && !!options.createDraft, termId: next === "planner" ? options.termId || "" : "" });
     setPage(next);
     setMenuOpen(false);
     requestAnimationFrame(() => {
@@ -77,8 +111,8 @@ function Workspace() {
     });
   };
   useEffect(() => {
-    setDiagnosticPage(page);
-  }, [page]);
+    setDiagnosticPage(activePage);
+  }, [activePage]);
   useEffect(() => {
     const error = (event: ErrorEvent) =>
       reportClientError("javascript_error", event.error);
@@ -98,6 +132,7 @@ function Workspace() {
         if (live) {
           setCsrf(response.csrf_token);
           setAccount(response.user);
+          setPage(defaultPageForRole(response.user.role));
         }
       })
       .catch(() => {})
@@ -114,6 +149,20 @@ function Workspace() {
       window.removeEventListener("session-expired", expire);
     };
   }, []);
+  useEffect(() => {
+    if (account?.role !== "admin" || account.must_change_password) { setOpenSuggestions(0); return; }
+    let active = true;
+    const load = async () => {
+      try {
+        const result = await api<{ total: number; counts: Record<string, number> }>("/admin/suggestions?status=open&limit=1");
+        if (active) setOpenSuggestions(result.counts?.open ?? result.total);
+      } catch { /* A badge failure must not block navigation. */ }
+    };
+    void load();
+    const timer = window.setInterval(load, 30000);
+    window.addEventListener("suggestions-updated", load);
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener("suggestions-updated", load); };
+  }, [account]);
   if (!ready)
     return <div className="loading-screen"><span className="brand">ChronoCampus</span><LoadingState /></div>;
   if (!account || authLink.token)
@@ -124,23 +173,11 @@ function Workspace() {
         onLogin={(user) => {
           setAccount(user);
           setMenuOpen(false);
-          setPage("overview");
+          setPage(defaultPageForRole(user.role));
         }}
       />
     );
-  const navigation = [
-    { id: "overview", icon: LayoutDashboard, group: "navigationMain" },
-    { id: "schedule", icon: CalendarDays, group: "navigationMain" },
-    ...(account.role === "admin"
-      ? [
-          { id: "planner", icon: Settings, group: "navigationMain" },
-          { id: "catalogs", icon: Database, group: "navigationAdmin" },
-          { id: "diagnostics", icon: Activity, group: "navigationAdmin" },
-        ]
-      : []),
-    { id: "feedback", icon: MessageSquare, group: "navigationPersonal" },
-    { id: "account", icon: UserRound, group: "navigationPersonal" },
-  ];
+  const navigation = navigationForRole(account.role);
   return (
     <div className={`workspace${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <a className="skip-link" href="#main-content">{t("skipContent")}</a>
@@ -181,15 +218,11 @@ function Workspace() {
             >
               <item.icon size={19} aria-hidden="true" />
               <span className="nav-label">{t(item.id)}</span>
+              {item.id === "suggestions" && account.role === "admin" && openSuggestions > 0 && <span className="nav-count" aria-label={`${t("suggestionOpen")}: ${openSuggestions}`}>{openSuggestions}</span>}
               {activePage === item.id && <span className="nav-active-dot" aria-hidden="true" />}
             </button>
           ))}</div>)}
         </nav>
-        <div className="sidebar-help">
-          <CircleHelp size={21} aria-hidden="true" />
-          <strong>{t("workspaceHelpTitle")}</strong><p>{t("workspaceHelpText")}</p>
-          <button disabled={account.must_change_password} onClick={() => navigate("feedback")}>{t("workspaceHelpAction")}<ArrowUpRight size={14} aria-hidden="true" /></button>
-        </div>
         <div className="sidebar-footer">
           <span className="avatar">
             {account.display_name?.slice(0, 1) || "C"}
@@ -239,11 +272,11 @@ function Workspace() {
         <main id="main-content" ref={main} tabIndex={-1}>
           <ErrorBox error={error} />
           <DiagnosticBoundary
-            key={page}
+            key={activePage}
             message={t("frontendFailure")}
             reload={t("reload")}
           >
-            {account.must_change_password || page === "account" ? (
+            {account.must_change_password || activePage === "account" ? (
               <>
               <div className="page-heading page-hero"><div className="page-hero-copy"><p className="eyebrow">{t("navigationPersonal")}</p><h1>{t("account")}</h1><p>{t("accountIntro")}</p></div><span className="page-hero-icon"><UserRound size={26} aria-hidden="true" /></span></div>
               <div className="account-layout"><section className="panel account-panel">
@@ -265,18 +298,22 @@ function Workspace() {
               </section>
               <aside className="panel account-security"><span className="security-icon"><ShieldCheck size={28} aria-hidden="true" /></span><h2>{t("accountSecurity")}</h2><p>{t("accountSecurityHelp")}</p><div className="security-rule"><span>12–256</span>{t("newPassword")}</div><p className="account-access-note">{t("authAccessHelp")}</p></aside></div>
               </>
-            ) : page === "catalogs" && account.role === "admin" ? (
-              <Catalogs />
-            ) : page === "planner" && account.role === "admin" ? (
-              <Planner initialVersionId={plannerVersion} />
-            ) : page === "diagnostics" && account.role === "admin" ? (
+            ) : (activePage === "university" || activePage === "semester") && account.role === "admin" ? (
+              <Catalogs key={activePage} mode={activePage} onCreateDraft={termId => navigate("planner", null, { createDraft: true, termId })} />
+            ) : activePage === "planner" && account.role === "admin" ? (
+              <Planner initialVersionId={plannerVersion} createOnOpen={plannerStart.createDraft} initialTermId={plannerStart.termId} onOpenSetup={() => navigate("semester")} />
+            ) : activePage === "diagnostics" && account.role === "admin" ? (
               <Diagnostics />
-            ) : page === "feedback" ? (
+            ) : activePage === "timetables" && account.role === "dean" ? (
+              <DeanTimetables />
+            ) : activePage === "suggestions" && (account.role === "dean" || account.role === "admin") ? (
+              <Suggestions mode={account.role} onNavigate={navigate} />
+            ) : activePage === "feedback" ? (
               <Feedback account={account} />
-            ) : page === "overview" ? (
-              <Overview account={account} onNavigate={navigate} />
+            ) : activePage === "schedule" && account.role !== "dean" ? (
+              <PersonalSchedule account={account} />
             ) : (
-              <PersonalSchedule />
+              <Overview account={account} onNavigate={navigate} />
             )}
           </DiagnosticBoundary>
         </main>

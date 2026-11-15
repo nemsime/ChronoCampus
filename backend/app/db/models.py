@@ -121,6 +121,7 @@ class Subject(Base):
 
 class Account(Base):
     __tablename__ = "User"
+    __table_args__ = (Index("ix_user_faculty", "faculty_id"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(Unicode(255), unique=True)
     password_hash: Mapped[str] = mapped_column(Unicode(255))
@@ -134,6 +135,7 @@ class Account(Base):
     course_group_id: Mapped[int | None] = mapped_column(ForeignKey("CourseGroup.id"))
     small_group_id: Mapped[int | None] = mapped_column(ForeignKey("SmallGroup.id"))
     lab_group_id: Mapped[int | None] = mapped_column(ForeignKey("LabGroup.id"))
+    faculty_id: Mapped[int | None] = mapped_column(ForeignKey("Faculty.id"))
 
 
 class UserSession(Base):
@@ -332,6 +334,45 @@ class Disruption(Base):
     original_day: Mapped[date] = mapped_column(Date)
     original_slot: Mapped[int]
     reason: Mapped[str] = mapped_column(Unicode(500))
+
+
+class ScheduleSuggestion(Base):
+    __tablename__ = "ScheduleSuggestion"
+    __table_args__ = (
+        Index("ix_suggestion_status_created", "status", "created_at"),
+        Index("ix_suggestion_author_status", "author_id", "status"),
+        Index("ix_suggestion_version", "version_id"),
+        Index("ix_suggestion_occurrence", "occurrence_id"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
+    version_id: Mapped[int] = mapped_column(ForeignKey("ScheduleVersion.id"))
+    base_revision: Mapped[int]
+    occurrence_id: Mapped[int | None] = mapped_column(ForeignKey("LessonOccurrence.id"))
+    course_group_id: Mapped[int | None] = mapped_column(ForeignKey("CourseGroup.id"))
+    kind: Mapped[str] = mapped_column(String(20))
+    anchor: Mapped[dict] = mapped_column(JSON, default=dict)
+    proposed_day: Mapped[date | None] = mapped_column(Date)
+    proposed_slot: Mapped[int | None]
+    proposed_room_id: Mapped[int | None] = mapped_column(ForeignKey("Room.id"))
+    title: Mapped[str] = mapped_column(Unicode(150))
+    body: Mapped[str] = mapped_column(UnicodeText)
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    decision_note: Mapped[str | None] = mapped_column(Unicode(1000))
+    decided_by: Mapped[int | None] = mapped_column(ForeignKey("User.id"))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime)
+    implemented_in_version_id: Mapped[int | None] = mapped_column(ForeignKey("ScheduleVersion.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class SuggestionComment(Base):
+    __tablename__ = "SuggestionComment"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    suggestion_id: Mapped[int] = mapped_column(ForeignKey("ScheduleSuggestion.id", ondelete="CASCADE"))
+    author_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
+    content: Mapped[str] = mapped_column(UnicodeText)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 class GenerationRun(Base):
