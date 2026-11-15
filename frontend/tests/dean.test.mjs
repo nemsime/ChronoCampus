@@ -12,7 +12,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const { outputFiles } = buildSync({
   stdin: {
     contents: `
-      export { navigationForRole, pageForRole } from "./src/system/Application";
+      export { navigationForRole, pageForRole, defaultPageForRole } from "./src/system/Application";
+      export { ScheduleFilters, PersonalSchedule } from "./src/system/Schedule";
       export { DeanTimetables } from "./src/system/Dean";
       export { SuggestionForm, SuggestionStatus } from "./src/system/Suggestions";
       export { deanWords } from "./src/system/deanWords";
@@ -27,7 +28,7 @@ const { outputFiles } = buildSync({
 });
 const bundled = { exports: {} };
 new Function("require", "module", "exports", outputFiles[0].text)(createRequire(import.meta.url), bundled, bundled.exports);
-const { navigationForRole, pageForRole, DeanTimetables, SuggestionForm, SuggestionStatus, LanguageProvider, deanWords, catalogSchema } = bundled.exports;
+const { navigationForRole, pageForRole, defaultPageForRole, ScheduleFilters, PersonalSchedule, DeanTimetables, SuggestionForm, SuggestionStatus, LanguageProvider, deanWords, catalogSchema } = bundled.exports;
 
 function render(component, props = {}, language = "en") {
   globalThis.localStorage = { getItem: key => key === "chronocampus.language" ? language : null };
@@ -57,6 +58,30 @@ test("unknown and unauthorized pages resolve to Overview for every role", () => 
   assert.equal(pageForRole("schedule", "dean"), "overview");
   assert.equal(pageForRole("timetables", "student"), "overview");
   assert.equal(pageForRole("suggestions", "lecturer"), "overview");
+});
+
+test("lecturers open their timetable by default and have no lecturer picker", () => {
+  assert.equal(defaultPageForRole("lecturer"), "schedule");
+  for (const role of ["student", "admin", "dean"]) assert.equal(defaultPageForRole(role), "overview");
+  const props = {
+    choices: { teacher_id: [{ id: 8, label: "Another lecturer" }], course_group_id: [{ id: 3, label: "T1" }],
+      subject_id: [{ id: 2, label: "Physics" }], lesson_type: [{ id: "lab", label: "lab" }] },
+    values: {}, onChange() {},
+  };
+  const personal = render(ScheduleFilters, { ...props, role: "lecturer" });
+  assert.doesNotMatch(personal, /name="teacher_id"|Another lecturer/);
+  assert.match(personal, /name="course_group_id"/);
+  assert.match(personal, /Physics/);
+  assert.match(personal, /name="lesson_type"/);
+  assert.match(render(ScheduleFilters, { ...props, role: "admin" }), /name="teacher_id"/);
+});
+
+test("personal lecturer timetable explains its scope in all three languages", () => {
+  for (const [language, text] of [["en", "Only lessons assigned to you"], ["ru", "только занятия, назначенные вам"], ["hy", "միայն ձեզ նշանակված դասերը"]]) {
+    const html = render(PersonalSchedule, { account: { id: 8, role: "lecturer", display_name: "Lecturer" } }, language);
+    assert.ok(html.includes(text), language);
+    assert.doesNotMatch(html, /lecturerScheduleIntro/);
+  }
 });
 
 test("dean timetable labels and read-only notice render in RU, HY and EN", () => {

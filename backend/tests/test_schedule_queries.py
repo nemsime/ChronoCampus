@@ -139,6 +139,25 @@ def test_nonstudent_roles(schedule, raw, count):
     assert len(page(schedule).json()["items"]) == count
 
 
+def test_lecturer_defaults_to_own_lessons_and_cannot_select_another_lecturer(schedule):
+    s = schedule
+    another = s.add(m.Account, email="another-teacher@invalid", password_hash="unused",
+                    role="lecturer", display_name="Another lecturer", must_change_password=False)
+    s.workloads[-1].teacher_id = another.id
+    s.db.commit()
+    s.client.cookies.set("chronocampus_session", "teacher")
+    own = page(s)
+    assert own.status_code == 200, own.text
+    assert len(own.json()["items"]) == 6
+    assert {row["teacher_id"] for row in own.json()["items"]} == {s.teacher.id}
+    assert {row["teacher_id"] for row in s.client.get("/schedule").json()} == {s.teacher.id}
+    assert page(s, teacher_id=another.id).json()["items"] == []
+    assert s.client.get("/schedule", params={"teacher_id": another.id}).json() == []
+    facets = s.client.get("/schedule/facets").json()["filters"]
+    assert facets["teacher_id"] == [{"id": s.teacher.id, "label": "Teacher"}]
+    assert {choice["id"] for choice in facets["course_group_id"]} == {s.groups[0].id}
+
+
 @pytest.mark.parametrize("endpoint", ["page", "facets"])
 @pytest.mark.parametrize("change", ["revoked", "inactive", "membership", "role", "revision"])
 def test_inflight_changes(schedule, monkeypatch, endpoint, change):

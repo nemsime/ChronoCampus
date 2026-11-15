@@ -61,6 +61,10 @@ export function pageForRole(page: string, role: Account["role"]) {
   return navigationForRole(role).some(item => item.id === page) ? page : "overview";
 }
 
+export function defaultPageForRole(role: Account["role"]) {
+  return role === "lecturer" ? "schedule" : "overview";
+}
+
 function Workspace() {
   const { t, lang } = useLanguage();
   const authLink = useAuthLink();
@@ -123,6 +127,7 @@ function Workspace() {
         if (live) {
           setCsrf(response.csrf_token);
           setAccount(response.user);
+          setPage(defaultPageForRole(response.user.role));
         }
       })
       .catch(() => {})
@@ -163,7 +168,7 @@ function Workspace() {
         onLogin={(user) => {
           setAccount(user);
           setMenuOpen(false);
-          setPage("overview");
+          setPage(defaultPageForRole(user.role));
         }}
       />
     );
@@ -306,7 +311,7 @@ function Workspace() {
             ) : activePage === "feedback" ? (
               <Feedback account={account} />
             ) : activePage === "schedule" && account.role !== "dean" ? (
-              <PersonalSchedule />
+              <PersonalSchedule account={account} />
             ) : (
               <Overview account={account} onNavigate={navigate} />
             )}

@@ -407,18 +407,19 @@ Keep student/lecturer browsers open on the baseline while the admin prepares rep
 
 ### Timetable
 
-The active Timetable is a dated lesson list, paginated at 25 rows. Set a range of **1–31 inclusive days**; to inspect a longer semester, use adjacent ranges. Select 2026-09-07–2026-09-18 for the small fixture. Clear filters before verifying fixture totals.
+The active Timetable opens as a weekly grid on desktop and a list on mobile; the list paginates at 25 rows. Use the week selector to inspect adjacent weeks. For the small fixture, check the weeks starting 2026-09-07 and 2026-09-14. API reads accept **1–31 inclusive days**. Clear filters before verifying fixture totals.
 
 | ID | Steps | Expected result |
 | --- | --- | --- |
-| VIEW-01 | Compare admin, lecturer1, student A and student B against the same current publication. | Admin sees current publications; lecturer only assigned teaching; students see whole-cohort plus their subgroup/lab lessons. QA baseline counts: 6 / 6 / 6 / 2; unrelated lecturer sees none. |
+| VIEW-01 | Compare admin, lecturer1, student A and student B against the same current publication. Sign in and reload as a lecturer. | A lecturer opens directly on their own timetable, without a lecturer picker; only assigned teaching is returned. Admin sees current publications; students see whole-cohort plus their subgroup/lab lessons. QA baseline counts: 6 / 6 / 6 / 2; unrelated lecturer sees none. |
 | VIEW-02 | Inspect one lecture, practical and lab card. | Correct date/weekday, start/end, slot, numerator/denominator, type, subject, teacher, room, cohort and subgroup/lab; pinned/canceled badges match assignment. |
-| VIEW-03 | Filter by semester/cohort/lecturer/room/subject/type, combine filters, then clear. Use a subject occurring beyond the first page on a larger dataset. | Filters cover authorized published data across all pages; names/counts and results agree. Guessed filter IDs do not broaden access. |
+| VIEW-03 | Filter by semester/cohort/room/subject/type, combine filters, then clear. Admin/student can also filter their authorized rows by lecturer; lecturers have no lecturer picker. Replay an API read with another lecturer ID using a lecturer session. | Filters cover authorized published data across all pages; names/counts and results agree. A lecturer requesting another lecturer ID receives no lessons. Guessed filter IDs do not broaden access. |
 | VIEW-04 | Use same start/end, 31 inclusive days, 32 inclusive days, empty/reversed range. | First two are allowed; invalid range shows guidance and no misleading results. API rejects invalid date ranges with 422. |
 | VIEW-05 | On a dataset with more than 25 matches, use Next/Previous; change filters/date range while on a later page. | Stable ordering, no duplicates/omissions; filter/range changes reset pagination. Repeated next/previous does not mix earlier results. |
 | VIEW-06 | Leave timetable open, publish a replacement elsewhere, then use Refresh, window focus, and normal polling. | Latest publication appears. Normal timetable refresh is every 30 seconds and on focus; stale cursor resets safely to first page. |
 | VIEW-07 | Test before any publication, then a date/filter with no matching lessons after publication. Simulate a temporary read/network failure and retry. | No-publication, no-match and failure states are understandable; failure is not presented as a successful empty schedule. |
 | VIEW-08 | Change a student's membership as admin while its old timetable browser remains open; issue another read. | Old session is revoked; new login uses new membership and authorized facets. Responses do not expose old/unrelated rows. Check `Cache-Control: private, no-store` in Network. |
+| VIEW-09 | Check Grid in all roles and RU/HY/EN with long subjects, names, rooms, subgroups and badges, including extra/weekend slots. Repeat at 360px, tablet and desktop widths. | Labels and lesson content wrap within cells; the slot label/time remain readable. Wide grids scroll within their own region and do not widen the page. Mobile starts in List unless a different preference was saved. |
 
 ### Personal notes
 

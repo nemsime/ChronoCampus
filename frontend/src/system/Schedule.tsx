@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, CalendarDays, MapPin, RefreshCw, SlidersHorizontal, StickyNote, UserRound, Users } from "lucide-react";
-import { api, ApiError, Row } from "./api";
+import { Account, api, ApiError, Row } from "./api";
 import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
@@ -174,7 +174,26 @@ export function LessonList({
     </>
   );
 }
-export function PersonalSchedule() {
+export function ScheduleFilters({ role, choices, values, onChange }: {
+  role: Account["role"];
+  choices: ScheduleFacets["filters"];
+  values: Record<string, string>;
+  onChange: (values: Record<string, string>) => void;
+}) {
+  const { t } = useLanguage();
+  return <div className="filters">
+    {Object.entries(choices).filter(([key]) => role !== "lecturer" || key !== "teacher_id").map(([key, options]) => <label key={key}>
+      {t(key)}<select name={key} value={values[key] || ""} onChange={event => onChange({ ...values, [key]: event.target.value })}>
+        <option value="">{t("all")}</option>
+        {options.map(choice => <option key={choice.id} value={choice.id}>
+          {key === "lesson_type" ? t(String(choice.id)) : choice.label}
+        </option>)}
+      </select>
+    </label>)}
+  </div>;
+}
+
+export function PersonalSchedule({ account }: { account: Account }) {
   const { t } = useLanguage();
   const [rows, setRows] = useState<Row[]>([]);
   const [notes, setNotes] = useState<Row[]>([]);
@@ -285,7 +304,7 @@ export function PersonalSchedule() {
         <div className="page-hero-copy">
           <p className="eyebrow">{t("scheduleEyebrow")}</p>
           <h1>{t("schedule")}</h1>
-          <p>{t("scheduleIntro")}</p>
+          <p>{t(account.role === "lecturer" ? "lecturerScheduleIntro" : "scheduleIntro")}</p>
         </div>
         <button
           className="secondary"
@@ -321,17 +340,7 @@ export function PersonalSchedule() {
             max={facets?.date_bounds.end || undefined} onChange={(start) => setRange({ start, end: addDays(start, 6) })} />}
           <ScheduleViewToggle value={view} onChange={setView} />
         </div>
-        <div className="filters">
-          {Object.entries(facets?.filters || {}).map(([key, choices]) => <label key={key}>
-            {t(key)}<select value={filters[key] || ""} onChange={(event) => {
-              setFilters({ ...filters, [key]: event.target.value });
-            }}><option value="">{t("all")}</option>
-              {choices.map((choice) => <option key={choice.id} value={choice.id}>
-                {key === "lesson_type" ? t(String(choice.id)) : choice.label}
-              </option>)}
-            </select>
-          </label>)}
-        </div>
+        <ScheduleFilters role={account.role} choices={facets?.filters || {}} values={filters} onChange={setFilters} />
         {range.start && !validRange && <p className="notice warning" role="alert">{t("schedule_range_required")}</p>}
         <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
         {pagination}
@@ -342,7 +351,7 @@ export function PersonalSchedule() {
           {grids.map(([termId, grid]) => <section key={termId}>
             {grids.length > 1 && <h3>{facets?.filters.term_id?.find((choice) => String(choice.id) === termId)?.label}</h3>}
             <WeekGrid weekStart={range.start} lessons={rows.filter((row) => String(row.term_id) === termId)} grid={grid}
-              perspective={filters.teacher_id ? "lecturer" : filters.room_id ? "room" : "group"} onSelect={selectLesson}
+              perspective={account.role === "lecturer" || filters.teacher_id ? "lecturer" : filters.room_id ? "room" : "group"} onSelect={selectLesson}
               decorations={(row) => ({ badges: notes.some((memo) => memo.occurrence_id === row.occurrence_id)
                 ? <span className="badge"><StickyNote size={12} aria-hidden="true" />{t("note")}</span> : undefined })} />
           </section>)}

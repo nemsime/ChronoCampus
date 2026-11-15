@@ -1,4 +1,5 @@
 export const scheduleWords: Record<string, [string, string, string]> = {
+  lecturerScheduleIntro: ["Ваше опубликованное расписание. Здесь показаны только занятия, назначенные вам.", "Ձեր հրապարակված դասացուցակը։ Այստեղ ցուցադրվում են միայն ձեզ նշանակված դասերը։", "Your published timetable. Only lessons assigned to you are shown."],
   scheduleView: ["Вид расписания", "Դասացուցակի տեսք", "Timetable view"],
   gridView: ["Сетка", "Ցանց", "Grid"],
   listView: ["Список", "Ցուցակ", "List"],

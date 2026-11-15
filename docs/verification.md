@@ -1,5 +1,41 @@
 # Verification
 
+## Timetable fit and lecturer default — 15 November 2026
+
+Timetable headers no longer inherit the catalog tables' `nowrap` rule. The shared
+grid defines its slot column explicitly and reserves space per weekday, wraps
+long labels/names/badges inside their cells and keeps horizontal scrolling within
+the grid region. Student, lecturer, dean and Planner views share this component.
+
+Lecturers now land on their own timetable after login and session restoration,
+without a lecturer picker. Their timetable explains its scope in RU/HY/EN and
+uses the lecturer perspective so their own name is not repeated on every card.
+The existing server predicate still enforces ownership independently of filters;
+no schema, database data or backend runtime code changed.
+
+- TypeScript and the Vite production build passed; the two frontend Node suites
+  passed **15 tests**. Added checks cover lecturer default navigation, removal of
+  the lecturer picker, scoped text in all three languages and long Armenian grid
+  content. Timetable API regressions passed **29 tests**, including a second
+  lecturer whose lessons remain inaccessible through page, legacy and facet
+  reads. Ruff correctness checks and Git whitespace checks passed.
+- Fresh headless Chrome layout checks used the real shared grid markup and app
+  styles, with six fixtures combining RU/HY/EN and five/seven weekdays. Long
+  Armenian subjects, lecturer names, rooms, subgroups and badges produced **zero
+  text rectangles outside their cells** at CSS viewport widths **360, 800 and
+  1264 px**, and no horizontal document overflow. A 360px iframe provided the
+  mobile viewport because the installed Windows Chrome's top-level headless
+  window has a 500px minimum. Inspected mobile/tablet screenshots; temporary
+  fixture files, isolated profiles and screenshots remain ignored under
+  `.runtime/grid-fit-qa/`. These are layout checks, not full signed-in browser,
+  keyboard or print acceptance.
+- Live API check with an existing demo lecturer's unchanged password passed:
+  login 200, nine published lessons in the selected week all belonging to the
+  signed-in lecturer, only that lecturer in facets, and zero results when a
+  different lecturer ID was supplied. Logged out only the test session. The
+  running Vite frontend serves the updated grid and default-page code, and
+  proxied readiness remains 200.
+
 ## Database runtime repair — 15 November 2026
 
 This supersedes the unverified/unapplied migration limitation in the dean

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, FlaskConical, LayoutGrid, List, MapPin, Pin, Users, UserRound } from "lucide-react";
 import { type Row } from "./api";
 import { addDays, dateLabel, localDay, weekStart as mondayOf } from "./common";
@@ -119,11 +119,11 @@ export function WeekGrid({ weekStart, lessons, grid, perspective, parityMode = "
     return <button type="button" key={`${row.version_id ?? ""}:${row.occurrence_id}:${row.id ?? ""}`}
       className={`grid-lesson grid-lesson-${row.lesson_type}${row.cancelled ? " cancelled" : ""}${extra?.className ? ` ${extra.className}` : ""}`}
       disabled={disabled} onClick={() => onSelect(row)}>
-      <span className="grid-lesson-kind"><Icon size={14} aria-hidden="true" />{t(row.lesson_type)}</span>
+      <span className="grid-lesson-line grid-lesson-kind"><Icon size={14} aria-hidden="true" /><span className="grid-lesson-text">{t(row.lesson_type)}</span></span>
       <strong>{row.subject}</strong>
-      {(perspective !== "lecturer" || severalTeachers) && <span><UserRound size={13} aria-hidden="true" />{row.teacher}</span>}
-      {(perspective !== "room" || severalRooms) && <span><MapPin size={13} aria-hidden="true" />{t("room_id")} {row.room}</span>}
-      {(perspective !== "group" || severalGroups) && <span><Users size={13} aria-hidden="true" />{row.group}</span>}
+      {(perspective !== "lecturer" || severalTeachers) && <span className="grid-lesson-line"><UserRound size={13} aria-hidden="true" /><span className="grid-lesson-text">{row.teacher}</span></span>}
+      {(perspective !== "room" || severalRooms) && <span className="grid-lesson-line"><MapPin size={13} aria-hidden="true" /><span className="grid-lesson-text">{t("room_id")} {row.room}</span></span>}
+      {(perspective !== "group" || severalGroups) && <span className="grid-lesson-line"><Users size={13} aria-hidden="true" /><span className="grid-lesson-text">{row.group}</span></span>}
       {(row.small_group_id || row.lab_group_id) && <small>{[
         row.small_group_id ? `${t("small_group_id")} ${row.small_group ?? row.small_group_id}` : "",
         row.lab_group_id ? `${t("lab_group_id")} ${row.lab_group ?? row.lab_group_id}` : "",
@@ -137,9 +137,10 @@ export function WeekGrid({ weekStart, lessons, grid, perspective, parityMode = "
     </button>;
   }
   return <div className="table-scroll week-grid-region" tabIndex={0} role="region" aria-label={t("weekGridCaption")}>
-    <table className="week-grid" ref={table} onKeyDown={navigate}>
+    <table className="week-grid" style={{ "--week-grid-days": weekdays.length } as CSSProperties} ref={table} onKeyDown={navigate}>
       <caption>{t("weekGridCaption")} · {dateLabel(weekStart, lang)} – {dateLabel(addDays(weekStart, 6), lang)}</caption>
-      <thead><tr><th scope="col"><CalendarDays size={15} aria-hidden="true" /> {t("slot")}</th>
+      <colgroup><col className="week-grid-slot-column" />{weekdays.map(day => <col key={day} />)}</colgroup>
+      <thead><tr><th scope="col"><span className="week-grid-slot-heading"><CalendarDays size={15} aria-hidden="true" /><span>{t("slot")}</span></span></th>
         {weekdays.map((day) => <th key={day} scope="col" className={addDays(weekStart, day) === today ? "grid-today" : undefined}>
           <time dateTime={addDays(weekStart, day)}>{dateLabel(addDays(weekStart, day), lang)}</time>
         </th>)}

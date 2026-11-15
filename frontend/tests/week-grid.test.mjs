@@ -120,3 +120,17 @@ test("grid labels render in all supported languages", () => {
     assert.doesNotMatch(html, />gridKeyboardHint</);
   }
 });
+
+test("long Armenian lesson details and badges stay available in the grid", () => {
+  const subject = "Համակարգչային ճարտարագիտություն և տեղեկատվական համակարգեր";
+  const teacher = "Աննա Հարությունյան-Հովհաննիսյան";
+  const html = render([{ ...lesson, subject, teacher, room: "Լաբորատորիա-համակարգչային-204" }], "hy", {
+    decorations: () => ({ badges: React.createElement("span", { className: "badge" }, "Առաջարկից հետո դասը փոխվել է") }),
+  });
+  assert.ok(html.includes(subject));
+  assert.ok(html.includes(teacher));
+  assert.match(html, /class="grid-lesson-text"/);
+  assert.match(html, /class="week-grid-slot-column"/);
+  assert.match(html, /--week-grid-days:2/);
+  assert.ok(html.includes("Առաջարկից հետո դասը փոխվել է"));
+});
