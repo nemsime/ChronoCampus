@@ -35,6 +35,7 @@ def authenticated(request: Request, db: Session = Depends(get_db)) -> Account:
     if (
         not account
         or not account.is_active
+        or not account.email_verified
         or account.role not in {"admin", "lecturer", "student"}
     ):
         raise HTTPException(401, "authentication_required")

@@ -112,7 +112,15 @@ def enqueue_reset(db, account, raw_token, reset_token, settings):
     encrypted = (
         Fernet(keys["keys"][key_id].encode("ascii"))
         .encrypt(
-            json.dumps({"email": account.email, "token": raw_token}).encode("utf-8")
+            json.dumps(
+                {
+                    "email": account.email,
+                    "token": raw_token,
+                    **(
+                        {"purpose": "verify"} if reset_token.purpose == "verify" else {}
+                    ),
+                }
+            ).encode("utf-8")
         )
         .decode("ascii")
     )
@@ -153,8 +161,17 @@ def decrypt_payload(outbox, settings):
         raise MailError("mail_payload_invalid") from None
 
 
-def send_reset(email: str, token: str, *, job_id, message_id, settings=None,
-               deadline=None, cancelled=lambda: False) -> None:
+def send_reset(
+    email: str,
+    token: str,
+    *,
+    job_id,
+    message_id,
+    settings=None,
+    deadline=None,
+    cancelled=lambda: False,
+    purpose="reset",
+) -> None:
     settings = settings or get_settings()
 
     def remaining():
@@ -167,16 +184,31 @@ def send_reset(email: str, token: str, *, job_id, message_id, settings=None,
 
     remaining()
     message = EmailMessage()
-    message["Subject"] = "ChronoCampus — password reset"
+    verification = purpose == "verify"
+    message["Subject"] = (
+        "ChronoCampus — verify your email"
+        if verification
+        else "ChronoCampus — password reset"
+    )
     message["From"] = settings.smtp_from or "chronocampus@example.invalid"
     message["To"] = email
     message["Message-ID"] = message_id
     # SMTP acceptance followed by a worker crash may duplicate this one-use link.
-    link = settings.public_url.rstrip("/") + "/#reset=" + token
+    link = (
+        settings.public_url.rstrip("/")
+        + ("/#verify=" if verification else "/#reset=")
+        + token
+    )
     message.set_content(
-        "Open this link to choose a new password. Opening it does not change your password.\n"
-        "Откройте ссылку и задайте новый пароль. Сам переход пароль не меняет.\n"
-        "Բացեք հղումը և ընտրեք նոր գաղտնաբառ։ Միայն բացելը գաղտնաբառը չի փոխում։\n\n"
+        (
+            "Verify your university email and choose your ChronoCampus password.\n"
+            "Подтвердите почту и задайте пароль ChronoCampus.\n"
+            "Հաստատեք էլ․ փոստը և ընտրեք ChronoCampus-ի գաղտնաբառը։\n\n"
+            if verification
+            else "Open this link to choose a new password. Opening it does not change your password.\n"
+            "Откройте ссылку и задайте новый пароль. Сам переход пароль не меняет.\n"
+            "Բացեք հղումը և ընտրեք նոր գաղտնաբառ։ Միայն բացելը գաղտնաբառը չի փոխում։\n\n"
+        )
         + link
         + f"\n\nExpires in: {settings.reset_minutes} min."
     )
@@ -199,17 +231,56 @@ def send_reset(email: str, token: str, *, job_id, message_id, settings=None,
         finally:
             temporary.unlink(missing_ok=True)
     elif settings.mail_mode == "smtp":
-        timeout = remaining()
-        with smtplib.SMTP(
-            settings.smtp_host, settings.smtp_port, timeout=timeout
-        ) as client:
-            client.starttls(context=ssl.create_default_context())
-            client.sock.settimeout(remaining())
-            if settings.smtp_username:
-                client.login(
-                    settings.smtp_username, settings.smtp_password.get_secret_value()
-                )
-            client.sock.settimeout(remaining())
-            client.send_message(message)
+        _smtp_send(message, settings, remaining)
     else:
         raise MailError("mail_not_configured")
+
+
+def _smtp_send(message, settings, remaining):
+    if not settings.smtp_host or not settings.smtp_from:
+        raise MailError("mail_not_configured")
+    if bool(settings.smtp_username) != bool(settings.smtp_password.get_secret_value()):
+        raise MailError("mail_not_configured")
+    implicit = settings.smtp_port == 465
+    factory = smtplib.SMTP_SSL if implicit else smtplib.SMTP
+    options = {"timeout": remaining()}
+    if implicit:
+        options["context"] = ssl.create_default_context()
+    with factory(settings.smtp_host, settings.smtp_port, **options) as client:
+        local_plain = settings.smtp_port == 1025 and settings.smtp_host in {
+            "localhost",
+            "127.0.0.1",
+            "::1",
+            "mailpit",
+        }
+        if not implicit and not local_plain:
+            client.starttls(context=ssl.create_default_context())
+        client.sock.settimeout(remaining())
+        if settings.smtp_username:
+            client.login(
+                settings.smtp_username, settings.smtp_password.get_secret_value()
+            )
+        client.sock.settimeout(remaining())
+        client.send_message(message)
+
+
+def sendEmail(mail, *, text_body=None, settings=None):
+    """Provider-independent SMTP. Never persist or log the message in SMTP mode."""
+    import re
+    from html import unescape
+
+    settings = settings or get_settings()
+    message = EmailMessage()
+    message["From"] = settings.smtp_from or "ChronoCampus <no-reply@chronocampus.local>"
+    message["To"] = mail["to"]
+    message["Subject"] = mail["subject"]
+    message["Message-ID"] = f"<{uuid4().hex}@chronocampus.local>"
+    message.set_content(
+        text_body
+        if text_body is not None
+        else unescape(re.sub(r"<[^>]+>", "", mail["html"]))
+    )
+    message.add_alternative(mail["html"], subtype="html")
+    if settings.mail_mode != "smtp":
+        raise MailError("mail_not_configured")
+    _smtp_send(message, settings, lambda: 10.0)

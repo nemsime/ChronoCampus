@@ -1,14 +1,41 @@
-import { FormEvent, useId, useState } from "react";
+import { FormEvent, useEffect, useId, useState } from "react";
 import { Account, api, setCsrf } from "./api";
 import { ErrorBox, PasswordInput, useAction } from "./common";
 import { LanguageSwitch, useLanguage } from "./i18n";
 import { ArrowRight, CalendarDays, Check, LockKeyhole } from "lucide-react";
+export function useAuthLink() {
+  const read = () => {
+    const params = new URLSearchParams(location.hash.slice(1));
+    const query = new URLSearchParams(location.search);
+    const resetPage = location.pathname === "/reset-password";
+    return { token: resetPage ? query.get("token") || "invalid" : params.get("verify") || params.get("reset") || "", verification: !resetPage && params.has("verify") };
+  };
+  const [link, setLink] = useState(read);
+  useEffect(() => {
+    // Keep the token only in React memory, removing it from address/history immediately.
+    if (location.pathname === "/reset-password" && new URLSearchParams(location.search).has("token")) {
+      const query = new URLSearchParams(location.search);
+      query.delete("token");
+      history.replaceState(null, "", location.pathname + (query.size ? "?" + query : ""));
+    }
+    const update = () => setLink(read());
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
+  return link;
+}
+function clearAuthLink() {
+  history.replaceState(null, "", (location.pathname === "/reset-password" ? "/" : location.pathname) + location.search);
+  window.dispatchEvent(new Event("hashchange"));
+}
 export function PasswordForm({
   onDone,
   token,
+  verification = false,
 }: {
   onDone: () => void;
   token?: string;
+  verification?: boolean;
 }) {
   const { t } = useLanguage();
   const fieldId = useId();
@@ -22,16 +49,16 @@ export function PasswordForm({
           if (f.get("password") !== f.get("confirmation"))
             throw new Error("password_mismatch");
           await api(
-            token ? "/auth/reset-password" : "/auth/change-password",
+            token ? verification ? "/auth/verify-email" : "/auth/reset-password" : "/auth/change-password",
             "POST",
             token
-              ? { token, password: f.get("password") }
+              ? verification ? { token, password: f.get("password") } : { token, newPassword: f.get("password") }
               : {
                   current_password: f.get("current_password"),
                   password: f.get("password"),
                 },
           );
-          history.replaceState(null, "", location.pathname);
+          clearAuthLink();
           onDone();
         });
       }}
@@ -74,20 +101,24 @@ export function PasswordForm({
       </div>
       <ErrorBox error={error} />
       <button disabled={busy}>
-        {t(busy ? "authChangingPassword" : "changePassword")}
+        {t(busy ? "authChangingPassword" : verification ? "verifyAndCreate" : "changePassword")}
       </button>
     </form>
   );
 }
-export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
+export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Account) => void; onSessionEnded: () => void; authLink: { token: string; verification: boolean } }) {
   const { t } = useLanguage();
   const passwordId = useId();
   const { busy, error, setError, run } = useAction();
-  const [mode, setMode] = useState<"login" | "reset">("login");
+  const [mode, setMode] = useState<"login" | "reset" | "register">("login");
   const [message, setMessage] = useState("");
-  const [token, setToken] = useState(
-    () => new URLSearchParams(location.hash.slice(1)).get("reset") || "",
-  );
+  const { token, verification } = authLink;
+  function navigate(next: "login" | "reset" | "register") {
+    clearAuthLink();
+    setMode(next);
+    setMessage("");
+    setError(null);
+  }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -95,6 +126,9 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
       if (mode === "reset") {
         await api("/auth/forgot-password", "POST", { email: f.get("email") });
         setMessage("reset_requested");
+      } else if (mode === "register") {
+        await api("/auth/register", "POST", { email: f.get("email"), display_name: f.get("display_name") });
+        setMessage("registration_requested");
       } else {
         const response = await api("/auth/login", "POST", {
           email: f.get("email"),
@@ -129,14 +163,14 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
           <header className="auth-card-header">
             <span className="auth-lock"><LockKeyhole size={22} strokeWidth={1.5} aria-hidden="true" /></span>
             <p className="eyebrow">{t("authPortal")}</p>
-            <h1>{t(token || mode === "reset" ? "reset" : "authSignInTitle")}</h1>
+            <h1>{t(verification && token ? "verifyEmail" : token || mode === "reset" ? "reset" : mode === "register" ? "register" : "authSignInTitle")}</h1>
             <p className="auth-description">
               {t(
                 token
-                  ? "authNewPasswordDescription"
+                  ? verification ? "verificationDescription" : "authNewPasswordDescription"
                   : mode === "login"
                     ? "authSignInDescription"
-                    : "authResetDescription",
+                    : mode === "register" ? "registrationDescription" : "authResetDescription",
               )}
             </p>
           </header>
@@ -146,16 +180,23 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
             </p>
           )}
           {token ? (
+            <div className="form-stack">
             <PasswordForm
+              key={token}
               token={token}
+              verification={verification}
               onDone={() => {
-                setToken("");
+                onSessionEnded();
                 setMode("login");
-                setMessage("password_changed");
+                setMessage(verification ? "email_verified" : "password_changed");
               }}
             />
+            <button className="link" type="button" onClick={() => navigate(verification ? "register" : "reset")}>{t("requestNewLink")}</button>
+            <button className="link" type="button" onClick={() => navigate("login")}>{t("login")}</button>
+            </div>
           ) : (
             <form onSubmit={submit} className="form-stack" aria-busy={busy}>
+              {mode === "register" && <label>{t("registrationName")}<input name="display_name" autoComplete="name" required maxLength={150} /></label>}
               <label>
                 {t("email")}
                 <input
@@ -183,7 +224,7 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
                 {t(
                   busy
                     ? mode === "login" ? "authSigningIn" : "authSendingReset"
-                    : mode === "login" ? "login" : "reset",
+                    : mode === "login" ? "login" : mode === "register" ? "register" : "reset",
                 )}
                 {!busy && <ArrowRight size={17} aria-hidden="true" />}
               </button>
@@ -192,16 +233,15 @@ export function SignIn({ onLogin }: { onLogin: (a: Account) => void }) {
                 type="button"
                 disabled={busy}
                 onClick={() => {
-                  setMode(mode === "login" ? "reset" : "login");
-                  setMessage("");
-                  setError(null);
+                  navigate(mode === "login" ? "reset" : "login");
                 }}
               >
                 {t(mode === "login" ? "forgot" : "login")}
               </button>
+              {mode !== "register" && <button className="link" type="button" disabled={busy} onClick={() => navigate("register")}>{t("register")}</button>}
             </form>
           )}
-          <p className="auth-access-note"><LockKeyhole size={13} aria-hidden="true" />{t("authAccessHelp")}</p>
+          <p className="auth-access-note"><LockKeyhole size={13} aria-hidden="true" />{t("registrationAccessHelp")}</p>
         </div>
       </section>
     </div>

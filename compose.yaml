@@ -17,6 +17,8 @@ services:
       context: ./frontend
     environment:
       API_PROXY_TARGET: http://backend:8000
+      # Windows/WSL bind mounts can miss file events and leave Vite serving old UI.
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "3000:3000"
     volumes:

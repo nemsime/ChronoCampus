@@ -78,8 +78,11 @@ def _invalid(db, outbox, payload=None):
     account = db.get(Account, token.user_id)
     if token.used or not account or not account.is_active:
         return "mail_reset_invalid"
+    if token.purpose not in {"reset", "verify"} or (token.purpose == "verify") == account.email_verified:
+        return "mail_reset_invalid"
     if payload and (
         token.token != token_hash(payload["token"]) or account.email != payload["email"]
+        or token.purpose != payload.get("purpose", "reset")
     ):
         return "mail_payload_invalid"
     return None
@@ -138,6 +141,7 @@ def _mail(engine, claim, settings):
                 settings=settings,
                 deadline=deadline,
                 cancelled=lost.is_set,
+                **({"purpose": "verify"} if payload.get("purpose") == "verify" else {}),
             )
             if lost.is_set():
                 return
@@ -266,6 +270,7 @@ def _maintenance(engine, claim):
                 ResetToken,
                 ResetToken.id,
                 (ResetToken.expires_at <= now)
+                & (ResetToken.created_at <= now - timedelta(hours=1))
                 & ~exists(
                     select(MailOutbox.id).where(
                         MailOutbox.reset_token_id == ResetToken.id

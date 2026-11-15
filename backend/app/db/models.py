@@ -4,6 +4,8 @@ from datetime import date, datetime, time
 
 from sqlalchemy import (
     CheckConstraint,
+    CHAR,
+    Index,
     Date,
     DateTime,
     ForeignKey,
@@ -15,7 +17,7 @@ from sqlalchemy import (
     UnicodeText,
     UniqueConstraint,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, synonym
 
 
 class Base(DeclarativeBase):
@@ -128,6 +130,7 @@ class Account(Base):
     display_name: Mapped[str | None] = mapped_column(Unicode(150))
     role: Mapped[str | None] = mapped_column(String(20))
     must_change_password: Mapped[bool] = mapped_column(default=True)
+    email_verified: Mapped[bool] = mapped_column(default=True)
     course_group_id: Mapped[int | None] = mapped_column(ForeignKey("CourseGroup.id"))
     small_group_id: Mapped[int | None] = mapped_column(ForeignKey("SmallGroup.id"))
     lab_group_id: Mapped[int | None] = mapped_column(ForeignKey("LabGroup.id"))
@@ -147,9 +150,14 @@ class UserSession(Base):
 
 class ResetToken(Base):
     __tablename__ = "PasswordResetToken"
+    __table_args__ = (UniqueConstraint("token_hash", name="uq_prt_token_hash"),
+                      Index("ix_prt_user_id", "user_id", "used"))
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
-    token: Mapped[str] = mapped_column(Unicode(255), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("User.id", name="fk_prt_user", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(CHAR(64))
+    # Compatibility for verification/outbox callers; the SQL column is hash-only.
+    token = synonym("token_hash")
+    purpose: Mapped[str] = mapped_column(String(20), default="reset")
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     used: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

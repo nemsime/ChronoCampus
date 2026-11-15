@@ -39,7 +39,8 @@ def fresh_scope(db, request):
         .join(sessions, sessions.c.user_id == U.c.id)
         .where(sessions.c.session_token == token_hash(request.cookies.get(COOKIE, "")),
                sessions.c.is_revoked == false(), sessions.c.expires_at > datetime.utcnow(),
-               U.c.is_active == true(), U.c.role.in_(["admin", "lecturer", "student"]))
+               U.c.is_active == true(), U.c.email_verified == true(),
+               U.c.role.in_(["admin", "lecturer", "student"]))
     ).mappings().first()
     if row is None:
         raise HTTPException(401, "authentication_required", headers=PRIVATE)

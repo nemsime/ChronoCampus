@@ -27,6 +27,15 @@ Workload changes are rejected once occurrences exist, preserving note and histor
 
 Roles and student/lecturer membership are enforced server-side. Passwords use salted PBKDF2-SHA256; session and reset secrets are stored hashed. Cookies are HttpOnly and SameSite=Lax; authenticated writes require a CSRF token and allowed origin. Password changes/reset revoke sessions. Temporary credentials restrict access until changed.
 
+Email registration accepts configured university domains and creates unverified
+student accounts without group membership. A verification link lets the mailbox
+owner choose the initial password; registration never installs a requester-chosen
+password before ownership is established. Verification and reset tokens have
+separate purposes and share the encrypted outbox. Completing verification consumes
+all outstanding account tokens. Unverified accounts cannot sign in or use a
+session, and administrators continue to control roles and academic groups.
+Migration 0005 preserves existing provisioned accounts and outstanding reset links.
+
 Reset requests return the same response for known and unknown addresses. Tokens expire and are consumed only on successful password submission. Token creation and an encrypted mail outbox entry commit together. A separate I/O worker delivers mail with bounded retries, expiry/account checks and a stable Message-ID; ciphertext is removed after delivery or terminal failure. Fernet keys live outside Git and SQL. A crash after SMTP acceptance can cause a duplicate message containing the same single-use link. Local file-mail tests do not verify university SMTP delivery.
 
 API restarts do not interrupt worker ownership. Claims have database-time leases, attempt numbers and increasing fencing tokens; expired owners cannot apply a result. Recovery schedules bounded retries or releases the draft guard atomically with a terminal state. Cancellation retains that guard until the solver stops or its ownership expires. Final result application, validation, draft revision, run status and guard release share one transaction. Admission is limited to four active generation jobs by default; a SQL gate enforces one running generation even if two coordinators are accidentally started.
