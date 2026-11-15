@@ -55,7 +55,7 @@ def alive(pid):
     try:
         status = Path(f"/proc/{pid}/stat").read_text().split()[2]
         return status != "Z"
-    except FileNotFoundError:
+    except (FileNotFoundError, ProcessLookupError):
         return False
 
 
