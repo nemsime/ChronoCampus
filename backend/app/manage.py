@@ -1,15 +1,14 @@
 """Local maintenance commands. Run from backend after applying migrations."""
 
 import argparse
-from getpass import getpass
 import json
+from getpass import getpass
 from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.accounts.roles import ADMIN
-
 from app.accounts.router import EmailInput
 from app.core.security import password_hash
 from app.db.models import Account

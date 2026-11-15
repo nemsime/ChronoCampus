@@ -9,7 +9,7 @@ import time
 import traceback
 from collections import deque
 from contextvars import ContextVar
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from uuid import uuid4
@@ -126,7 +126,7 @@ ERROR_CODES = {
 
 
 def utc_now():
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 class SafeFileHandler(RotatingFileHandler):

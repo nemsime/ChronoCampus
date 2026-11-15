@@ -5,13 +5,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.accounts.roles import ADMIN
-
 from app.accounts.dependencies import administrator, current_user
+from app.accounts.roles import ADMIN
 from app.db import models as m
 from app.db.session import get_db, lock_revision
-from app.scheduling.snapshot import record
 from app.observability.audit import record_audit
+from app.scheduling.snapshot import record
 
 router = APIRouter(prefix="/feedback", tags=["feedback"])
 

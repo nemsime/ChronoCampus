@@ -1,10 +1,11 @@
+import re
 from datetime import timedelta
 from email import policy
 from email.parser import BytesParser
 from unittest.mock import Mock
-import re
 
 import pytest
+from conftest import PASSWORD
 from sqlalchemy import select
 
 from app.accounts import recovery
@@ -13,7 +14,6 @@ from app.core.config import Settings
 from app.core.security import token_hash, verify_password
 from app.db.models import Account, ResetToken
 from app.jobs.models import MailOutbox
-from conftest import PASSWORD
 
 
 def requested(client, tmp_path):

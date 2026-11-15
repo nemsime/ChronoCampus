@@ -44,7 +44,13 @@ def database_probe(db):
         db.execute(select(m.ScheduleSuggestion.status).limit(1))
         db.execute(select(m.SuggestionComment.id).limit(1))
         db.execute(select(m.ResetToken.purpose, m.ResetToken.token_hash).limit(1))
-        from app.jobs.models import BackgroundJob, JobAttempt, MailOutbox, WorkerHeartbeat, QueueAdmission
+        from app.jobs.models import (
+            BackgroundJob,
+            JobAttempt,
+            MailOutbox,
+            QueueAdmission,
+            WorkerHeartbeat,
+        )
 
         db.execute(select(m.GenerationRun.job_id).limit(1))
         db.execute(select(BackgroundJob.protocol_version, BackgroundJob.lease_generation).limit(1))

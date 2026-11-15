@@ -1,6 +1,6 @@
-from alembic import context
 from sqlalchemy import create_engine, pool
 
+from alembic import context
 from app.db.models import Base
 from app.db.session import database_url
 

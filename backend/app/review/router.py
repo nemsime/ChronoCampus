@@ -12,7 +12,11 @@ from app.db import models as m
 from app.db.session import get_db, lock_revision
 from app.review import service as s
 from app.review.schemas import (
-    CommentInput, DecisionInput, ImplementedInput, SuggestionInput, SuggestionStatus,
+    CommentInput,
+    DecisionInput,
+    ImplementedInput,
+    SuggestionInput,
+    SuggestionStatus,
 )
 from app.scheduling import queries as q
 from app.scheduling.moves import move_candidate

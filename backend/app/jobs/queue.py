@@ -5,10 +5,11 @@ import random
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import select, text, update
+from sqlalchemy import bindparam, select, text, update
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.db.utc import UTCDateTime, as_utc
 from app.jobs.models import BackgroundJob, JobAttempt, QueueAdmission, WorkerHeartbeat
 
 
@@ -24,10 +25,10 @@ class Claim:
 
 def database_now(db):
     if db.bind.dialect.name == "mssql":
-        return db.scalar(text("SELECT SYSUTCDATETIME()"))
+        return as_utc(db.scalar(text("SELECT SYSUTCDATETIME()")))
     if db.bind.dialect.name != "sqlite":
         raise RuntimeError("unsupported_queue_database")
-    return datetime.now(UTC).replace(tzinfo=None)
+    return datetime.now(UTC)
 
 
 def admission_lock(db):
@@ -100,7 +101,9 @@ def claim_job(engine, kind, owner_id, *, job_id=None):
         deadline = now + timedelta(seconds=300)
         if engine.dialect.name == "mssql":
             identifier = db.scalar(
-                text(SQL_CLAIM),
+                text(SQL_CLAIM).bindparams(
+                    *(bindparam(name, type_=UTCDateTime()) for name in ("now", "lease", "deadline"))
+                ),
                 {
                     "kind": kind,
                     "job_id": job_id,

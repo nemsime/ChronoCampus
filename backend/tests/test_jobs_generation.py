@@ -107,7 +107,7 @@ def test_retry_snapshot_reused_and_revision_change_terminal(
     original_hash, snapshot_time = row.input_hash, row.snapshot_created_at
     assert row.status == "retry_wait" and db.get(ActiveGeneration, version["id"])
     job = db.get(BackgroundJob, run["job"]["id"])
-    job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
     db.commit()
     second = claim_job(db.bind, "generation", "owner2")
     execute_claim(db.bind, second)
@@ -115,7 +115,7 @@ def test_retry_snapshot_reused_and_revision_change_terminal(
     row = db.get(m.GenerationRun, run["id"])
     assert row.snapshot_created_at == snapshot_time and row.input_hash == original_hash
     job = db.get(BackgroundJob, job.id)
-    job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.available_at = datetime.now(UTC) - timedelta(seconds=1)
     db.get(m.DataRevision, 1).revision += 1
     db.commit()
     third = claim_job(db.bind, "generation", "owner3")
@@ -134,7 +134,7 @@ def test_expired_cancel_recovery_and_stale_apply_rejected(admin_client, campus):
     claim, _, _, _, _ = prepare(db.bind, claim)
     admin_client.post(f"/api/admin/schedule/runs/{run['id']}/cancel")
     job = db.get(BackgroundJob, claim.job_id, populate_existing=True)
-    job.lease_until = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.lease_until = datetime.now(UTC) - timedelta(seconds=1)
     db.commit()
     recover_expired(db.bind, "generation")
     assert not apply_result(db.bind, claim, {"assignments": []})
@@ -240,7 +240,7 @@ def test_retry_exhaustion_finalizes_run_attempt_and_guard(
         job = db.get(BackgroundJob, claim.job_id)
         if index < 2:
             assert job.state == "retry_wait" and db.get(ActiveGeneration, version["id"])
-            job.available_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(
+            job.available_at = datetime.now(UTC) - timedelta(
                 seconds=1
             )
             db.commit()
@@ -276,7 +276,7 @@ def test_expired_exhausted_attempt_releases_guard_atomically(admin_client, campu
     claim = claim_job(db.bind, "generation", "crashed-owner")
     prepare(db.bind, claim)
     db.refresh(job)
-    job.lease_until = datetime.now(UTC).replace(tzinfo=None) - timedelta(seconds=1)
+    job.lease_until = datetime.now(UTC) - timedelta(seconds=1)
     db.commit()
     recover_expired(db.bind, "generation")
     db.expire_all()

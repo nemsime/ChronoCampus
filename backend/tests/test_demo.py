@@ -2,12 +2,11 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from conftest import HASH
+from sqlalchemy import event, select
 
 from app import demo
 from app.db import models as m
-from sqlalchemy import event, select
-
-from conftest import HASH
 
 
 def test_seed_account_rotates_existing_demo_credentials(monkeypatch):

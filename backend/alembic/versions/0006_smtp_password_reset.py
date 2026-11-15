@@ -4,8 +4,9 @@ Existing token/outbox deletion requires explicit operator approval via
 alembic -x purge_reset_tokens=yes upgrade head. Stop API/workers first.
 """
 
-from alembic import context, op
 import sqlalchemy as sa
+
+from alembic import context, op
 
 revision = "0006_smtp_password_reset"
 down_revision = "0005_email_registration"

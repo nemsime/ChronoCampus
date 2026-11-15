@@ -1,10 +1,11 @@
 from datetime import date, time
 
 import pytest
-from app.db import models as m
-from app.scheduling.router import execute_run
 from conftest import HASH, PASSWORD
 from sqlalchemy import select
+
+from app.db import models as m
+from app.scheduling.router import execute_run
 
 
 @pytest.fixture

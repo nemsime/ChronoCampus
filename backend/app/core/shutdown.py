@@ -1,8 +1,8 @@
 """Cooperative signal/file shutdown used by the owning local supervisor."""
 import os
-from pathlib import Path
 import signal
 import threading
+from pathlib import Path
 
 
 def shutdown_event():

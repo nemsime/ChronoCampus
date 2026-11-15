@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import re
+from datetime import timedelta
 
 from fastapi import (
     APIRouter,
@@ -32,6 +32,7 @@ from app.core.security import (
 )
 from app.db.models import Account, RateLimit, ResetToken, UserSession
 from app.db.session import get_db, lock_revision
+from app.db.utc import utc_now
 from app.observability.audit import record_audit
 
 router = APIRouter(prefix="/auth", tags=["accounts"])
@@ -97,7 +98,7 @@ class ResetInput(PasswordInput):
 def throttle(db: Session, key: str, limit=8):
     lock_revision(db, changed=False)
     key = token_hash(key)
-    now = datetime.utcnow()
+    now = utc_now()
     entry = db.get(RateLimit, key)
     if entry and entry.started_at > now - timedelta(minutes=15):
         entry.attempts += 1
@@ -163,10 +164,10 @@ def login(
         UserSession(
             user_id=account.id,
             session_token=token_hash(raw),
-            expires_at=datetime.utcnow() + timedelta(hours=settings.session_hours),
+            expires_at=utc_now() + timedelta(hours=settings.session_hours),
         )
     )
-    account.last_login = datetime.utcnow()
+    account.last_login = utc_now()
     record_audit(db, account, "account.login", "users", account.id)
     db.commit()
     response.set_cookie(
@@ -303,7 +304,7 @@ def register(body: RegistrationInput, request: Request, db: Session = Depends(ge
             user_id=account.id,
             token=token_hash(raw),
             purpose="verify",
-            expires_at=datetime.utcnow() + timedelta(minutes=settings.reset_minutes),
+            expires_at=utc_now() + timedelta(minutes=settings.reset_minutes),
         )
         enqueue_reset(db, account, raw, verification, settings)
         db.commit()
@@ -332,7 +333,7 @@ def verify_email(
         not token
         or token.purpose != "verify"
         or token.used
-        or token.expires_at <= datetime.utcnow()
+        or token.expires_at <= utc_now()
     ):
         raise HTTPException(400, "invalid_verification_token")
     account = db.get(Account, token.user_id)

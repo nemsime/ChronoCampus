@@ -3,7 +3,7 @@
 import base64
 import hashlib
 import json
-from datetime import date, datetime, time
+from datetime import date, time
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from sqlalchemy import and_, false, func, or_, select, true
@@ -15,6 +15,7 @@ from app.calendar.rules import lesson_slot, parity
 from app.core.security import token_hash
 from app.db import models as m
 from app.db.session import get_db
+from app.db.utc import utc_now
 
 router = APIRouter(tags=["scheduling"])
 PRIVATE = {"Cache-Control": "private, no-store"}
@@ -46,7 +47,7 @@ def fresh_scope(db, request):
                .scalar_subquery().label("revision"))
         .join(sessions, sessions.c.user_id == U.c.id)
         .where(sessions.c.session_token == token_hash(request.cookies.get(COOKIE, "")),
-               sessions.c.is_revoked == false(), sessions.c.expires_at > datetime.utcnow(),
+               sessions.c.is_revoked == false(), sessions.c.expires_at > utc_now(),
                U.c.is_active == true(), U.c.email_verified == true(),
                U.c.role.in_(ROLES))
     ).mappings().first()

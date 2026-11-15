@@ -1,5 +1,4 @@
 import hmac
-from datetime import datetime
 
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy import false, select
@@ -10,6 +9,7 @@ from app.core.config import get_settings
 from app.core.security import csrf_token, token_hash
 from app.db.models import Account, UserSession
 from app.db.session import get_db
+from app.db.utc import utc_now
 
 COOKIE = "chronocampus_session"
 
@@ -29,7 +29,7 @@ def authenticated(request: Request, db: Session = Depends(get_db)) -> Account:
         select(UserSession).where(
             UserSession.session_token == token_hash(raw),
             UserSession.is_revoked == false(),
-            UserSession.expires_at > datetime.utcnow(),
+            UserSession.expires_at > utc_now(),
         )
     )
     account = db.get(Account, session.user_id) if session else None

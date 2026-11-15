@@ -1,10 +1,10 @@
 import time
 from collections import Counter
-from datetime import datetime
 
 from sqlalchemy.orm import Session, object_session
 
 from app.db.models import DataRevision, GenerationRun
+from app.db.utc import utc_now
 from app.jobs.models import BackgroundJob
 from app.observability import telemetry as t
 
@@ -44,7 +44,7 @@ def run_view(run, detailed=True):
     revision = db.get(DataRevision, 1, populate_existing=True) if db and job else None
     view["inputs_updated_since_enqueue"] = bool(job and revision and
         revision.revision != job.payload.get("enqueue_data_revision"))
-    finish = run.finished_at or datetime.utcnow()
+    finish = run.finished_at or utc_now()
     if run.status not in {"queued", "running"}:
         view["progress"] = {**(run.progress or {}), "stage": run.status}
     view["elapsed_seconds"] = (
@@ -150,7 +150,7 @@ class Progress:
                 if row is None or row.status not in {"queued", "running"}:
                     return
                 row.progress = dict(self.state)
-                row.updated_at = datetime.utcnow()
+                row.updated_at = utc_now()
                 db.commit()
             if changed:
                 t.emit(

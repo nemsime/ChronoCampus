@@ -13,7 +13,7 @@ This document distinguishes **existing implementation**, **evidence from univers
 | Source | What it establishes |
 | --- | --- |
 | [Frontend](../frontend/src/) and [package manifest](../frontend/package.json) | React/TypeScript/Vite interface, mock data, local interactions, and current data models. |
-| [Database script](../db/ChronoCampus.sql) | SQL Server schema, constraints, triggers, views, scheduling procedures, and sample records. |
+| [Database script](../backend/db/ChronoCampus.sql) | SQL Server schema, constraints, triggers, views, scheduling procedures, and sample records. |
 | [B1kurs1-1.doc](B1kurs1-1.doc), [B2kurs1-1.doc](B2kurs1-1.doc), [B3kurs1-1.doc](B3kurs1-1.doc), [B3kurs1.doc](B3kurs1.doc), [B4kurs1.doc](B4kurs1.doc) | Examples of the university's regular timetable grids, grouped by the document naming convention for course years. |
 | [heraka-1-kurs.doc](heraka-1-kurs.doc), [heraka-2-kurs.doc](heraka-2-kurs.doc), [heraka-3kurs.doc](heraka-3kurs.doc), [heraka-4-kurs.doc](heraka-4-kurs.doc) | Examples associated with the university's հեռակա study form, including parenthesized group labels and an additional lesson block in one document. |
 

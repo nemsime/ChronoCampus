@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from app.calendar.rules import lesson_slot, parity, required_pairs, audiences_overlap
+from app.calendar.rules import audiences_overlap, lesson_slot, parity, required_pairs
 from app.scheduling.solver import generate
 from app.scheduling.validation import validate
 

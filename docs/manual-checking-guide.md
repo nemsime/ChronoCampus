@@ -92,7 +92,7 @@ Completion requires all in-scope cases to pass or have an explicitly accepted de
 ### Prerequisites and configuration
 
 - Python 3.11+, Node.js 20.19+ or 22.12+, a reachable SQL Server, unixODBC on Linux, and Microsoft ODBC Driver 18. See [README setup](../README.md#run-locally-on-windows-or-linux) for installation links.
-- Create an empty isolated database, or restore a backup into an isolated database. Apply Alembic migrations with an account permitted to change its schema. Do not run the archived destructive `db/ChronoCampus.sql` as an upgrade.
+- Create an empty isolated database, or restore a backup into an isolated database. Apply Alembic migrations with an account permitted to change its schema. Do not run the archived destructive `backend/db/ChronoCampus.sql` as an upgrade.
 - For a fresh checkout, install dependencies with the commands below. Copy `.env.example` only when `backend/.env` does not already exist; preserve existing private configuration.
 
 Windows PowerShell, from the repository root:

@@ -5,8 +5,9 @@ No legacy data or scheduler tables are removed. Unknown legacy accounts require
 explicit administrator role assignment and a password reset before access.
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "0001_modular"
 down_revision = None

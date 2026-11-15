@@ -1,9 +1,9 @@
 """Idempotent, explicitly synthetic diploma fixtures; never run on a production database."""
 
-from datetime import date, time
-from pathlib import Path
 import json
 import secrets
+from datetime import date, time
+from pathlib import Path
 
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session

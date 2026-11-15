@@ -1,8 +1,8 @@
 """Hash-only password recovery with database time and atomic token consumption."""
 
+import secrets
 from datetime import datetime, timedelta
 from html import escape
-import secrets
 from urllib.parse import urlencode
 
 from sqlalchemy import false, func, select, text, true, update
@@ -12,6 +12,7 @@ from app.accounts.mail import sendEmail
 from app.core.security import password_hash, token_hash
 from app.db.models import Account, ResetToken, UserSession
 from app.db.session import lock_revision
+from app.db.utc import as_utc
 from app.observability.telemetry import emit
 
 GENERIC_NOTICE = "If that email is registered, we sent a reset link"
@@ -20,9 +21,9 @@ GENERIC_NOTICE = "If that email is registered, we sent a reset link"
 def utc_now(db):
     # SQL Server and SQLite both read their own clocks; no host clock for reset logic.
     if db.get_bind().dialect.name == "mssql":
-        return db.scalar(select(func.sysutcdatetime()))
+        return as_utc(db.scalar(select(func.sysutcdatetime())))
     value = db.scalar(select(func.current_timestamp()))
-    return datetime.fromisoformat(value) if isinstance(value, str) else value
+    return as_utc(datetime.fromisoformat(value) if isinstance(value, str) else value)
 
 
 def request_reset(db: Session, email: str, settings, *, background=None):

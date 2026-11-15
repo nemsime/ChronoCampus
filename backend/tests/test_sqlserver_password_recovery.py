@@ -1,10 +1,10 @@
 """Opt-in procedure tests, restricted to newly created disposable databases."""
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import timedelta
 import os
 import re
 import secrets
+from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
 from threading import Barrier
 
 import pytest

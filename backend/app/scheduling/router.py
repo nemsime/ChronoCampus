@@ -1,4 +1,4 @@
-from datetime import date, datetime, time
+from datetime import date, time
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -10,18 +10,19 @@ from app.accounts.dependencies import administrator
 from app.calendar.rules import lesson_slot, parity
 from app.db import models as m
 from app.db.session import get_db, lock_revision
+from app.db.utc import utc_now
 from app.jobs.generation import cancel_run, enqueue_generation, execute_run  # noqa: F401
 from app.jobs.models import JobAttempt
 from app.observability.audit import record_audit
 from app.observability.runs import run_view
+from app.scheduling import queries as q
+from app.scheduling.moves import move_candidate
 from app.scheduling.snapshot import (
     build_snapshot,
     current_assignments,
     record,
 )
 from app.scheduling.validation import validate
-from app.scheduling.moves import move_candidate
-from app.scheduling import queries as q
 
 router = APIRouter(tags=["scheduling"])
 
@@ -339,7 +340,7 @@ def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db),
             db.add(pointer)
         pointer.version_id = version.id
     version.status = "published"
-    version.published_at = datetime.utcnow()
+    version.published_at = utc_now()
     version.revision += 1
     version.report = report
     version.configuration = {"term": snapshot["term"], "calendar": snapshot["calendar"]}

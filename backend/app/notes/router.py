@@ -1,4 +1,3 @@
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -9,6 +8,7 @@ from app.accounts.dependencies import current_user
 from app.accounts.roles import DEAN
 from app.db import models as m
 from app.db.session import get_db, lock_revision
+from app.db.utc import utc_now
 from app.scheduling import queries as q
 from app.scheduling.snapshot import record
 
@@ -57,7 +57,7 @@ def save_note(
         note = m.Note(user_id=account.id, occurrence_id=occurrence_id)
         db.add(note)
     note.content = body.content
-    note.updated_at = datetime.utcnow()
+    note.updated_at = utc_now()
     db.commit()
     return record(note)
 
