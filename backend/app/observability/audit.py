@@ -7,6 +7,8 @@ from app.observability.telemetry import request_id_var
 
 # Only operational fields are retained. Names/emails/passwords/free text are omitted.
 SAFE_FIELDS = {
+    "version_id",
+    "implemented_in_version_id",
     "role",
     "is_active",
     "must_change_password",

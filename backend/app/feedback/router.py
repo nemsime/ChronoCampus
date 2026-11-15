@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN
+
 from app.accounts.dependencies import administrator, current_user
 from app.db import models as m
 from app.db.session import get_db, lock_revision
@@ -28,7 +30,7 @@ class StatusInput(BaseModel):
 
 def thread_for(db, identifier, account):
     thread = db.get(m.Feedback, identifier)
-    if not thread or account.role != "admin" and thread.user_id != account.id:
+    if not thread or account.role != ADMIN and thread.user_id != account.id:
         raise HTTPException(404, "thread_not_found")
     return thread
 
@@ -50,7 +52,7 @@ def thread_view(db, thread):
 @router.get("")
 def threads(account: m.Account = Depends(current_user), db: Session = Depends(get_db)):
     statement = select(m.Feedback).order_by(m.Feedback.created_at.desc())
-    if account.role != "admin":
+    if account.role != ADMIN:
         statement = statement.where(m.Feedback.user_id == account.id)
     return [thread_view(db, t) for t in db.scalars(statement)]
 

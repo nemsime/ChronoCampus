@@ -1,4 +1,56 @@
-# Verification — 24 October 2026
+# Verification
+
+## Dean role and weekly timetable — 15 November 2026
+
+Implemented the dean role, nullable faculty scope, safe published/draft version
+reads and diff, non-binding suggestion lifecycle and admin dry runs, dean/admin
+screens, server-derived weekly grids for all four roles, the local-date fix,
+scoped overview counts, fictional dean seed accounts and additive migration
+`0007_dean_suggestions`. P1/P2 roadmap items and optional design upgrades in the
+implementation plan remain separate work.
+
+- Full backend suite, executed with
+  `docker exec chronocampus-backend-1 python -m pytest tests -q -rs` in the existing
+  Linux/Python 3.11 container: **219 passed, 22 skipped**, 106.36 seconds. Tests
+  isolate their SQLite state; the running development database was not migrated
+  or seeded. The upstream Starlette/httpx deprecation warning remains.
+- Skips: one Windows containment test, seven native Windows launcher tests,
+  seven SQL Server queue cases (including Windows hard-death acceptance), six
+  SQL Server password-recovery cases, and one concurrent-publication SQL Server
+  case. Required isolated SQL databases were not configured. These are not passed
+  SQL Server or Windows checks.
+- New tests cover the administrator route matrix for dean/student/lecturer,
+  mixed-faculty version privacy, revocation/scope revalidation, version/revision
+  cursors, diffs, all proposal kinds, validation/quota/ownership, lifecycle and
+  comments, expected-status races, audit privacy, shared dry-run/manual-move
+  conflict codes, schedule/revision immutability, dean accounts/passwords,
+  student-only registration, overview, bounded note authorization, probe and
+  idempotent demo scopes. Route discovery uses the resolved OpenAPI paths to
+  account for the installed FastAPI's deferred included routers.
+- `npm --prefix frontend run typecheck` and `npm --prefix frontend run build`
+  passed. `node frontend/tests/week-grid.test.mjs` passed five checks;
+  `node frontend/tests/dean.test.mjs` passed seven. They cover local 01:00 UTC+4,
+  semantic/server-timed grids, occupied extra/weekend slots, subgroup/parity and
+  cancellation text, RU/HY/EN rendering, role navigation/guards, conditional dean
+  scope, proposal bounds and the read-only review source boundary. No new runtime
+  or development dependencies were added.
+- Ruff correctness rules (`E4,E7,E9,F`) and `git diff --check` passed. Published
+  page reads still use three SELECTs for both 7 and 517 lessons. Facets now use
+  ten SELECTs, adding one constant-count calendar metadata query. Note saves use
+  one bounded authorization/note SELECT plus the existing revision-lock SELECT.
+- Migration frozen DDL passed a SQL Server-dialect compilation check, including
+  the additive faculty FK/index, suggestion/comment tables and refused downgrade.
+  **Live empty-database and restored-copy migration verification is unchecked**:
+  the isolated-database attempt was denied with SQL Server error 262 (`CREATE
+  DATABASE` permission denied in `master`). It failed before creating a database
+  or backup. The live database remains at `0006_smtp_password_reset`; apply and
+  verify 0007 with an authorized migration account before running this revision.
+- No fresh browser, 360px layout, keyboard interaction, native-dialog focus or
+  print acceptance was performed. Server rendering does not establish these.
+  Armenian copy needs native-speaker review. See the new manual checking
+  scenarios before demonstration or release. No push, PR or deployment was made.
+
+## Earlier verification — 24 October 2026
 
 Environment: native Windows, Python 3.11, Node 24, SQL Server with ODBC Driver 18. Development database restored from the original using a COPY_ONLY/CHECKSUM backup. The original database was not migrated or seeded.
 

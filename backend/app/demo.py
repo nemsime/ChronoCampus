@@ -44,6 +44,8 @@ def _seed_account(db, credentials, email, name, role, **membership):
 
     row.password_hash = password_hash(secret)
     row.must_change_password = False
+    for key, value in membership.items():
+        setattr(row, key, value)
     credentials[email] = {"password": secret, "name": name, "role": role}
     db.flush()
     return row
@@ -70,6 +72,9 @@ def seed_demo(credentials_path: Path):
                 ("FCS", "Faculty of Computer Science"),
             )
         ]
+        account("dean.demo@example.invalid", "Demo University Dean", "dean", faculty_id=None)
+        account("dean.faculty1.demo@example.invalid", "Demo Faculty Dean", "dean",
+                faculty_id=faculties[0].id)
         specifications = [
             (900101, "Software Engineering", 0, "present"),
             (900102, "Automation and Robotics", 0, "present"),

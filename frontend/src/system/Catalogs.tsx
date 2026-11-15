@@ -283,6 +283,8 @@ export function Catalogs() {
     void run(async () => {
       const body = { ...draft };
       for (const field of catalogSchema[resource]) {
+        if (field.visibleWhen && body[field.visibleWhen.key] !== field.visibleWhen.value)
+          body[field.key] = null;
         if (field.type === "numbers")
           body[field.key] = Array.isArray(body[field.key])
             ? body[field.key]
@@ -479,7 +481,7 @@ export function Catalogs() {
                 <p className="notice">{t("unavailableCalendar")}</p>
               )}
               <div className="form-grid">
-                {catalogSchema[resource].map((field) => (
+                {catalogSchema[resource].filter((field) => !field.visibleWhen || draft[field.visibleWhen.key] === field.visibleWhen.value).map((field) => (
                   <FieldInput
                     key={field.key}
                     field={field}
@@ -490,6 +492,10 @@ export function Catalogs() {
                       setDraft({
                         ...draft,
                         [field.key]: v,
+                        ...(field.key === "role" ? {
+                          ...(v !== "dean" ? { faculty_id: null } : {}),
+                          ...(v !== "student" ? { course_group_id: null, small_group_id: null, lab_group_id: null } : {}),
+                        } : {}),
                         ...(field.key === "course_group_id" &&
                         "small_group_id" in draft
                           ? { small_group_id: null, lab_group_id: null }

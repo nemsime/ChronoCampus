@@ -3,7 +3,8 @@ export interface Account {
   id: number;
   email: string;
   display_name: string;
-  role: "admin" | "lecturer" | "student";
+  role: "admin" | "lecturer" | "student" | "dean";
+  faculty_id?: number | null;
   must_change_password: boolean;
 }
 let csrf = "";
@@ -68,6 +69,9 @@ const sourceModules = new Set([
   "Catalogs",
   "Schedule",
   "Feedback",
+  "Dean",
+  "Suggestions",
+  "WeekGrid",
   "common",
   "api",
   "i18n",

@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, defer
 
 from app.accounts.dependencies import administrator
-from app.calendar.rules import audiences_overlap, lesson_slot, parity
+from app.calendar.rules import lesson_slot, parity
 from app.db import models as m
 from app.db.session import get_db, lock_revision
 from app.jobs.generation import cancel_run, enqueue_generation, execute_run  # noqa: F401
@@ -20,6 +20,8 @@ from app.scheduling.snapshot import (
     record,
 )
 from app.scheduling.validation import validate
+from app.scheduling.moves import move_candidate
+from app.scheduling import queries as q
 
 router = APIRouter(tags=["scheduling"])
 
@@ -121,17 +123,10 @@ def assignment_view(db, assignment, component):
     }
 
 
-def readable(account, component):
-    if account.role == "admin":
-        return True
-    if account.role == "lecturer":
-        return component.teacher_id == account.id
-    membership = {
-        key: getattr(account, key)
-        for key in ("course_group_id", "small_group_id", "lab_group_id")
-    }
-    audience = {key: getattr(component, key) for key in membership}
-    return audiences_overlap(membership, audience)
+def readable(account, component, db):
+    return db.scalar(select(1).select_from(q.W).where(
+        q.W.c.id == component.id, q.authorized(q.account_scope(account))
+    ).limit(1)) is not None
 
 
 @router.get("/admin/schedule/versions", dependencies=[Depends(administrator)])
@@ -212,6 +207,7 @@ def version_detail(identifier: int, db: Session = Depends(get_db)):
         "occurrences": snapshot["occurrences"],
         "workloads": snapshot["workloads"],
         "last_run": run_view(last_run) if last_run else None,
+        "grid": q.grid_configuration(snapshot["calendar"], [a.slot for a, c in rows]),
     }
 
 
@@ -297,49 +293,7 @@ def move_assignment(
 ):
     lock_revision(db, changed=False)
     version = require_draft(db, identifier, body.revision)
-    snapshot = build_snapshot(db, version)
-    if occurrence_id not in {o["id"] for o in snapshot["occurrences"]}:
-        raise HTTPException(422, "invalid_occurrence")
-    try:
-        start, end = lesson_slot(snapshot["calendar"], body.slot)
-    except ValueError as error:
-        raise HTTPException(422, str(error)) from None
-    moved = {
-        "occurrence_id": occurrence_id,
-        "day": body.day.isoformat(),
-        "slot": body.slot,
-        "room_id": body.room_id,
-        "starts_at": start,
-        "ends_at": end,
-        "pinned": body.pinned,
-        "cancelled": snapshot["term"]["holiday_policy"] == "exempt"
-        and any(h["day"] == body.day.isoformat() for h in snapshot["holidays"]),
-    }
-    # An explicit manual edit can move/unpin this lesson; all other pins still apply.
-    snapshot["pins"] = [
-        p for p in snapshot["pins"] if p["occurrence_id"] != occurrence_id
-    ]
-    rows = list(
-        db.scalars(select(m.Assignment).where(m.Assignment.version_id == identifier))
-    )
-    existing = next((a for a in rows if a.occurrence_id == occurrence_id), None)
-    if moved["cancelled"] and not (
-        existing and existing.cancelled and existing.day == body.day
-    ):
-        raise HTTPException(409, "manual_holiday_move")
-    candidates = [record(a) for a in rows if a.occurrence_id != occurrence_id] + [moved]
-    report = validate(snapshot, candidates)
-    # Catalog changes may invalidate several existing lessons. Allow repairs one
-    # lesson at a time, but never accept a conflict involving the edited lesson.
-    blocking = [
-        issue
-        for issue in report["issues"]
-        if issue["code"] != "configuration_unconfirmed"
-        and (
-            "occurrence_id" not in issue
-            or occurrence_id in (issue["occurrence_id"], issue.get("other_occurrence_id"))
-        )
-    ]
+    existing, moved, report, blocking = move_candidate(db, version, occurrence_id, body)
     if blocking:
         raise HTTPException(
             409, {"code": "schedule_conflict", "issues": blocking}

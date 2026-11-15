@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { AlertCircle, CalendarCheck, CalendarDays, CheckCircle2, CircleStop, Clock3, Play, Plus, RefreshCw, ShieldCheck, Upload } from "lucide-react";
 import { api, Row } from "./api";
 import { CatalogData, loadCatalogs, rowLabel } from "./Catalogs";
-import { Dialog, EmptyState, ErrorBox, LoadingState, SectionLinks, useAction } from "./common";
+import { addDays, Dialog, EmptyState, ErrorBox, LoadingState, localDay, SectionLinks, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
 import { isRunActive, RunCard, RunHistory } from "./Diagnostics";
+import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 export function Planner({ initialVersionId = null }: { initialVersionId?: number | null } = {}) {
   const { t } = useLanguage();
   const [data, setData] = useState<CatalogData>({});
@@ -18,6 +19,7 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
   const [algorithm, setAlgorithm] = useState("cp_sat");
   const [seed, setSeed] = useState(1);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [inspecting, setInspecting] = useState<Row | null>(null);
   const [slotOptions, setSlotOptions] = useState<Row[]>([]);
   const launchIntent = useRef<{ parameters: string; key: string } | null>(null);
   const selection = useRef<number | null>(null);
@@ -404,22 +406,12 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
             </section>
             <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
             <h2 className="section-title">{t("schedule")}</h2>
-            <LessonList
-              rows={detail.assignments}
-              action={
-                version.status === "draft"
-                  ? (row) => (
-                      <button
-                        disabled={busy || searching}
-                        className="secondary"
-                        onClick={() => void run(() => edit(row))}
-                      >
-                        {t("edit")}
-                      </button>
-                    )
-                  : undefined
-              }
-            />
+            <PlannerTimetable key={version.id} detail={detail} disabled={busy || searching}
+              onSelect={(row) => {
+                if (version.status === "draft") {
+                  if (!busy && !searching) void run(() => edit(row));
+                } else setInspecting(row);
+              }} />
             </section>
             <section id="planner-history" className="section-target" tabIndex={-1} aria-label={t("runHistory")}>
             <RunHistory key={version.id} versionId={version.id} />
@@ -427,6 +419,13 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
           </>
         )}
       </section>
+      {inspecting && <Dialog labelledBy="planner-lesson-title" onClose={() => setInspecting(null)}>
+        <h2 id="planner-lesson-title">{t("lessonDetails")}</h2>
+        <h3>{inspecting.subject}</h3>
+        <p>{inspecting.day} · {String(inspecting.starts_at).slice(0, 5)}–{String(inspecting.ends_at).slice(0, 5)} · {t(inspecting.lesson_type)}</p>
+        <p>{inspecting.teacher} · {inspecting.group} · {t("room_id")} {inspecting.room}</p>
+        {inspecting.cancelled && <p className="notice warning">{t("cancelled")}</p>}
+      </Dialog>}
       {create && (
         <Dialog labelledBy="draft-title" closeDisabled={busy} onClose={() => setCreate(false)}>
           <h2 id="draft-title">{t("createDraft")}</h2>
@@ -639,4 +638,58 @@ export function Planner({ initialVersionId = null }: { initialVersionId?: number
       )}
     </>
   );
+}
+
+function PlannerTimetable({ detail, disabled, onSelect }: { detail: Row; disabled: boolean; onSelect: (row: Row) => void }) {
+  const { t } = useLanguage();
+  const assignments: Row[] = detail.assignments;
+  const dates = assignments.map((row) => row.day as string).sort();
+  const startsOn = detail.version.configuration?.term?.starts_on || dates[0] || localDay();
+  const endsOn = detail.version.configuration?.term?.ends_on || dates[dates.length - 1] || startsOn;
+  const [monday, setMonday] = useState(() => {
+    const today = localDay();
+    return weekStart(today < startsOn ? startsOn : today > endsOn ? endsOn : today);
+  });
+  const [view, setView] = useScheduleView();
+  const [perspective, setPerspective] = useState<"group" | "lecturer" | "room">("group");
+  const [filter, setFilter] = useState("");
+  const field = perspective === "group" ? "course_group_id" : perspective === "lecturer" ? "teacher_id" : "room_id";
+  const label = perspective === "group" ? "group" : perspective === "lecturer" ? "teacher" : "room";
+  const choices = Array.from(new Map(assignments.map((row) => [String(row[field]), row[label]])).entries());
+  const rows = assignments.filter((row) => row.day >= monday && row.day <= addDays(monday, 6) && (!filter || String(row[field]) === filter));
+  // The server computes the frozen version's calendar, including empty slots.
+  const grid: GridConfiguration | undefined = detail.grid?.slots ? detail.grid : detail.grid?.[String(detail.version.term_id)];
+  const issueIds = new Set<number>((detail.report?.issues || []).flatMap((issue: Row) => [
+    ...(Array.isArray(issue.occurrence_ids) ? issue.occurrence_ids : []),
+    ...(issue.occurrence_id ? [issue.occurrence_id] : []),
+  ]));
+  return <div className="planner-timetable">
+    <div className="schedule-week-toolbar">
+      <WeekSelector weekStart={monday} onChange={setMonday} min={startsOn} max={endsOn} />
+      <ScheduleViewToggle value={view} onChange={setView} />
+    </div>
+    <div className="filters timetable-perspective-controls">
+      <label>{t("viewBy")}<select value={perspective} onChange={(event) => {
+        setPerspective(event.target.value as typeof perspective); setFilter("");
+      }}>
+        <option value="group">{t("course_group_id")}</option>
+        <option value="lecturer">{t("teacher_id")}</option>
+        <option value="room">{t("room_id")}</option>
+      </select></label>
+      <label>{t(field)}<select value={filter} onChange={(event) => setFilter(event.target.value)}>
+        <option value="">{t("all")}</option>
+        {choices.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+      </select></label>
+    </div>
+    {grid && <div className={view === "grid" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
+      <WeekGrid weekStart={monday} lessons={rows} grid={grid} perspective={perspective} onSelect={onSelect} disabled={disabled}
+        decorations={(row) => ({ badges: issueIds.has(row.occurrence_id)
+          ? <span className="badge warn"><AlertCircle size={12} aria-hidden="true" />{t("needsReview")}</span> : undefined })} />
+    </div>}
+    {(view === "list" || !grid) && <div className="schedule-list-content"><LessonList rows={rows} action={(row) =>
+      <button type="button" className="secondary" disabled={disabled} onClick={() => onSelect(row)}>
+        {t(detail.version.status === "draft" ? "edit" : "lessonDetails")}
+      </button>} /></div>}
+    {view === "grid" && grid && !rows.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
+  </div>;
 }

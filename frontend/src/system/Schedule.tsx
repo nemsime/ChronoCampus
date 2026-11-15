@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, MapPin, RefreshCw, SlidersHorizontal, StickyNote, UserRound, Users } from "lucide-react";
+import { BookOpen, CalendarDays, MapPin, RefreshCw, SlidersHorizontal, StickyNote, UserRound, Users } from "lucide-react";
 import { api, ApiError, Row } from "./api";
-import { dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, useAction } from "./common";
+import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
+import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 export function LessonList({
   rows,
   action,
@@ -183,8 +184,8 @@ export function PersonalSchedule() {
   const [facets, setFacets] = useState<ScheduleFacets | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [range, setRange] = useState({ start: "", end: "" });
-  const [cursors, setCursors] = useState<(string | null)[]>([null]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [view, setView] = useScheduleView();
+  const [page, setPage] = useState(0);
   const [reload, setReload] = useState(0);
   const [loading, setLoading] = useState(false);
   const [readError, setReadError] = useState<unknown>(null);
@@ -192,8 +193,8 @@ export function PersonalSchedule() {
   const refresh = async () => { setReload((value) => value + 1); };
   const rangeDays = (Date.parse(range.end) - Date.parse(range.start)) / 86400000;
   const validRange = Number.isFinite(rangeDays) && rangeDays >= 0 && rangeDays <= 30;
-  const cursor = cursors[cursors.length - 1];
   const activeFilters = Object.values(filters).filter(Boolean).length;
+  useEffect(() => setPage(0), [range, filters, view]);
   useEffect(() => {
     let active = true;
     let inFlight = false;
@@ -209,62 +210,75 @@ export function PersonalSchedule() {
         if (!range.start) {
           const bounds = choices.date_bounds;
           if (bounds.start && bounds.end) {
-            const today = new Date().toISOString().slice(0, 10);
-            const start = today < bounds.start ? bounds.start : today > bounds.end ? bounds.end : today;
-            setRange({ start, end: addDays(start, Math.min(30, (Date.parse(bounds.end) - Date.parse(start)) / 86400000)) });
+            const today = localDay();
+            const start = weekStart(today < bounds.start ? bounds.start : today > bounds.end ? bounds.end : today);
+            setRange({ start, end: addDays(start, 6) });
           }
           setRows([]);
           return;
         }
         if (!validRange) { setRows([]); return; }
-        const params = new URLSearchParams({ ...range, limit: "25" });
+        const params = new URLSearchParams({ ...range, limit: "500" });
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.set(key, value);
         });
-        if (cursor) params.set("cursor", cursor);
-        const [page, memos] = await Promise.all([
-          api<{ items: Row[]; next_cursor: string | null }>(`/schedule/page?${params}`),
-          api<Row[]>("/notes"),
-        ]);
+        // A grid must never silently omit later server pages.
+        const loadWeek = async () => {
+          const collected: Row[] = [];
+          let cursor: string | null = null;
+          for (let index = 0; index < 20; index += 1) {
+            if (!active) return [];
+            if (cursor) params.set("cursor", cursor);
+            const result: { items: Row[]; next_cursor: string | null } = await api(`/schedule/page?${params}`);
+            collected.push(...result.items);
+            cursor = result.next_cursor;
+            if (!cursor) return collected;
+          }
+          throw new ApiError(422, "weekLoadLimit");
+        };
+        const [lessons, memos] = await Promise.all([loadWeek(), api<Row[]>("/notes")]);
         if (!active) return;
-        setRows(page.items);
-        setNextCursor(page.next_cursor);
+        setRows(lessons);
         setNotes(memos);
+        setSelected(current => current
+          ? lessons.find(lesson => lesson.occurrence_id === current.occurrence_id) || null
+          : null);
       } catch (failure) {
         if (!active) return;
         setRows([]);
-        setNextCursor(null);
-        if (failure instanceof ApiError && failure.status === 409 && cursor) {
-          setCursors([null]);
-        } else setReadError(failure);
+        setSelected(null);
+        setReadError(failure);
       } finally {
         inFlight = false;
         if (active) setLoading(false);
       }
     };
     setRows([]);
-    setNextCursor(null);
+    setSelected(null);
     void load();
     const timer = window.setInterval(() => void load(), 30000);
     const focus = () => void load();
     window.addEventListener("focus", focus);
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", focus); };
-  }, [filters, range, cursor, reload, validRange]);
+  }, [filters, range, reload, validRange]);
   const note = selected
     ? notes.find((n) => n.occurrence_id === selected.occurrence_id)
     : undefined;
-  function changePage(next: (string | null)[]) {
-    setCursors(next);
+  function changePage(next: number) {
+    setPage(next);
     results.current?.focus({ preventScroll: true });
     results.current?.scrollIntoView({ block: "start" });
   }
-  const pagination = (nextCursor !== null || cursors.length > 1) && <nav className="pagination result-pagination personal-pagination" aria-label={t("paginationLabel")}>
-    <button className="secondary" disabled={loading || cursors.length === 1}
-      onClick={() => changePage(cursors.slice(0, -1))}><ChevronLeft size={16} aria-hidden="true" />{t("previous_page")}</button>
-    <span className="count-label">{t("pageLabel")} {cursors.length}</span>
-    <button className="secondary" disabled={loading || !nextCursor}
-      onClick={() => nextCursor && changePage([...cursors, nextCursor])}>{t("next_page")}<ChevronRight size={16} aria-hidden="true" /></button>
-  </nav>;
+  const currentPage = Math.min(page, Math.max(0, Math.ceil(rows.length / 25) - 1));
+  const pageRows = rows.slice(currentPage * 25, (currentPage + 1) * 25);
+  const shownRows = view === "list" ? pageRows : rows;
+  const pagination = view === "list" && <ListPagination page={currentPage} pageSize={25} total={rows.length} onChange={changePage} />;
+  const selectLesson = (row: Row) => {
+    setSelected(row);
+    setContent(notes.find((n) => n.occurrence_id === row.occurrence_id)?.content || "");
+  };
+  const grids = Object.entries(facets?.grid || {}).filter(([termId]) =>
+    (!filters.term_id || filters.term_id === termId) && rows.some((row) => String(row.term_id) === termId));
   return (
     <>
       <div className="page-heading page-hero">
@@ -284,10 +298,10 @@ export function PersonalSchedule() {
       </div>
       <dl className="summary-strip schedule-summary">
         {[
-          { icon: CalendarDays, label: "lessonsOnPage", value: rows.length },
-          { icon: CalendarDays, label: "teachingDaysOnPage", value: new Set(rows.map((row) => row.day)).size },
-          { icon: BookOpen, label: "subjectsOnPage", value: new Set(rows.map((row) => row.subject_id)).size },
-          { icon: StickyNote, label: "notesOnPage", value: rows.filter((row) => notes.some((note) => note.occurrence_id === row.occurrence_id)).length },
+          { icon: CalendarDays, label: "lessonsOnPage", value: shownRows.length },
+          { icon: CalendarDays, label: "teachingDaysOnPage", value: new Set(shownRows.map((row) => row.day)).size },
+          { icon: BookOpen, label: "subjectsOnPage", value: new Set(shownRows.map((row) => row.subject_id)).size },
+          { icon: StickyNote, label: "notesOnPage", value: shownRows.filter((row) => notes.some((note) => note.occurrence_id === row.occurrence_id)).length },
         ].map(({ icon: Icon, label, value }) => <div className="summary-item" key={label}>
           <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
           <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className="summary-item-value">{loading ? "—" : value}</dd></div>
@@ -299,19 +313,18 @@ export function PersonalSchedule() {
         <div className="schedule-filter-bar">
           <div><h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}
             {activeFilters > 0 && <span className="badge">{activeFilters}</span>}
-          </h2><p>{t("scheduleRangeHint")}</p></div>
-          {activeFilters > 0 && <button className="link" onClick={() => { setFilters({}); setCursors([null]); }}>{t("clearFilters")}</button>}
+          </h2><p>{t("scheduleWeekHint")}</p></div>
+          {activeFilters > 0 && <button className="link" onClick={() => setFilters({})}>{t("clearFilters")}</button>}
+        </div>
+        <div className="schedule-week-toolbar">
+          {range.start && <WeekSelector weekStart={range.start} min={facets?.date_bounds.start || undefined}
+            max={facets?.date_bounds.end || undefined} onChange={(start) => setRange({ start, end: addDays(start, 6) })} />}
+          <ScheduleViewToggle value={view} onChange={setView} />
         </div>
         <div className="filters">
-          {(["start", "end"] as const).map((key) => <label key={key}>
-            {t(key === "start" ? "starts_on" : "ends_on")}
-            <input type="date" value={range[key]} min={facets?.date_bounds.start || undefined}
-              max={key === "end" && range.start ? addDays(range.start, 30) : facets?.date_bounds.end || undefined}
-              onChange={(event) => { setRange({ ...range, [key]: event.target.value }); setCursors([null]); }} />
-          </label>)}
           {Object.entries(facets?.filters || {}).map(([key, choices]) => <label key={key}>
             {t(key)}<select value={filters[key] || ""} onChange={(event) => {
-              setFilters({ ...filters, [key]: event.target.value }); setCursors([null]);
+              setFilters({ ...filters, [key]: event.target.value });
             }}><option value="">{t("all")}</option>
               {choices.map((choice) => <option key={choice.id} value={choice.id}>
                 {key === "lesson_type" ? t(String(choice.id)) : choice.label}
@@ -325,26 +338,29 @@ export function PersonalSchedule() {
         {(loading || (!facets && !readError)) && <LoadingState label={t("scheduleLoading")} compact={rows.length > 0} />}
         {rows.length > 0 && <>
         <div className="schedule-results"><span className="count-label">{t("lessonsOnPage")}: {rows.length}</span></div>
-        <LessonList
+        <div className={view === "grid" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
+          {grids.map(([termId, grid]) => <section key={termId}>
+            {grids.length > 1 && <h3>{facets?.filters.term_id?.find((choice) => String(choice.id) === termId)?.label}</h3>}
+            <WeekGrid weekStart={range.start} lessons={rows.filter((row) => String(row.term_id) === termId)} grid={grid}
+              perspective={filters.teacher_id ? "lecturer" : filters.room_id ? "room" : "group"} onSelect={selectLesson}
+              decorations={(row) => ({ badges: notes.some((memo) => memo.occurrence_id === row.occurrence_id)
+                ? <span className="badge"><StickyNote size={12} aria-hidden="true" />{t("note")}</span> : undefined })} />
+          </section>)}
+        </div>
+        {(view === "list" || !grids.length) && <div className="schedule-list-content"><LessonList
           serverPage
-          rows={rows}
+          rows={pageRows}
           action={(row) => (
             <button
               className="secondary"
-              onClick={() => {
-                setSelected(row);
-                setContent(
-                  notes.find((n) => n.occurrence_id === row.occurrence_id)
-                    ?.content || "",
-                );
-              }}
+              onClick={() => selectLesson(row)}
             >
               <StickyNote size={16} aria-hidden="true" />
               {t("note")}
               {notes.some((n) => n.occurrence_id === row.occurrence_id) && <span className="note-dot" aria-hidden="true" />}
             </button>
           )}
-        />
+        /></div>}
         </>}
         {!loading && !readError && facets && !rows.length && (
           !facets.date_bounds.start ? <EmptyState icon={CalendarDays} title={t("noPublishedTitle")} description={t("noPublishedHelp")} />
@@ -356,9 +372,8 @@ export function PersonalSchedule() {
       {selected && (
         <Dialog labelledBy="note-title" closeDisabled={busy} onClose={() => setSelected(null)}>
           <h2 id="note-title">{t("note")}</h2>
-          <p>
-            {selected.subject} · {selected.day}
-          </p>
+          <p>{selected.subject} · {selected.day} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)}</p>
+          <p>{selected.teacher} · {t("room_id")} {selected.room} · {selected.group}</p>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -419,12 +434,9 @@ export function PersonalSchedule() {
   );
 }
 
-interface ScheduleFacets {
+export interface ScheduleFacets {
   filters: Record<string, { id: string | number; label: string }[]>;
   date_bounds: { start: string | null; end: string | null };
   revision: number;
-}
-
-function addDays(day: string, days: number) {
-  return new Date(Date.parse(day) + days * 86400000).toISOString().slice(0, 10);
+  grid: Record<string, GridConfiguration>;
 }

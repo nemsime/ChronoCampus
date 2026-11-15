@@ -12,6 +12,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.accounts.dependencies import administrator, current_user
+from app.accounts.roles import DEAN
 from app.core.config import get_settings
 from app.db import models as m
 from app.db.session import get_db
@@ -39,7 +40,9 @@ def database_probe(db):
             ).limit(1)
         )
         db.execute(select(m.AuditEvent).limit(1))
-        db.execute(select(m.Account.email_verified).limit(1))
+        db.execute(select(m.Account.email_verified, m.Account.faculty_id).limit(1))
+        db.execute(select(m.ScheduleSuggestion.status).limit(1))
+        db.execute(select(m.SuggestionComment.id).limit(1))
         db.execute(select(m.ResetToken.purpose, m.ResetToken.token_hash).limit(1))
         from app.jobs.models import BackgroundJob, JobAttempt, MailOutbox, WorkerHeartbeat, QueueAdmission
 
@@ -52,7 +55,7 @@ def database_probe(db):
         admission = db.scalar(select(QueueAdmission.id).where(QueueAdmission.name == "generation"))
         return {
             "ready": revision is not None and admission is not None,
-            "schema": "0006_smtp_password_reset",
+            "schema": "0007_dean_suggestions",
             "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
         }
     except Exception as error:
@@ -281,6 +284,10 @@ class ClientFrame(BaseModel):
         "Catalogs",
         "Schedule",
         "Feedback",
+        "Dean",
+        "Suggestions",
+        "WeekGrid",
+        "Overview",
         "common",
         "api",
         "i18n",
@@ -301,6 +308,9 @@ class ClientError(BaseModel):
         "feedback",
         "account",
         "diagnostics",
+        "overview",
+        "timetables",
+        "suggestions",
         "unknown",
     ] = "unknown"
     source_request_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
@@ -309,6 +319,8 @@ class ClientError(BaseModel):
 
 @client_router.post("/diagnostics/client-errors", status_code=202)
 def client_error(body: ClientError, account: m.Account = Depends(current_user)):
+    if account.role == DEAN:
+        raise HTTPException(403, "forbidden")
     now = time.perf_counter()
     with _client_lock:
         window, count = _client_reports.get(account.id, (now, 0))

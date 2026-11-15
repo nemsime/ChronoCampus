@@ -4,6 +4,8 @@ from pydantic import ValidationError
 from sqlalchemy import delete, func, inspect, select
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN, LECTURER, STUDENT, DEAN
+
 from app.accounts.dependencies import administrator, public_account
 from app.accounts.router import EmailInput, revoke_sessions
 from app.core.security import password_hash
@@ -119,6 +121,12 @@ def validate_calendar_workloads(db, resource, data, existing):
 
 
 def validate_domain(db, resource, data, existing, actor):
+    # A role change must remove an old dean scope even if an editor echoes it.
+    if resource == "users" and data["role"] != DEAN:
+        if existing and existing.role == DEAN:
+            data["faculty_id"] = None
+        elif data.get("faculty_id") is not None:
+            raise HTTPException(422, "faculty_dean_only")
     if resource in {"users", "workloads", "subgroups"}:
         membership(db, data)
     model, _ = resource_type(resource)
@@ -138,22 +146,22 @@ def validate_domain(db, resource, data, existing, actor):
             data["email"] = EmailInput(email=data["email"]).email
         except ValidationError:
             raise HTTPException(422, "invalid_email") from None
-        if data["role"] == "student" and not data.get("course_group_id"):
+        if data["role"] == STUDENT and not data.get("course_group_id"):
             raise HTTPException(422, "student_group_required")
-        if data["role"] != "student" and any(
+        if data["role"] != STUDENT and any(
             data.get(k) for k in ("course_group_id", "small_group_id", "lab_group_id")
         ):
             raise HTTPException(422, "student_membership_only")
         if (
             existing
             and existing.id == actor.id
-            and (data["role"] != "admin" or not data["is_active"])
+            and (data["role"] != ADMIN or not data["is_active"])
         ):
             raise HTTPException(409, "cannot_disable_self")
         if (
             existing
-            and existing.role == "lecturer"
-            and (data["role"] != "lecturer" or not data["is_active"])
+            and existing.role == LECTURER
+            and (data["role"] != LECTURER or not data["is_active"])
         ):
             if db.scalar(
                 select(m.Workload.id)
@@ -225,7 +233,7 @@ def validate_domain(db, resource, data, existing, actor):
         if total > data["capacity"]:
             raise HTTPException(422, "subgroup_capacity")
     if resource == "availability" and data["teacher_id"]:
-        if require_record(db, m.Account, data["teacher_id"]).role != "lecturer":
+        if require_record(db, m.Account, data["teacher_id"]).role != LECTURER:
             raise HTTPException(422, "lecturer_required")
     if resource in {"periods", "extra-permissions", "holidays"}:
         term = require_record(db, m.Term, data["term_id"])
@@ -243,7 +251,7 @@ def validate_domain(db, resource, data, existing, actor):
         if major.study_form != calendar.study_form:
             raise HTTPException(422, "study_form_mismatch")
         teacher = require_record(db, m.Account, data["teacher_id"])
-        if teacher.role != "lecturer" or not teacher.is_active:
+        if teacher.role != LECTURER or not teacher.is_active:
             raise HTTPException(422, "lecturer_required")
         units = calendar.academic_hours_per_lesson
         if units and data["semester_hours"] % units:

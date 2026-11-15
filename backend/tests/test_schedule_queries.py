@@ -227,7 +227,7 @@ def test_constant_query_count_and_legacy_cap(schedule):
         assert s.client.get("/schedule", params={"start": "2026-09-08"}).json() == []
         statements.clear()
         assert s.client.get("/schedule/facets").status_code == 200
-        assert len(statements) == 9
-        print(f"schedule SELECT benchmark: 7/517 published rows -> {counts} statements; facets -> 9; cache absent")
+        assert len(statements) == 10
+        print(f"schedule SELECT benchmark: 7/517 published rows -> {counts} statements; facets including grid -> 10; cache absent")
     finally:
         event.remove(s.db.get_bind(), "before_cursor_execute", track)

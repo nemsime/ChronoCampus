@@ -1,0 +1,66 @@
+.nav-count { margin-left: auto; min-width: 22px; padding: 2px 6px; border-radius: 12px; background: #dcece6; color: #16483d; font-size: 12px; text-align: center; }
+.sidebar-collapsed .nav-count { position: absolute; right: 4px; top: 3px; min-width: 18px; padding: 1px 4px; }
+.dean-version-controls > label { max-width: 760px; }
+.dean-version-summary { display: flex; flex-wrap: wrap; gap: 16px 32px; margin: 20px 0 0; }
+.dean-version-summary div { min-width: 100px; }
+.dean-version-summary dt { color: #52665e; font-size: 13px; }
+.dean-version-summary dd { margin: 6px 0 0; font-size: 19px; font-weight: 650; }
+.dean-schedule-toolbar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; }
+.dean-schedule-toolbar > .inline { align-items: end; flex-wrap: wrap; }
+.dean-schedule-toolbar label { min-width: 140px; }
+.dean-comparison-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 20px 0; }
+.diff-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.diff-removed-lesson { opacity: .75; border-style: dashed !important; }
+.diff-removed-lesson strong { text-decoration: line-through; }
+.diff-changed-lesson { border-left: 3px solid #967542 !important; }
+.diff-added { background: #e0f0e5; color: #28563a; }
+.diff-removed { background: #f6e6e2; color: #7e3c30; }
+.diff-moved, .diff-room_changed, .diff-cancelled_changed { background: #f6ecd8; color: #6f5627; }
+.pending-suggestion { display: inline-flex; align-items: center; gap: 4px; }
+.dean-lesson-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.dean-lesson-details { padding-bottom: 16px; }
+.dean-lesson-details .badge { margin: 4px 6px 4px 0; }
+.suggestion-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 16px; }
+.suggestion-form p { line-height: 1.6; }
+.field-counter { display: block; text-align: right; color: #596c63; font-variant-numeric: tabular-nums; }
+.suggestion-detail-modal { width: min(760px, calc(100vw - 32px)); }
+.suggestion-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; color: #52665e; margin: 16px 0; }
+.suggestion-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.suggestion-facts { display: grid; gap: 12px; margin: 24px 0; }
+.suggestion-facts > div { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: 16px; }
+.suggestion-facts dt { font-size: 13px; color: #52665e; }
+.suggestion-facts dd { margin: 0; overflow-wrap: anywhere; }
+.suggestion-admin-actions { display: grid; gap: 16px; padding: 20px 0; border-top: 1px solid #dce4de; }
+.suggestion-check, .suggestion-implementation { display: grid; gap: 12px; }
+.suggestion-check > button, .suggestion-implementation > button, .suggestion-admin-actions > button { justify-self: start; }
+.suggestion-check h3, .suggestion-check p { margin: 0; }
+.suggestion-thread { margin-top: 24px; padding-top: 20px; border-top: 1px solid #dce4de; }
+.suggestion-thread h3 { display: flex; align-items: center; gap: 8px; }
+.suggestion-thread ol { padding: 0; margin: 16px 0; list-style: none; }
+.suggestion-thread li { padding: 16px 0; border-bottom: 1px solid #e6eae6; }
+.suggestion-thread li header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.suggestion-thread li time { font-size: 12px; color: #52665e; }
+.suggestion-thread form { display: grid; gap: 12px; }
+.suggestion-thread form > button { justify-self: start; }
+.suggestion-counts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.suggestion-counts button { font-size: 13px; gap: 10px; }
+.suggestion-counts button.selected { border-color: #2c6856; background: #edf5f0; color: #21503f; }
+.suggestion-counts button span { font-variant-numeric: tabular-nums; font-weight: 650; }
+.suggestion-table-meta { display: block; margin-top: 4px; color: #52665e; }
+.suggestion-status-open { background: #e7eff5; color: #2c5671; }
+.suggestion-status-accepted { background: #e4efe2; color: #355b31; }
+.suggestion-status-rejected { background: #f8e6e2; color: #803b31; }
+.suggestion-status-implemented { background: #dceee5; color: #235440; }
+.suggestion-status-withdrawn { background: #e9ece9; color: #4d5d55; }
+@media (max-width: 760px) {
+  .dean-schedule-toolbar, .dean-schedule-toolbar > .inline { align-items: stretch; }
+  .dean-schedule-toolbar > .inline, .dean-schedule-toolbar label, .dean-comparison-controls > button { width: 100%; }
+  .dean-version-summary { gap: 16px; }
+  .dean-version-summary div { flex: 1 1 calc(50% - 16px); }
+  .suggestion-facts > div { grid-template-columns: 1fr; gap: 4px; }
+  .suggestion-counts button { min-height: 44px; }
+}
+@media print {
+  .dean-version-controls > label, .dean-schedule-toolbar, .dean-comparison-controls, .dean-lesson-actions button, .diff-legend { display: none; }
+  .dean-version-summary { margin: 0; }
+}

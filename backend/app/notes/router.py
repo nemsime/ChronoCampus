@@ -2,14 +2,15 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import and_, literal, select
 from sqlalchemy.orm import Session
 
 from app.accounts.dependencies import current_user
+from app.accounts.roles import DEAN
 from app.db import models as m
 from app.db.session import get_db, lock_revision
-from app.scheduling.router import readable
-from app.scheduling.snapshot import current_assignments, record
+from app.scheduling import queries as q
+from app.scheduling.snapshot import record
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -37,17 +38,21 @@ def save_note(
     account: m.Account = Depends(current_user),
     db: Session = Depends(get_db),
 ):
-    if not any(
-        a.occurrence_id == occurrence_id and readable(account, c)
-        for a, c in current_assignments(db)
-    ):
+    if account.role == DEAN:
         raise HTTPException(404, "lesson_not_found")
     lock_revision(db, changed=False)
-    note = db.scalar(
-        select(m.Note).where(
-            m.Note.user_id == account.id, m.Note.occurrence_id == occurrence_id
-        )
-    )
+    scope = q.account_scope(account)
+    # Bounded authorization and existing note lookup share a single SELECT.
+    row = db.execute(
+        select(literal(1), m.Note)
+        .select_from(q.source(scope).outerjoin(m.Note, and_(
+            m.Note.user_id == account.id, m.Note.occurrence_id == q.A.c.occurrence_id
+        )))
+        .where(q.A.c.occurrence_id == occurrence_id, q.authorized(scope)).limit(1)
+    ).first()
+    if row is None:
+        raise HTTPException(404, "lesson_not_found")
+    note = row[1]
     if not note:
         note = m.Note(user_id=account.id, occurrence_id=occurrence_id)
         db.add(note)

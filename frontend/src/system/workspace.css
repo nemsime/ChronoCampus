@@ -336,6 +336,84 @@ p, small { color: #69786b; }
 .auth-access-note { color: #738468; font-size: 10px; }
 .personal-pagination { display: grid; grid-template-columns: auto 1fr auto; }
 .personal-pagination > .count-label { flex-basis: auto; text-align: center; }
+
+/* The timetable scrolls within its own region, including on compact screens. */
+.schedule-week-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-block: 16px; }
+.schedule-week-selector { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.schedule-week-selector label { margin: 0; }
+.schedule-week-selector input { width: 150px; min-height: 42px; }
+.schedule-week-label { font-size: 12px; color: var(--text); }
+.schedule-view-toggle { display: inline-flex; gap: 4px; padding: 3px; border: 1px solid var(--border); border-radius: 10px; background: #f7f9f5; }
+.schedule-view-toggle button { min-height: 40px; padding: 8px 12px; box-shadow: none; border-color: transparent; }
+.schedule-view-toggle button[aria-pressed="true"] { color: #fff; background: var(--accent); }
+.week-grid-region { max-width: 100%; min-width: 0; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.week-grid { width: 100%; min-width: 760px; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+.week-grid caption { padding: 12px 14px; text-align: left; font-size: 14px; font-weight: 600; color: var(--text); }
+.week-grid th, .week-grid td { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: top; padding: 7px; text-transform: none; letter-spacing: normal; }
+.week-grid th { color: var(--text); background: #f3f6f0; font-size: 12px; font-weight: 600; }
+.week-grid thead th { position: sticky; top: 0; z-index: 2; }
+.week-grid tr > :first-child { width: 94px; }
+.week-grid th[scope="row"] strong, .week-grid th[scope="row"] small { display: block; }
+.week-grid th[scope="row"] small { font-size: 11px; font-weight: 400; color: #50645b; margin-top: 4px; }
+.week-grid tr > :last-child { border-right: 0; }
+.week-grid tbody tr:last-child > * { border-bottom: 0; }
+.week-grid td { height: 105px; background: #fff; }
+.week-grid .grid-today { background: #f0f6f1; }
+.grid-lesson { display: flex; flex-direction: column; align-items: stretch; width: 100%; min-height: 64px; gap: 4px; margin-bottom: 6px; padding: 9px; border: 1px solid #cbd9d2; border-left: 3px solid #537e72; border-radius: 7px; text-align: left; white-space: normal; overflow-wrap: anywhere; background: #f1f6f3; color: #27433d; box-shadow: none; font-size: 12px; line-height: 1.4; }
+.grid-lesson:last-child { margin-bottom: 0; }
+.grid-lesson:hover:not(:disabled) { background: #e9f1ec; border-color: #6a8f81; }
+.grid-lesson.grid-lesson-practical { background: #f3f5fb; border-left-color: #596c9a; }
+.grid-lesson.grid-lesson-lab { background: #faf4ed; border-left-color: #967344; }
+.grid-lesson > span { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.grid-lesson > span > svg { flex-shrink: 0; }
+.grid-lesson strong { font-size: 13px; color: #243d37; }
+.grid-lesson small { font-size: 11px; color: #506159; }
+.grid-lesson .grid-lesson-kind { font-size: 11px; font-weight: 600; }
+.grid-lesson .badge { display: inline-flex; gap: 3px; align-items: center; font-size: 10px; padding: 2px 5px; }
+.grid-lesson.cancelled strong { text-decoration: line-through; }
+.grid-lesson-flags:empty { display: none; }
+.grid-empty { display: block; text-align: center; color: #68766b; padding-top: 20px; }
+.grid-keyboard-hint { margin: 0; padding: 10px 14px; border-top: 1px solid var(--border); font-size: 12px; }
+.grid-parity-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+.grid-parity-pair > div + div { border-left: 1px dashed #acbcb3; padding-left: 5px; }
+.grid-parity-label { display: block; font-size: 10px; color: #50645b; margin-bottom: 5px; }
+.schedule-grid-print { display: none; }
+.schedule-grid-content { min-width: 0; }
+.schedule-grid-content > section + section { margin-top: 24px; }
+.week-grid td:focus, .grid-lesson:focus-visible, .week-grid-region:focus-visible { outline: 3px solid #247b70; outline-offset: -3px; }
+.timetable-perspective-controls { margin-bottom: 16px; }
+@media (max-width: 760px) {
+  .schedule-week-toolbar { align-items: flex-start; }
+  .schedule-week-selector { gap: 5px; }
+  .schedule-week-selector input { width: 145px; min-height: 44px; font-size: 16px; }
+  .schedule-week-selector button, .schedule-view-toggle button { min-height: 44px; }
+  .schedule-week-label { flex-basis: 100%; font-size: 12px; }
+  .grid-lesson { min-height: 44px; }
+}
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  html, body { background: #fff; }
+  .sidebar, .topbar, .page-hero, .summary-strip, .planner-stage-rail, .section-links,
+  .schedule-filter-bar, .filters, .schedule-week-toolbar, .pagination, .grid-keyboard-hint,
+  .planner-panel > .toolbar, #planner-controls, #planner-report, #planner-history,
+  .schedule-list-content { display: none !important; }
+  .main-area, .sidebar-collapsed .main-area { display: block; margin: 0; width: 100%; }
+  .main-area main { padding: 0; }
+  .panel { border: 0; box-shadow: none; padding: 0; margin: 0; }
+  .schedule-grid-print { display: block; }
+  .week-grid-region { border-color: #777; overflow: visible; border-radius: 0; }
+  .week-grid { min-width: 0; width: 100%; font-size: 8pt; }
+  .week-grid caption { padding: 5px; font-size: 11pt; }
+  .week-grid thead th { position: static; }
+  .week-grid th, .week-grid td { padding: 3px; border-color: #aaa; font-size: 8pt; height: auto; }
+  .week-grid tr > :first-child { width: 70px; }
+  .week-grid tr { break-inside: avoid; }
+  .week-grid th[scope="row"] small { font-size: 7pt; }
+  .grid-lesson { padding: 4px; min-height: 0; gap: 2px; background: #fff !important; color: #000; border-color: #888; box-shadow: none; font-size: 7pt; break-inside: avoid; }
+  .grid-lesson strong { color: #000; font-size: 8pt; }
+  .grid-lesson small, .grid-lesson .grid-lesson-kind, .grid-lesson .badge { color: #222; font-size: 7pt; }
+  .grid-empty { padding-top: 10px; }
+}
 @media (max-width: 760px) {
   .overview-panel-heading h2 { font-size: 14px; }.overview-date-row > p { font-size: 10px; }
   .overview-metric > span { font-size: 10px; }.upcoming-description h3 { font-size: 12px; }

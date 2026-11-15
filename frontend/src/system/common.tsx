@@ -52,6 +52,22 @@ export function useAction() {
 }
 const armenianDays = ["կիր", "երկ", "երք", "չրք", "հնգ", "ուրբ", "շբթ"];
 const armenianMonths = ["հնվ", "փտվ", "մրտ", "ապր", "մյս", "հնս", "հլս", "օգս", "սեպ", "հոկ", "նոյ", "դեկ"];
+// Use calendar dates in the viewer's timezone, including just after midnight.
+export function localDay(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+export function addDays(day: string, days: number) {
+  const value = new Date(`${day}T12:00:00`);
+  value.setDate(value.getDate() + days);
+  return localDay(value);
+}
+
+export function weekStart(day = localDay()) {
+  const value = new Date(`${day}T12:00:00`);
+  return addDays(day, -((value.getDay() + 6) % 7));
+}
+
 export const dateLabel = (date: string, lang: string) => {
   const value = new Date(`${date}T12:00:00`);
   // Some browser distributions omit Armenian ICU data and silently use English.

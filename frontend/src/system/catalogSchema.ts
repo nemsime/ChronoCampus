@@ -21,6 +21,7 @@ export interface Field {
   min?: number;
   max?: number;
   filter?: string;
+  visibleWhen?: { key: string; value: string };
 }
 const text = (key: string, optional = false): Field => ({ key, optional });
 const num = (
@@ -108,10 +109,11 @@ export const catalogSchema: Record<string, Field[]> = {
   users: [
     { key: "email", type: "email" },
     text("display_name"),
-    choice("role", ["student", "lecturer", "admin"]),
+    choice("role", ["student", "lecturer", "dean", "admin"]),
+    { ...ref("faculty_id", "faculties", true), visibleWhen: { key: "role", value: "dean" } },
     bool("is_active", true),
     { key: "password", type: "password", optional: true },
-    ...membership.map((f) => ({ ...f, optional: true })),
+    ...membership.map((f) => ({ ...f, optional: true, visibleWhen: { key: "role", value: "student" } })),
   ],
   calendars: [
     text("name"),

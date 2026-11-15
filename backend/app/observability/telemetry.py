@@ -63,6 +63,16 @@ FIELDS = {
     "queue_wait_seconds",
 }
 ERROR_CODES = {
+    "dean_required",
+    "forbidden",
+    "suggestion_not_found",
+    "suggestion_closed",
+    "suggestion_state_changed",
+    "suggestion_limit",
+    "invalid_proposal",
+    "outside_faculty_scope",
+    "faculty_required_for_scope",
+    "faculty_dean_only",
     "authentication_required",
     "administrator_required",
     "origin_forbidden",

@@ -11,6 +11,7 @@ import { runtimeWords } from "./runtimeWords";
 import { scheduleWords } from "./scheduleWords";
 import { uiWords } from "./uiWords";
 import { designWords } from "./designWords";
+import { deanWords } from "./deanWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   ...ruleMessages,
@@ -19,6 +20,7 @@ const words: Record<string, [string, string, string]> = {
   ...scheduleWords,
   ...uiWords,
   ...designWords,
+  ...deanWords,
   register: ["Создать аккаунт", "Ստեղծել հաշիվ", "Create account"],
   registrationName: ["Имя и фамилия", "Անուն և ազգանուն", "Full name"],
   verifyEmail: ["Подтвердите почту", "Հաստատեք էլ․ փոստը", "Verify your email"],

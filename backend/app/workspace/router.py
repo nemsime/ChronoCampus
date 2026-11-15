@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy import false, func, select, true
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN, DEAN, ROLES
 from app.db import models as m
 from app.db.session import get_db
 from app.scheduling import queries as q
@@ -31,7 +32,7 @@ def overview_data(db: Session, scope: dict, day: date) -> dict:
              "lessons": counts.get(monday + timedelta(days=index), 0)}
             for index in range(7)]
     support_statement = select(m.Feedback.status, func.count()).group_by(m.Feedback.status)
-    if scope["role"] != "admin":
+    if scope["role"] != ADMIN:
         support_statement = support_statement.where(m.Feedback.user_id == scope["id"])
     support_counts = dict(db.execute(support_statement).all())
     support = {status: support_counts.get(status, 0)
@@ -39,9 +40,10 @@ def overview_data(db: Session, scope: dict, day: date) -> dict:
     stats = {
         "today_lessons": counts.get(day, 0),
         "week_lessons": sum(item["lessons"] for item in week),
-        "personal_notes": db.scalar(select(count_rows(m.Note, m.Note.user_id == scope["id"]))),
         "open_requests": support["new"] + support["in_progress"],
     }
+    if scope["role"] != DEAN:
+        stats["personal_notes"] = db.scalar(select(count_rows(m.Note, m.Note.user_id == scope["id"])))
     upcoming_statement = (
         q.selection(scope, {"start": day, "end": upcoming_end})
         .where(q.A.c.cancelled == false())
@@ -56,12 +58,31 @@ def overview_data(db: Session, scope: dict, day: date) -> dict:
         item["parity"] = q.parity(term_start, item["day"])
         upcoming.append(item)
     versions, activity = [], []
-    if scope["role"] == "admin":
+    if scope["role"] == DEAN:
+        from app.review.service import scope_groups, visible_versions
+
+        groups = scope_groups(db, scope)
+        publications = select(func.count(func.distinct(m.PublishedGroup.course_group_id)))
+        if groups is not None:
+            publications = publications.where(m.PublishedGroup.course_group_id.in_(groups))
+        suggestion_counts = dict(db.execute(
+            select(m.ScheduleSuggestion.status, func.count())
+            .where(m.ScheduleSuggestion.author_id == scope["id"])
+            .group_by(m.ScheduleSuggestion.status)
+        ).all())
+        stats.update({
+            "published_cohorts_in_scope": db.scalar(publications),
+            "draft_versions_in_scope": len(visible_versions(db, scope, "draft")),
+            "my_open_suggestions": suggestion_counts.get("open", 0),
+            "my_accepted_suggestions": suggestion_counts.get("accepted", 0),
+        })
+    if scope["role"] == ADMIN:
         aggregates = db.execute(select(
             count_rows(m.CourseGroup).label("total_cohorts"),
             count_rows(m.Room).label("total_rooms"),
             count_rows(m.Account, m.Account.is_active == true(),
-                       m.Account.role.in_(["admin", "lecturer", "student"])).label("active_users"),
+                       m.Account.role.in_(ROLES)).label("active_users"),
+            count_rows(m.ScheduleSuggestion, m.ScheduleSuggestion.status == "open").label("open_suggestions"),
             count_rows(m.ScheduleVersion, m.ScheduleVersion.status == "draft").label("draft_versions"),
             select(func.count(func.distinct(m.PublishedGroup.course_group_id)))
             .scalar_subquery().label("published_cohorts"),
@@ -85,8 +106,10 @@ def overview_data(db: Session, scope: dict, day: date) -> dict:
                    m.AuditEvent.created_at)
             .order_by(m.AuditEvent.id.desc()).limit(8)
         ).mappings()]
-    return {"date": day, "stats": stats, "week": week, "upcoming": upcoming,
-            "versions": versions, "activity": activity, "support": support}
+    result = {"date": day, "stats": stats, "week": week, "upcoming": upcoming, "support": support}
+    if scope["role"] != DEAN:
+        result.update(versions=versions, activity=activity)
+    return result
 
 
 @router.get("/overview")

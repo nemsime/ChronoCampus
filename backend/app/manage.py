@@ -8,6 +8,8 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.accounts.roles import ADMIN
+
 from app.accounts.router import EmailInput
 from app.core.security import password_hash
 from app.db.models import Account
@@ -53,7 +55,7 @@ def main():
                 Account(
                     email=email,
                     display_name=args.name,
-                    role="admin",
+                    role=ADMIN,
                     password_hash=password_hash(password),
                     must_change_password=True,
                 )
