@@ -146,7 +146,6 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
           <span className="brand-mark" aria-hidden="true"><CalendarDays size={24} strokeWidth={1.7} /></span><span>Chrono<span className="brand-light">Campus</span></span>
         </div>
         <div className="auth-story-content">
-          <p className="eyebrow"><span />{t("authEyebrow")}</p>
           <h2>{t("authHeadline")}</h2>
           <p>{t("authStory")}</p>
           <div className="auth-schedule-art" aria-hidden="true">
