@@ -3,6 +3,7 @@ import { CalendarDays, Lightbulb, RefreshCw } from "lucide-react";
 import { api, Row } from "./api";
 import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, LoadingState, localDay, weekStart } from "./common";
 import { useLanguage } from "./i18n";
+import { SemesterTimetable } from "./SemesterTimetable";
 import { LessonList } from "./Schedule";
 import { ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 import { ReviewFacets, ReviewVersion, SuggestionForm } from "./Suggestions";
@@ -23,7 +24,7 @@ export function DeanTimetables() {
   const [perspective, setPerspective] = useState<Perspective>("group");
   const [filter, setFilter] = useState("");
   const [week, setWeek] = useState(() => weekStart());
-  const [view, setView] = useScheduleView();
+  const [view, setView] = useScheduleView(true);
   const [showChanges, setShowChanges] = useState(false);
   const [diff, setDiff] = useState<VersionDiff | null>(null);
   const [diffLoading, setDiffLoading] = useState(false);
@@ -38,6 +39,7 @@ export function DeanTimetables() {
   const field = perspectiveFields[perspective];
   const choices = facets?.filters[field] || [];
   const end = addDays(week, 6);
+  const templateFilters = useMemo(() => filter ? { [field]: filter } : {}, [field, filter]);
 
   useEffect(() => {
     let active = true;
@@ -154,15 +156,16 @@ export function DeanTimetables() {
           <div className="inline"><label>{t("reviewPerspective")}<select value={perspective} onChange={event => { const value = event.target.value as Perspective; setPerspective(value); setFilter(String(facets?.filters[perspectiveFields[value]]?.[0]?.id || "")); }}>
             {(["group", "lecturer", "room"] as const).map(value => <option key={value} value={value}>{t(value === "group" ? "reviewGroup" : value === "lecturer" ? "reviewLecturer" : "reviewRoom")}</option>)}
           </select></label><label>{t(field)}<select value={filter} onChange={event => setFilter(event.target.value)}><option value="">{t("all")}</option>{choices.map(choice => <option key={choice.id} value={choice.id}>{choice.label}</option>)}</select></label></div>
-          <WeekSelector weekStart={week} onChange={setWeek} min={version?.starts_on} max={version?.ends_on} />
-          <ScheduleViewToggle value={view} onChange={setView} />
+          {view !== "semester" && <WeekSelector weekStart={week} onChange={setWeek} min={version?.starts_on} max={version?.ends_on} />}
+          <ScheduleViewToggle semester value={view} onChange={setView} />
         </div>
         <div className="dean-comparison-controls"><label className="check"><input type="checkbox" checked={showChanges} onChange={event => setShowChanges(event.target.checked)} />{t("showChanges")}</label><button className="secondary" disabled={!facets} onClick={() => { setSelected(null); setSuggesting(true); setSent(false); }}><Lightbulb size={16} aria-hidden="true" />{t("suggestionGeneral")}</button></div>
         <ErrorBox error={diffError} />
         {diffLoading && <LoadingState compact label={t("changesLoading")} />}
         {showChanges && diff && <div className="diff-legend" role="status">{Object.entries(diff.counts).map(([change, count]) => <span className={`badge diff-${change}`} key={change}>{t(changeKeys[change] || change)}: {count}</span>)}{diff.total === 0 && <p>{t("changesNone")}</p>}</div>}
-        {loading && <LoadingState label={t("scheduleLoading")} />}
-        {!loading && !error && facets && <>
+        {view === "semester" && versionId && <SemesterTimetable filters={templateFilters} reload={reload} versionId={versionId} />}
+        {view !== "semester" && loading && <LoadingState label={t("scheduleLoading")} />}
+        {view !== "semester" && !loading && !error && facets && <>
           {facets.grid?.[String(version?.term_id)] && <div className={`schedule-grid-content${view === "list" ? " schedule-grid-print" : ""}`}><WeekGrid layout={view === "overview" ? "overview" : "grid"} weekStart={week} lessons={displayRows} grid={facets.grid[String(version?.term_id)]} perspective={perspective} parityMode="this-week" decorations={row => ({ badges: badges(row), className: row._removed ? "diff-removed-lesson" : changes.has(row.occurrence_id) ? "diff-changed-lesson" : "" })} onSelect={setSelected} /></div>}
           {(view === "list" || !facets.grid?.[String(version?.term_id)]) && <div className="schedule-list-content"><LessonList serverPage rows={displayRows} action={row => <div className="dean-lesson-actions">{badges(row)}<button className="secondary" onClick={() => setSelected(row)}>{t("suggestionLessonDetails")}</button></div>} /></div>}
         </>}

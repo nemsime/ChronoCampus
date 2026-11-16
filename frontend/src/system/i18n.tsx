@@ -15,6 +15,24 @@ import { deanWords } from "./deanWords";
 import { adminWords } from "./adminWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
+  template_scope_too_large: ["Выберите одну группу или семестр.", "Ընտրեք մեկ խումբ կամ կիսամյակ։", "Choose one group or semester."],
+  published_schedule_only: ["Доступно только опубликованное расписание.", "Հասանելի է միայն հրապարակված դասացուցակը։", "Only published timetables are available."],
+  pair: ["Пара", "Զույգ", "Pair"],
+  semesterTimetable: ["Расписание семестра", "Կիսամյակի դասացուցակ", "Semester timetable"],
+  semesterChanges: ["Изменения", "Փոփոխություններ", "Changes"],
+  semesterNoChanges: ["Нет выявленных изменений.", "Հայտնաբերված փոփոխություններ չկան։", "No detected changes."],
+  semesterTemplateHelp: ["Шаблон выведен из сохранённых занятий. Датированные занятия и заметки доступны в недельном виде.", "Ձևանմուշը կազմված է պահպանված դասերից։ Ամսաթվերով դասերն ու նշումները հասանելի են շաբաթական տեսքում։", "Derived from saved lessons. Use the weekly view for dated lessons and notes."],
+  semesterParityLegend: ["Верхняя половина — числитель, нижняя — знаменатель. Полная ячейка — каждую неделю.", "Վերին կեսը՝ համարիչ, ստորինը՝ հայտարար։ Ամբողջ վանդակը՝ ամեն շաբաթ։", "Upper half: numerator; lower half: denominator. Full cell: every week."],
+  semesterIrregular: ["Занятия по отдельным датам", "Առանձին ամսաթվերով դասեր", "Irregular dated lessons"],
+  semesterIrregularHelp: ["Эти занятия не образуют достоверный недельный шаблон; действуют указанные даты.", "Այս դասերը շաբաթական հստակ ձևանմուշ չունեն․ գործում են նշված ամսաթվերը։", "These lessons do not form a reliable weekly pattern; use the explicit dates."],
+  template_cancelled: ["Отменено", "Չեղարկված", "Cancelled"],
+  template_holiday_cancelled: ["Отмена в праздник", "Տոնական չեղարկում", "Holiday cancellation"],
+  template_moved: ["Перенесено", "Տեղափոխված", "Moved"],
+  template_room_changed: ["Изменена аудитория", "Լսարանը փոխված է", "Room changed"],
+  template_disrupted: ["Изменение по исключению", "Բացառությամբ փոփոխություն", "Recorded exception"],
+  template_inferred: ["Выведено из дат", "Եզրակացված է ամսաթվերից", "Inferred from dates"],
+  template_original: ["Было", "Նախկինը", "Originally"],
+
   ...ruleMessages,
   ...diagnosticWords,
   ...runtimeWords,

@@ -351,3 +351,20 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 @media print {
   .lesson-list-grouped .lesson { box-shadow: none; border-color: #aaa; }
 }
+
+.semester-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(210px, 260px); gap: 20px; align-items: start; }
+.semester-scroll { overflow-x: auto; }
+.semester-table { width: 100%; min-width: 780px; table-layout: fixed; border-collapse: collapse; }
+.semester-table th, .semester-table td { border: 1px solid var(--border, #cbd5e1); padding: 8px; vertical-align: top; }
+.semester-table th:first-child { width: 62px; }
+.semester-table caption { text-align: left; padding: 12px 0; font-weight: 600; }
+.semester-half { min-height: 58px; padding: 6px 0; }
+.semester-half.denominator { border-top: 1px solid var(--border, #cbd5e1); }
+.semester-table small { opacity: .75; }
+.semester-every { min-height: 116px; padding: 6px 0; }
+.semester-every:only-child { height: 100%; }
+.semester-lesson { display: flex; flex-direction: column; gap: 4px; padding: 6px 0; font-size: 12px; overflow-wrap: anywhere; }
+.semester-changes { max-height: 75vh; overflow-y: auto; }
+.semester-changes section, .semester-irregular > div { border-bottom: 1px solid var(--border, #cbd5e1); padding: 10px 0; }
+.semester-irregular { margin-top: 24px; }
+@media (max-width: 1000px) { .semester-layout { grid-template-columns: minmax(0, 1fr); } .semester-changes { max-height: none; } }
