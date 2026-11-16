@@ -203,6 +203,9 @@ def decision(identifier: int, body: DecisionInput, actor: m.Account = Depends(ad
              db: Session = Depends(get_db)):
     locked_actor(db, actor, ADMIN)
     suggestion = s.require_suggestion(db, identifier, actor)
+    if body.status == "accepted" and db.get(m.Account, suggestion.author_id).role == "lecturer":
+        from app.scheduling.change_api import check_request_current
+        check_request_current(db, suggestion)
     s.transition(db, suggestion, actor, body.expected_status, body.status, note=body.note)
     db.commit()
     return s.suggestion_view(db, suggestion, comments=True)
@@ -213,6 +216,8 @@ def implemented(identifier: int, body: ImplementedInput, actor: m.Account = Depe
                 db: Session = Depends(get_db)):
     locked_actor(db, actor, ADMIN)
     suggestion = s.require_suggestion(db, identifier, actor)
+    if db.get(m.Account, suggestion.author_id).role == "lecturer":
+        raise HTTPException(409, "request_publish_required")
     s.transition(db, suggestion, actor, body.expected_status, "implemented", version_id=body.version_id)
     db.commit()
     return s.suggestion_view(db, suggestion, comments=True)

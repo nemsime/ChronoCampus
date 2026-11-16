@@ -310,3 +310,64 @@ def facets(db, scope, version_id=None):
 @router.get("/schedule/facets")
 def schedule_facets(request: Request, response: Response, db: Session = Depends(get_db)):
     return consistent(db, request, response, lambda scope: facets(db, scope))
+
+
+@router.get("/schedule/template")
+def semester_template(request: Request, response: Response,
+                      group_id: int | None = None, version_id: int | None = None,
+                      values: dict = Depends(filters), db: Session = Depends(get_db)):
+    from app.scheduling.snapshot import record
+    from app.scheduling.template import derive_template
+
+    def read(scope):
+        if version_id is not None and scope['role'] not in {ADMIN, DEAN}:
+            raise HTTPException(403, "published_schedule_only", headers=PRIVATE)
+        if version_id is not None:
+            from app.review.service import require_version
+            require_version(db, version_id, scope)
+        # Dates must not truncate a semester series before classification.
+        selected = {**values, 'start': None, 'end': None}
+        if group_id is not None:
+            selected['course_group_id'] = group_id
+        # Filter room/type/teacher AFTER derivation so moves are not misclassified.
+        query_values = {k: v for k, v in selected.items()
+                        if k not in {'room_id', 'subject_id', 'lesson_type'}}
+        rows = db.execute(selection(scope, query_values, version_id).order_by(A.c.day, A.c.id).limit(20001)).mappings().all()
+        if len(rows) > 20000:
+            raise HTTPException(422, "template_scope_too_large", headers=PRIVATE)
+        from app.scheduling.changes import metadata, missing_template_rows
+        rows = list(rows) + missing_template_rows(db, scope, query_values, version_id)
+        if len(rows) > 20000:
+            raise HTTPException(422, "template_scope_too_large", headers=PRIVATE)
+        batches = {}
+        for row in rows:
+            batches.setdefault((row['version_id'], row['term_id']), []).append(dict(row))
+        semesters = []
+        for (vid, tid), assignments in batches.items():
+            term = db.get(m.Term, tid)
+            configuration = assignments[0].get('configuration') or {}
+            term_data = configuration.get('term') or record(term)
+            config = dict(configuration.get('calendar') or record(db.get(m.CalendarConfig, term.calendar_id)))
+            config['periods'] = [record(p) for p in db.scalars(select(m.TeachingPeriod).where(m.TeachingPeriod.term_id == tid))]
+            _, config['overrides'] = metadata(db, vid)
+            config['disruptions'] = [record(d) for d in db.scalars(select(m.Disruption).where(m.Disruption.version_id == vid))]
+            holidays = [record(h) for h in db.scalars(select(m.Holiday).where(m.Holiday.term_id == tid))]
+            clean = [{k: v for k, v in row.items() if k not in {'configuration', 'starts_on'}} for row in assignments]
+            derived = derive_template(clean, term_data, holidays, config)
+            for key in derived:
+                derived[key] = [row for row in derived[key] if all(
+                    selected.get(f) is None or row.get(f) == selected[f]
+                    for f in ('room_id', 'subject_id', 'lesson_type'))]
+            semesters.append(dict(term_id=tid, version_id=vid, term=term.name,
+                                  grid=grid_configuration(config, [r['slot'] for r in clean]), **derived))
+        return dict(semesters=semesters, revision=scope['revision'])
+
+    def stable_read(scope):
+        if version_id is None:
+            return read(scope)
+        if scope['role'] not in {ADMIN, DEAN}:
+            raise HTTPException(403, "published_schedule_only", headers=PRIVATE)
+        from app.review.router import stable_version
+        return stable_version(db, version_id, scope, lambda version: read(scope))
+
+    return consistent(db, request, response, stable_read)

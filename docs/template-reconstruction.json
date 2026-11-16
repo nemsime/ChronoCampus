@@ -1,0 +1,92 @@
+[
+  {
+    "version": 1,
+    "group": "DEMO-1-26",
+    "assignments": 198,
+    "template_rows": 14,
+    "exceptions": 16,
+    "irregular": 32,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 2,
+    "group": "DEMO-2-26",
+    "assignments": 240,
+    "template_rows": 24,
+    "exceptions": 6,
+    "irregular": 0,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 1002,
+    "group": "DEMO-5-26",
+    "assignments": 120,
+    "template_rows": 6,
+    "exceptions": 2,
+    "irregular": 72,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 1003,
+    "group": "DEMO-1-26",
+    "assignments": 248,
+    "template_rows": 23,
+    "exceptions": 2,
+    "irregular": 48,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 1004,
+    "group": "DEMO-4-26",
+    "assignments": 232,
+    "template_rows": 22,
+    "exceptions": 4,
+    "irregular": 32,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 1005,
+    "group": "DEMO-5-26",
+    "assignments": 120,
+    "template_rows": 6,
+    "exceptions": 2,
+    "irregular": 72,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 2005,
+    "group": "DEMO-4-26",
+    "assignments": 232,
+    "template_rows": 22,
+    "exceptions": 4,
+    "irregular": 32,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 3005,
+    "group": "DEMO-4-26",
+    "assignments": 232,
+    "template_rows": 22,
+    "exceptions": 4,
+    "irregular": 32,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 3006,
+    "group": "DEMO-5-26",
+    "assignments": 120,
+    "template_rows": 6,
+    "exceptions": 2,
+    "irregular": 72,
+    "exact_roundtrip": true
+  },
+  {
+    "version": 3007,
+    "group": "DEMO-4-26",
+    "assignments": 232,
+    "template_rows": 22,
+    "exceptions": 4,
+    "irregular": 32,
+    "exact_roundtrip": true
+  }
+]

@@ -10,7 +10,7 @@ export interface GridConfiguration {
   slots: { slot: number; starts_at: string; ends_at: string }[];
 }
 export type GridConfig = GridConfiguration;
-export type ScheduleView = "grid" | "list" | "overview";
+export type ScheduleView = "grid" | "list" | "overview" | "semester";
 export interface WeekGridProps {
   weekStart: string;
   lessons: Row[];
@@ -26,23 +26,25 @@ export interface WeekGridProps {
 // A new preference key gives the redesigned timeline its own default while
 // continuing to remember an explicit grid choice within this design.
 const preferenceKey = "chronocampus.schedule-view.v2";
-export function useScheduleView(): [ScheduleView, (view: ScheduleView) => void] {
+export function useScheduleView(semester = false): [ScheduleView, (view: ScheduleView) => void] {
   const [view, setView] = useState<ScheduleView>(() => {
     try {
-      const saved = window.localStorage.getItem(preferenceKey);
+      const saved = window.localStorage.getItem(semester ? `${preferenceKey}.semester` : preferenceKey);
+      if (semester && saved === "semester") return saved;
       if (saved === "grid" || saved === "list" || saved === "overview") return saved;
     } catch { /* Storage is optional in private browsing. */ }
-    return "list";
+    return semester ? "semester" : "list";
   });
   return [view, (next) => {
     setView(next);
-    try { window.localStorage.setItem(preferenceKey, next); } catch { /* optional */ }
+    try { window.localStorage.setItem(semester ? `${preferenceKey}.semester` : preferenceKey, next); } catch { /* optional */ }
   }];
 }
 
-export function ScheduleViewToggle({ value, onChange }: { value: ScheduleView; onChange: (view: ScheduleView) => void }) {
+export function ScheduleViewToggle({ value, onChange, semester = false }: { value: ScheduleView; onChange: (view: ScheduleView) => void; semester?: boolean }) {
   const { t } = useLanguage();
   return <div className="schedule-view-toggle" role="group" aria-label={t("scheduleView")}>
+    {semester && <button type="button" className="secondary" aria-pressed={value === "semester"} onClick={() => onChange("semester")}><CalendarDays size={16} aria-hidden="true" />{t("semesterTimetable")}</button>}
     <button type="button" className="secondary" aria-pressed={value === "list"} onClick={() => onChange("list")}>
       <List size={16} aria-hidden="true" />{t("listView")}
     </button>

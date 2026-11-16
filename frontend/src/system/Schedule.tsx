@@ -3,6 +3,8 @@ import { BookOpen, CalendarDays, MapPin, RefreshCw, SlidersHorizontal, StickyNot
 import { Account, api, ApiError, Row } from "./api";
 import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
+import { LecturerRequestForm, LecturerRequests } from "./DatedChanges";
+import { SemesterTimetable } from "./SemesterTimetable";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 export function LessonList({
   rows,
@@ -203,7 +205,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
   const [facets, setFacets] = useState<ScheduleFacets | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [range, setRange] = useState({ start: "", end: "" });
-  const [view, setView] = useScheduleView();
+  const [view, setView] = useScheduleView(true);
   const [page, setPage] = useState(0);
   const [reload, setReload] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -226,6 +228,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
         const choices = await api<ScheduleFacets>("/schedule/facets");
         if (!active) return;
         setFacets(choices);
+        if (view === "semester") { setRows([]); return; }
         if (!range.start) {
           const bounds = choices.date_bounds;
           if (bounds.start && bounds.end) {
@@ -279,7 +282,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
     const focus = () => void load();
     window.addEventListener("focus", focus);
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", focus); };
-  }, [filters, range, reload, validRange]);
+  }, [filters, range, reload, validRange, view]);
   const note = selected
     ? notes.find((n) => n.occurrence_id === selected.occurrence_id)
     : undefined;
@@ -315,7 +318,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
           {t("refresh")}
         </button>
       </div>
-      <dl className="summary-strip schedule-summary">
+      {view !== "semester" && <dl className="summary-strip schedule-summary">
         {[
           { icon: CalendarDays, label: "lessonsOnPage", value: shownRows.length },
           { icon: CalendarDays, label: "teachingDaysOnPage", value: new Set(shownRows.map((row) => row.day)).size },
@@ -325,9 +328,9 @@ export function PersonalSchedule({ account }: { account: Account }) {
           <span className="summary-item-icon"><Icon size={20} aria-hidden="true" /></span>
           <div className="summary-item-copy"><dt className="summary-item-label">{t(label)}</dt><dd className="summary-item-value">{loading ? "—" : value}</dd></div>
         </div>)}
-      </dl>
+      </dl>}
       <ErrorBox error={error} />
-      <ErrorBox error={readError} />
+      {view !== "semester" && <ErrorBox error={readError} />}
       <section className="panel schedule-panel" aria-busy={loading}>
         <div className="schedule-filter-bar">
           <div><h2 className="inline"><SlidersHorizontal size={16} aria-hidden="true" />{t("filtersHeading")}
@@ -336,13 +339,14 @@ export function PersonalSchedule({ account }: { account: Account }) {
           {activeFilters > 0 && <button className="link" onClick={() => setFilters({})}>{t("clearFilters")}</button>}
         </div>
         <div className="schedule-week-toolbar">
-          {range.start && <WeekSelector weekStart={range.start} min={facets?.date_bounds.start || undefined}
+          {view !== "semester" && range.start && <WeekSelector weekStart={range.start} min={facets?.date_bounds.start || undefined}
             max={facets?.date_bounds.end || undefined} onChange={(start) => setRange({ start, end: addDays(start, 6) })} />}
-          <ScheduleViewToggle value={view} onChange={setView} />
+          <ScheduleViewToggle semester value={view} onChange={setView} />
         </div>
         <ScheduleFilters role={account.role} choices={facets?.filters || {}} values={filters} onChange={setFilters} />
-        {range.start && !validRange && <p className="notice warning" role="alert">{t("schedule_range_required")}</p>}
+        {view !== "semester" && range.start && !validRange && <p className="notice warning" role="alert">{t("schedule_range_required")}</p>}
         <div className="results-anchor" ref={results} tabIndex={-1} aria-label={t("schedule")}>
+        {view === "semester" ? <SemesterTimetable filters={filters} reload={reload} /> : <>
         {pagination}
         {(loading || (!facets && !readError)) && <LoadingState label={t("scheduleLoading")} compact={rows.length > 0} />}
         {rows.length > 0 && <>
@@ -376,13 +380,16 @@ export function PersonalSchedule({ account }: { account: Account }) {
             : validRange ? <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} /> : null
         )}
         {pagination}
+        </>}
         </div>
       </section>
+      {account.role === "lecturer" && <LecturerRequests reload={reload} />}
       {selected && (
         <Dialog labelledBy="note-title" closeDisabled={busy} onClose={() => setSelected(null)}>
           <h2 id="note-title">{t("note")}</h2>
           <p>{selected.subject} · {selected.day} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)}</p>
           <p>{selected.teacher} · {t("room_id")} {selected.room} · {selected.group}</p>
+          {account.role === "lecturer" && <LecturerRequestForm key={selected.occurrence_id} lesson={selected} slots={facets?.grid[String(selected.term_id)]?.slots || []} onSaved={() => setReload(v => v + 1)} />}
           <form
             onSubmit={(e) => {
               e.preventDefault();

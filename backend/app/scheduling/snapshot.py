@@ -137,6 +137,10 @@ def build_snapshot(
             select(m.Disruption).where(m.Disruption.version_id == version.id)
         )
     ]
+    from app.scheduling.changes import metadata
+    events, overrides = metadata(db, version.id)
+    snapshot["closures"] = [e for e in events if e["kind"] == "closure"]
+    snapshot["overrides"] = overrides
     snapshot["external"] = []
     for assignment, component in current_assignments(db):
         if (

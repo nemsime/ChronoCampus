@@ -251,3 +251,27 @@ def test_constant_query_count_and_legacy_cap(schedule):
         print(f"schedule SELECT benchmark: 7/517 published rows -> {counts} statements; facets including grid -> 10; cache absent")
     finally:
         event.remove(s.db.get_bind(), "before_cursor_execute", track)
+
+
+def test_template_authorization_and_lossless_projection(schedule):
+    s = schedule
+    response = s.client.get('/schedule/template')
+    assert response.status_code == 200
+    assert response.headers['cache-control'] == 'private, no-store'
+    semesters = response.json()['semesters']
+    assert semesters
+    for semester in semesters:
+        rows = semester['irregular'] + semester['exceptions'] + semester['template_rows']
+        assert all(r['course_group_id'] == s.groups[0].id for r in rows)
+        assert all(r.get('small_group_id') in (None, s.smalls[0].id) for r in rows)
+        assert all(r.get('lab_group_id') in (None, s.labs[0].id, s.labs[1].id) for r in rows)
+        # Fixture contains deliberately irregular dates; projection must retain them.
+        assert semester['irregular']
+    assert s.client.get('/schedule/template', params={'group_id': s.groups[1].id}).json()['semesters'] == []
+    assert s.client.get('/schedule/template', params={'version_id': s.version.id}).status_code == 403
+    s.client.cookies.set('chronocampus_session', 'teacher')
+    assert s.client.get('/schedule/template', params={'version_id': s.version.id}).status_code == 403
+    s.client.cookies.set('chronocampus_session', 'admin')
+    assert s.client.get('/schedule/template', params={'version_id': s.version.id}).status_code == 200
+    s.client.cookies.clear()
+    assert s.client.get('/schedule/template').status_code == 401

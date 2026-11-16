@@ -452,14 +452,45 @@ p, small { color: var(--muted); }
   .schedule-view-toggle { background: var(--sage); border-color: transparent; padding: 4px; border-radius: 12px; }
   .schedule-view-toggle button { color: var(--muted); border-radius: 9px; font-size: 12px; }
   .schedule-view-toggle button[aria-pressed="true"] { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: 0 1px 3px #1f2d260a; }
-  .week-grid-region { border-radius: 14px; }
+  .week-grid-region {
+    border: 1.5px solid #bccbbd;
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(31, 45, 38, 0.06);
+  }
+  .week-grid {
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+  }
+  .week-grid th, .week-grid td {
+    border-right: 1.5px solid #bccbbd;
+    border-bottom: 1.5px solid #bccbbd;
+  }
   .week-grid td { padding: 10px; background: var(--surface); }
-  .week-grid th { background: #f5f6f2; }
-  .week-grid .grid-lesson { background: var(--surface); border-color: #e5e8e1; border-left-color: #648671; padding: 12px; gap: 7px; border-radius: 9px; }
+  .week-grid th { background: linear-gradient(180deg, #edf4eb 0%, #e6efe2 100%); color: var(--text); }
+  .week-grid thead th {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: inset 0 -1px 0 rgba(53, 78, 61, 0.08);
+  }
+  .week-grid tbody th[scope="row"] {
+    background: #f7faf5;
+    color: var(--text);
+    border-right: 1.5px solid #bccbbd;
+  }
+  .week-grid .grid-lesson {
+    background: var(--surface);
+    border: 1px solid #dfe9de;
+    border-left: 4px solid #648671;
+    padding: 12px;
+    gap: 7px;
+    border-radius: 10px;
+    box-shadow: 0 1px 0 rgba(31, 45, 38, 0.04);
+  }
   .week-grid .grid-lesson-practical { background: var(--surface); border-left-color: #728da0; }
   .week-grid .grid-lesson-lab { background: var(--surface); border-left-color: #a087a3; }
-  .week-grid .grid-lesson:hover:not(:disabled) { background: #f7f8f4; border-color: #9eafa2; }
-  .week-grid .grid-lesson strong { font-size: 13px; line-height: 1.5; font-weight: 600; }
+  .week-grid .grid-lesson:hover:not(:disabled) { background: #f7f8f4; border-color: #a5b9a7; box-shadow: 0 6px 16px rgba(31, 45, 38, 0.08); }
+  .week-grid .grid-lesson strong { font-size: 13px; line-height: 1.5; font-weight: 700; }
   .week-grid .grid-lesson-line, .week-grid .grid-lesson small { color: var(--muted); font-size: 11px; line-height: 1.5; }
   .week-grid .grid-lesson-kind { font-size: 10px; letter-spacing: .02em; }
   .week-grid .grid-empty { color: #7a877d; font-size: 12px; padding-top: 12px; }

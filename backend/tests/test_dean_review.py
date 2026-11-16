@@ -381,3 +381,20 @@ def test_suggestion_csrf_origin_and_no_student_access(client, review):
     assert client.post("/api/dean/suggestions", json=proposal(review)).status_code == 403
     login(client, "teacher@example.invalid")
     assert client.get("/api/dean/suggestions").status_code == 403
+
+
+def test_semester_template_preserves_faculty_scope_and_account_data(client, review):
+    login(client, 'dean@example.invalid')
+    db = review['db']
+    before = invariant(db)
+    accounts = [record(a) for a in db.scalars(select(m.Account).order_by(m.Account.id))]
+    response = client.get('/api/schedule/template', params={'version_id': review['draft'].id})
+    assert response.status_code == 200, response.text
+    semesters = response.json()['semesters']
+    assert semesters
+    for semester in semesters:
+        for key in ('template_rows', 'exceptions', 'irregular'):
+            assert all(r['course_group_id'] == review['group'].id for r in semester[key])
+    assert client.get('/api/schedule/template', params={'version_id': review['outside'].id}).status_code == 404
+    assert invariant(db) == before
+    assert [record(a) for a in db.scalars(select(m.Account).order_by(m.Account.id))] == accounts
