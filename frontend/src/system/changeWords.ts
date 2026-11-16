@@ -1,4 +1,8 @@
 export const changeWords: Record<string, [string, string, string]> = {
+  "compactLab": ["Лаб.", "Լաբ.", "Lab."],
+  "compactLecture": ["Лек.", "Դաս.", "Lec."],
+  "compactPractical": ["Пр.", "Գործ.", "Pr."],
+  "compactGroup": ["Г", "Խ", "G"],
   "semesterWholeWeek": ["Вся неделя", "Ամբողջ շաբաթը", "Whole week"],
   "semesterDayFilter": ["День расписания", "Դասացուցակի օրը", "Timetable day"],
   "semesterSheetHelp": ["Дни недели разделены на пары, группы — по строкам. Прокрутите таблицу или выберите день для крупного просмотра.", "Շաբաթվա օրերը բաժանված են զույգերի, իսկ խմբերը՝ տողերի։ Սահեցրեք աղյուսակը կամ ընտրեք օրը՝ խոշոր դիտելու համար։", "Each weekday is divided into lesson pairs, with groups in rows. Scroll across the sheet or select a day for a larger view."],

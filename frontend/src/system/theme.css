@@ -480,3 +480,31 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 .semester-sheet-table .semester-half > small { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 .semester-scroll { max-width: 100%; overflow-x: auto; }
 .semester-scroll, .semester-sheet-table .semester-half { position: relative; }
+
+/* Compact paper cells: initials and abbreviations; full details open on click. */
+.semester-timetable .semester-legend { padding-bottom: 8px; gap: 8px 16px; }
+.semester-timetable .semester-section-heading { margin: 4px 0 10px; }
+.semester-timetable .semester-section-heading h2 { font-size: 16px; }
+.semester-timetable .semester-groups { margin-bottom: 10px; }
+.semester-timetable .semester-day-filter { margin-bottom: 8px; }
+.semester-sheet-group-column { width: 64px; }
+.semester-sheet-pair-column { width: 60px; }
+.semester-sheet-table thead th { padding: 6px 2px; }
+.semester-sheet-table thead tr:first-child th { font-size: 11px; }
+.semester-sheet-table thead tr:nth-child(2) th { padding: 4px 1px; font-size: 10px; }
+.semester-sheet-table .semester-sheet-group { padding: 6px 3px; font-size: 10px; }
+.semester-sheet-table .semester-half { display: flex; flex-direction: column; justify-content: center; padding: 2px; min-height: 90px; }
+.semester-sheet-table .semester-every { padding: 2px; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+.semester-sheet-table .semester-cell.only-every { min-height: 180px; }
+.semester-sheet-table .semester-every > small { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); padding: 0; }
+.semester-sheet-table .semester-compact-lesson { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 1px; width: 100%; min-width: 0; min-height: 60px; padding: 3px 2px; margin: 0; border: 0; border-radius: 3px; background: transparent; color: var(--text); box-shadow: none; text-align: center; line-height: 1.25; }
+.semester-sheet-table .semester-compact-lesson:hover { background: #edf2e7; }
+.semester-compact-lesson > strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 10px; line-height: 1.3; font-weight: 650; overflow-wrap: anywhere; }
+.semester-compact-lesson > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; font-weight: 400; }
+.semester-compact-lesson .compact-kind { color: #627b55; }
+.semester-compact-lesson.semester-lesson-lab .compact-kind { color: #667e98; }
+.semester-compact-lesson.semester-lesson-practical .compact-kind { color: #937949; }
+.semester-compact-lesson .compact-teacher, .semester-compact-lesson .compact-room { color: var(--muted); }
+@media print { .semester-sheet-table .semester-compact-lesson { padding: 1px; min-height: 0; } .semester-compact-lesson > strong { font-size: 7px; } .semester-compact-lesson > span { font-size: 6px; } }
+.semester-legend { position: relative; }
+.semester-legend > small.sr-only { width: 1px; }

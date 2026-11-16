@@ -7,10 +7,10 @@ import { buildSync } from "esbuild";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const { outputFiles } = buildSync({ stdin: { contents: 'export { SemesterTemplateContent } from "./src/system/SemesterTimetable"; export { ChangeDrawer, publishedChanges, notificationKey } from "./src/system/ChangeNotifications"; export { LanguageProvider } from "./src/system/i18n"; export { useScheduleView } from "./src/system/WeekGrid";', resolveDir: root, loader: "tsx" }, bundle: true, write: false, platform: "node", format: "cjs", jsx: "automatic", external: ["react", "react-dom", "lucide-react"] });
+const { outputFiles } = buildSync({ stdin: { contents: 'export { SemesterTemplateContent } from "./src/system/SemesterTimetable"; export {shortSubject, shortLecturer} from "./src/system/timetableLabels"; export { ChangeDrawer, publishedChanges, notificationKey } from "./src/system/ChangeNotifications"; export { LanguageProvider } from "./src/system/i18n"; export { useScheduleView } from "./src/system/WeekGrid";', resolveDir: root, loader: "tsx" }, bundle: true, write: false, platform: "node", format: "cjs", jsx: "automatic", external: ["react", "react-dom", "lucide-react"] });
 const bundle = { exports: {} };
 new Function("require", "module", "exports", outputFiles[0].text)(createRequire(import.meta.url), bundle, bundle.exports);
-const { SemesterTemplateContent, ChangeDrawer, publishedChanges, notificationKey, LanguageProvider, useScheduleView } = bundle.exports;
+const { shortSubject, shortLecturer, SemesterTemplateContent, ChangeDrawer, publishedChanges, notificationKey, LanguageProvider, useScheduleView } = bundle.exports;
 test("semester is the personal default; weekly preference remains independent", () => {
   globalThis.window = { localStorage: { getItem: () => null } };
   function Preference() { return React.createElement("span", null, useScheduleView(true)[0]); }
@@ -74,4 +74,31 @@ test("university sheet groups pair columns under weekdays and keeps groups as ro
     assert.match(html, /1–2/); assert.match(html, /7–8/);
     assert.match(html, /Group A/); assert.match(html, /Group B/);
   } finally { delete globalThis.localStorage; }
+});
+
+
+test("compact labels abbreviate subjects and lecturer names without changing stored values", () => {
+  assert.equal(shortSubject("Software engineering"), "Soft. Eng.");
+  assert.equal(shortSubject("Software quality assurance"), "QA");
+  assert.equal(shortSubject("Object-oriented programming"), "OOP");
+  assert.equal(shortSubject("constructor"), "constructor");
+  assert.equal(shortLecturer("Lilit Davtyan"), "L. Davtyan");
+  assert.equal(shortLecturer("L. Davtyan"), "L. Davtyan");
+  assert.equal(shortLecturer("Լիլիթ Դավթյան"), "Լ. Դավթյան");
+  assert.equal(shortLecturer("Teacher"), "Teacher");
+});
+
+test("compact lab labels use local lab numbers and preserve full accessible details", () => {
+  const lesson = {subject: "Software quality assurance", teacher: "Lilit Davtyan", lesson_type: "lab", lab_group: "1", lab_group_id: 75, small_group: "2", group: "Group A", room: "D005", weekday: 0, slot: 1, parity: "every"};
+  const semester = {term_id: 1,version_id: 1,term: "Autumn",grid:{weekdays:[0,1,2,3,4],slots:[]},template_rows:[lesson],exceptions:[],irregular:[]};
+  globalThis.localStorage={getItem:()=>"en"};
+  try {
+    const html=renderToStaticMarkup(React.createElement(LanguageProvider,null,React.createElement(SemesterTemplateContent,{semesters:[semester]})));
+    assert.match(html, />QA<\/strong>/);
+    assert.match(html, />Lab\. 1<\/span>/);
+    assert.match(html, />L\. Davtyan<\/span>/);
+    assert.doesNotMatch(html, /Lab\. 75/);
+    assert.match(html, /aria-label="Software quality assurance/);
+    assert.match(html, /Lilit Davtyan/);
+  } finally {delete globalThis.localStorage;}
 });

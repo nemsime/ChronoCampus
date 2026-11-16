@@ -2,7 +2,8 @@ import { Bell, MapPin, UserRound } from "lucide-react";
 import { ChangeDrawer } from "./ChangeNotifications";
 import { useEffect, useId, useState } from "react";
 import { api, Row } from "./api";
-import { ErrorBox, dateLabel, LoadingState } from "./common";
+import { shortLecturer, shortSubject } from "./timetableLabels";
+import { Dialog, ErrorBox, dateLabel, LoadingState } from "./common";
 import { useLanguage } from "./i18n";
 
 export function SemesterTimetable({ filters, reload, versionId }: { filters: Record<string, string>; reload: number; versionId?: string }) {
@@ -33,7 +34,19 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
   const { t, lang } = useLanguage();
   const tableId = useId();
   const [focusedDay, setFocusedDay] = useState<number | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<Row | null>(null);
   const [activeChanges, setActiveChanges] = useState<Row[] | null>(null);
+  const compactLesson = (row: Row) => {
+    const kind = t(row.lesson_type === "lab" ? "compactLab" : row.lesson_type === "lecture" ? "compactLecture" : "compactPractical");
+    const audience = row.lesson_type === "lab" ? row.lab_group : row.small_group;
+    const full = [row.subject, t(row.lesson_type), row.teacher, `${t("room_id")} ${row.room}`, row.group, row.small_group ? `${t("small_group_id")} ${row.small_group}` : "", row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : ""].filter(Boolean).join(" · ");
+    return <button type="button" className={`semester-compact-lesson semester-lesson-${row.lesson_type}`} title={full} aria-label={full} onClick={() => setSelectedLesson(row)}>
+      <strong>{shortSubject(row.subject || "")}</strong>
+      <span className="compact-kind">{kind}{audience ? ` ${audience}` : ""}</span>
+      <span className="compact-teacher">{shortLecturer(row.teacher || "")}</span>
+      <span className="compact-room">{row.room}{row.lesson_type === "lab" && row.small_group ? ` · ${t("compactGroup")}${row.small_group}` : ""}</span>
+    </button>;
+  };
   const lesson = (row: Row, showGroup = true) => <div className={`semester-lesson semester-lesson-${row.lesson_type}`}>
     <span className="semester-type">{t(row.lesson_type)}</span>
     <strong>{row.subject}</strong>
@@ -42,8 +55,8 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
     {(showGroup || row.small_group || row.lab_group) && <span className="semester-audience">{[showGroup ? row.group : null, row.small_group ? `${t("small_group_id")} ${row.small_group}` : null, row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : null].filter(Boolean).join(" · ")}</span>}
   </div>;
   return <div className="semester-timetable">
-    <p className="semester-intro">{t("semesterTemplateHelp")}</p>
-    <div className="semester-legend"><span><i className="legend-every" />{t("every")}</span><span><i className="legend-numerator" />{t("numerator")}</span><span><i className="legend-denominator" />{t("denominator")}</span><small>{t("semesterParityLegend")}</small></div>
+    <p className="semester-intro sr-only">{t("semesterTemplateHelp")}</p>
+    <div className="semester-legend"><span><i className="legend-every" />{t("every")}</span><span><i className="legend-numerator" />{t("numerator")}</span><span><i className="legend-denominator" />{t("denominator")}</span><small className="sr-only">{t("semesterParityLegend")}</small></div>
     {!semesters.length && <p>{t("noPublishedHelp")}</p>}
     {semesters.map(semester => {
       const rows: Row[] = semester.template_rows;
@@ -64,7 +77,7 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
         </div>
         <p className="semester-sheet-hint">{t("semesterSheetHelp")}</p>
         <div className="semester-layout"><div className="semester-scroll" tabIndex={0} role="region" aria-label={t("semesterTimetable")}>
-          <table className="semester-table semester-sheet-table" style={{ minWidth: `${108 + visibleDays.length * slots.length * 128}px` }}>
+          <table className="semester-table semester-sheet-table" style={{ minWidth: `${64 + visibleDays.length * slots.length * 60}px` }}>
             <caption className="sr-only">{t("semesterTimetable")}</caption>
             <colgroup><col className="semester-sheet-group-column" />{visibleDays.flatMap(day => slots.map(slot => <col key={`${day}-${slot}`} className="semester-sheet-pair-column" />))}</colgroup>
             <thead>
@@ -76,9 +89,9 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
               {visibleDays.flatMap(day => slots.map(slot => {
                 const cell = rows.filter(row => row.group === group && row.weekday === day && row.slot === slot);
                 return <td key={`${day}-${slot}`} data-weekday={day} data-slot={slot} headers={`${headerId}-group-${groupIndex} ${headerId}-day-${day} ${headerId}-pair-${day}-${slot}`}><div className={`semester-cell${cell.length && cell.every(row => row.parity === "every") ? " only-every" : ""}`}>
-                  {cell.filter(row => row.parity === "every").map((row, i) => <div className="semester-every" key={`every-${i}`}><small>{t("every")}</small>{lesson(row, false)}</div>)}
+                  {cell.filter(row => row.parity === "every").map((row, i) => <div className="semester-every" key={`every-${i}`}><small className="sr-only">{t("every")}</small>{compactLesson(row)}</div>)}
                   {(cell.some(row => row.parity !== "every") || !cell.length) && (["numerator", "denominator"] as const).map(parity => <div className={`semester-half ${parity}`} key={parity} role="group" aria-label={t(parity)}>
-                    <small>{t(parity)}</small>{cell.filter(row => row.parity === parity).map((row, i) => <div key={i}>{lesson(row, false)}</div>)}
+                    <small>{t(parity)}</small>{cell.filter(row => row.parity === parity).map((row, i) => <div key={i}>{compactLesson(row)}</div>)}
                   </div>)}
                 </div></td>;
               }))}
@@ -90,6 +103,14 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
         </details>
       </section>;
     })}
+    {selectedLesson && <Dialog labelledBy={`${tableId}-lesson`} onClose={() => setSelectedLesson(null)}>
+      <h2 id={`${tableId}-lesson`}>{selectedLesson.subject}</h2>
+      <p>{t(selectedLesson.lesson_type)} · {selectedLesson.teacher}</p>
+      <p>{t(`semesterWeekday${selectedLesson.weekday}`)} · {t("pair")} {selectedLesson.slot * 2 - 1}–{selectedLesson.slot * 2} · {t(selectedLesson.parity)}</p>
+      <p>{t("room_id")} {selectedLesson.room} · {selectedLesson.group}</p>
+      {selectedLesson.small_group && <p>{t("small_group_id")} {selectedLesson.small_group}</p>}
+      {selectedLesson.lab_group && <p>{t("lab_group_id")} {selectedLesson.lab_group}</p>}
+    </Dialog>}
     {activeChanges && <ChangeDrawer rows={activeChanges} onClose={() => setActiveChanges(null)} />}
   </div>;
 }

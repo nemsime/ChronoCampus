@@ -211,3 +211,24 @@ Headless browser checks used existing timetable data in an isolated fixture:
 full-width sheet (five days/twenty pairs), weekday selection (one day/four pairs),
 and contained scrolling at desktop and an emulated 390px mobile viewport.
 No database or account data changes were made for this layout update.
+
+## Compact sheet labels
+
+Grid labels now use display-only abbreviations (for example `Soft. Eng.`, `QA`,
+`OOP`, `Math. An.`), lecturer initials (`L. Davtyan`) and short lesson types with
+local audience numbers (`Lab. 1`, rather than a database ID). Catalog names and
+account data are unchanged. Full names remain in accessible labels and hover
+text, and clicking a compact lesson opens its complete details.
+
+The latest cell proportions are approximately 60px per lesson-pair column and
+90px per parity half, with a 64px group column. The complete five-day/four-pair
+sheet minimum width is 1,264px instead of the earlier 2,668px. Every-week lesson
+blocks are centered vertically across the unsplit cell; parity-only blocks stay
+in their upper/lower halves. Group labels, day focus and notifications remain.
+
+Tests cover known abbreviations, Unicode initials, local lab numbers, full
+accessible labels and the existing sheet structure. A browser fixture at
+1100×900 showed the one-group sheet without page overflow or vertical scrolling;
+the grid measured about 236px high and weekly block centers matched cell centers
+exactly. A separate click check opened full subject/teacher details. Larger group
+lists naturally occupy more rows; no lessons are omitted to force a height limit.
