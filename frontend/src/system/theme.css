@@ -444,3 +444,39 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 .semester-table .semester-audience { border: 0; padding-top: 1px; }
 .semester-table .semester-half.denominator { border-top-style: solid; border-top-color: #bcc6b7; }
 .semester-scroll { border-radius: 7px; }
+
+/* University sheet: weekday bands, pair subcolumns, and one row per cohort. */
+.semester-day-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.semester-day-filter button { padding: 7px 12px; min-height: 34px; font-size: 11px; }
+.semester-day-filter button[aria-pressed="true"] { background: #e9efdf; border-color: #97aa85; color: #364d2f; }
+.semester-sheet-hint { margin: 0 0 14px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.semester-timetable .semester-sheet-table { width: 100%; }
+.semester-sheet-group-column { width: 108px; }
+.semester-sheet-pair-column { width: 128px; }
+.semester-sheet-table thead th { padding: 10px 6px; text-align: center; }
+.semester-sheet-table thead tr:first-child th { border-bottom: 1px solid #9eac97; font-size: 12px; }
+.semester-sheet-table thead tr:nth-child(2) th { background: #fafbf8; padding: 7px 3px; font-size: 11px; border-top: 1px solid var(--border); }
+.semester-sheet-table th:first-child { width: auto; }
+.semester-sheet-table .semester-sheet-corner, .semester-sheet-table .semester-sheet-group { position: sticky; left: 0; z-index: 2; background: #f1f4ee; border-right: 2px solid #a7b29f; }
+.semester-sheet-table .semester-sheet-group { vertical-align: middle; text-align: center; padding: 16px 8px; overflow-wrap: anywhere; font-size: 12px; font-weight: 650; color: var(--text); }
+.semester-sheet-table .semester-half, .semester-sheet-table .semester-every { padding: 8px; }
+.semester-sheet-table .semester-lesson strong { font-size: 11px; line-height: 1.55; }
+.semester-sheet-table .semester-lesson { font-size: 10px; }
+.semester-sheet-table .semester-half { min-height: 125px; }
+.semester-sheet-table .semester-every { min-height: 250px; }
+.semester-sheet-table td[data-slot="1"] { border-left: 2px solid #a7b29f; }
+@media print {
+  .semester-day-filter, .semester-sheet-hint { display: none; }
+  .semester-timetable .semester-sheet-table { min-width: 0 !important; width: 100%; }
+  .semester-sheet-table col { width: auto; }
+  .semester-sheet-table .semester-sheet-group-column { width: 56px; }
+  .semester-sheet-table .semester-sheet-corner, .semester-sheet-table .semester-sheet-group { position: static; }
+  .semester-sheet-table .semester-half, .semester-sheet-table .semester-every { padding: 3px; min-height: 0; }
+  .semester-sheet-table .semester-lesson strong, .semester-sheet-table .semester-sheet-group { font-size: 7px; }
+  .semester-sheet-table .semester-lesson, .semester-sheet-table small, .semester-sheet-table .semester-audience { font-size: 6px; }
+  .semester-sheet-table .semester-person svg, .semester-sheet-table .semester-room svg { display: none; }
+  .semester-sheet-table thead th { font-size: 8px !important; padding: 3px; }
+}
+.semester-sheet-table .semester-half > small { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.semester-scroll { max-width: 100%; overflow-x: auto; }
+.semester-scroll, .semester-sheet-table .semester-half { position: relative; }

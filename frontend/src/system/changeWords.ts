@@ -1,4 +1,7 @@
 export const changeWords: Record<string, [string, string, string]> = {
+  "semesterWholeWeek": ["Вся неделя", "Ամբողջ շաբաթը", "Whole week"],
+  "semesterDayFilter": ["День расписания", "Դասացուցակի օրը", "Timetable day"],
+  "semesterSheetHelp": ["Дни недели разделены на пары, группы — по строкам. Прокрутите таблицу или выберите день для крупного просмотра.", "Շաբաթվա օրերը բաժանված են զույգերի, իսկ խմբերը՝ տողերի։ Սահեցրեք աղյուսակը կամ ընտրեք օրը՝ խոշոր դիտելու համար։", "Each weekday is divided into lesson pairs, with groups in rows. Scroll across the sheet or select a day for a larger view."],
   "semesterScrollHint": ["Прокрутите таблицу вправо, чтобы увидеть все дни.", "Բոլոր օրերը տեսնելու համար աղյուսակը սահեցրեք աջ։", "Scroll the timetable sideways to see every weekday."],
 "timetableNotifications": ["Изменения расписания", "Դասացուցակի փոփոխություններ", "Timetable changes"],
 "notificationHelp": ["Выберите изменение, чтобы посмотреть занятие и новую дату.", "Ընտրեք փոփոխությունը՝ դասը և նոր ամսաթիվը տեսնելու համար։", "Select a change to see the lesson and its updated details."],

@@ -58,3 +58,20 @@ test("notifications exclude unresolved drafts, keep publication identities and d
   assert.notEqual(notificationKey(changes[0]), notificationKey(changes[1]));
   assert.equal(JSON.stringify(semesters), before);
 });
+
+
+test("university sheet groups pair columns under weekdays and keeps groups as rows", () => {
+  const base = { subject: "Analysis", lesson_type: "lecture", teacher: "Teacher", room: "101", weekday: 0, slot: 1, parity: "every" };
+  const semester = { term_id: 1, version_id: 1, term: "Autumn", grid: { weekdays: [0,1,2,3,4], slots: [] }, template_rows: [{ ...base, group: "Group A" }, { ...base, group: "Group B" }], exceptions: [], irregular: [] };
+  globalThis.localStorage = { getItem: () => "en" };
+  try {
+    const html = renderToStaticMarkup(React.createElement(LanguageProvider, null, React.createElement(SemesterTemplateContent, { semesters: [semester] })));
+    assert.equal((html.match(/scope="colgroup" colspan="4"/gi) || []).length, 5);
+    assert.match(html, /rowspan="2"/i);
+    assert.equal((html.match(/data-course-group=/g) || []).length, 2);
+    assert.equal((html.match(/data-weekday=/g) || []).length, 40);
+    assert.match(html, /Whole week/);
+    assert.match(html, /1–2/); assert.match(html, /7–8/);
+    assert.match(html, /Group A/); assert.match(html, /Group B/);
+  } finally { delete globalThis.localStorage; }
+});

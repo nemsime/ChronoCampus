@@ -195,9 +195,19 @@ mobile timetable scrolls horizontally within its region. Screenshots are ignored
 under `.runtime/notification-qa/`; browser fixtures do not replace live role
 permission tests, which were covered by the backend suite before rollout.
 
-The university reference was clarified after the initial UI review: numerator
-is the upper half, denominator the lower half, and every-week lessons span both.
-The user preferred a readable screen layout closer to the paper rather than an
-exact copy. The grid therefore keeps weekdays across and pairs down the side,
-using thin ruled cells, subtle lesson-type text colours and group labels in the
-heading. Assertions explicitly check upper/lower order and unsplit weekly cells.
+The university reference was clarified: numerator is the upper half, denominator
+the lower half, and every-week lessons span both. The latest approved layout now
+copies the photo structure: weekday bands across the top, lesson-pair subcolumns
+beneath each weekday, and one row per authorized course group down the left.
+The whole week is the default. Weekday buttons provide a larger focused view;
+the full sheet scrolls horizontally inside its region with a sticky group column.
+Configured additional slots and weekend days remain visible when present.
+Notifications and explicitly dated irregular lessons remain available unchanged.
+
+Frontend structure tests check five weekday bands with four pair columns each,
+two group rows with forty cells, upper/lower parity order, and unsplit weekly
+lessons. TypeScript, all four frontend test files and production build passed.
+Headless browser checks used existing timetable data in an isolated fixture:
+full-width sheet (five days/twenty pairs), weekday selection (one day/four pairs),
+and contained scrolling at desktop and an emulated 390px mobile viewport.
+No database or account data changes were made for this layout update.
