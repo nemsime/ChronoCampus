@@ -24,6 +24,8 @@ const words: Record<string, [string, string, string]> = {
   ...deanWords,
   ...adminWords,
   register: ["Создать аккаунт", "Ստեղծել հաշիվ", "Create account"],
+  registrationNoGroups: ["Учебные группы ещё не добавлены. Обратитесь к администратору.", "Ուսումնական խմբեր դեռ չկան։ Դիմեք ադմինիստրատորին։", "No academic groups are available yet. Contact an administrator."],
+  registrationGroupPrompt: ["Выберите учебную группу", "Ընտրեք ուսումնական խումբը", "Choose your academic group"],
   registrationName: ["Имя и фамилия", "Անուն և ազգանուն", "Full name"],
   verifyEmail: ["Подтвердите почту", "Հաստատեք էլ․ փոստը", "Verify your email"],
   verifyAndCreate: ["Подтвердить и создать аккаунт", "Հաստատել և ստեղծել հաշիվ", "Verify and create account"],

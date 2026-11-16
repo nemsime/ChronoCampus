@@ -138,7 +138,8 @@ registration is needed for this email-based flow. Existing provisioned accounts
 keep their access after migration `0005_email_registration`.
 
 New accounts cannot sign in until verification succeeds. Registration always
-creates a student; an administrator assigns the academic group in **Data & rules**.
+creates a student; the registration form lets students select an academic group.
+Administrators can correct group assignments in **University → People**.
 The address format alone does not establish a group or grant staff privileges.
 Expired verification links can be replaced by submitting **Create account** again.
 Existing users can choose **Forgot password?** to receive a single-use reset link.

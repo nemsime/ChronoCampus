@@ -30,7 +30,7 @@ from app.core.security import (
     token_hash,
     verify_password,
 )
-from app.db.models import Account, RateLimit, ResetToken, UserSession
+from app.db.models import Account, CourseGroup, RateLimit, ResetToken, UserSession
 from app.db.session import get_db, lock_revision
 from app.db.utc import utc_now
 from app.observability.audit import record_audit
@@ -68,6 +68,7 @@ class LoginInput(EmailInput):
 
 
 class RegistrationInput(EmailInput):
+    course_group_id: int | None = Field(default=None, gt=0)
     display_name: str = Field(min_length=1, max_length=150)
 
     @field_validator("display_name")
@@ -268,6 +269,13 @@ def reset_password(
     response.delete_cookie(COOKIE, path="/api")
 
 
+@router.get("/registration-groups")
+def registration_groups(db: Session = Depends(get_db)):
+    return [dict(row) for row in db.execute(
+        select(CourseGroup.id, CourseGroup.group_code).order_by(CourseGroup.group_code)
+    ).mappings()]
+
+
 @router.post("/register", status_code=202)
 def register(body: RegistrationInput, request: Request, db: Session = Depends(get_db)):
     check_origin(request)
@@ -287,12 +295,15 @@ def register(body: RegistrationInput, request: Request, db: Session = Depends(ge
     lock_revision(db, changed=False)
     account = db.scalar(select(Account).where(Account.email == body.email))
     if account is None:
+        if body.course_group_id is not None and db.get(CourseGroup, body.course_group_id) is None:
+            raise HTTPException(422, "invalid_course_group")
         # The mailbox owner chooses the real password only AFTER opening the link.
         account = Account(
             email=body.email,
             display_name=body.display_name,
             password_hash=password_hash(new_token()),
             role=STUDENT,
+            course_group_id=body.course_group_id,
             email_verified=False,
             must_change_password=False,
         )
