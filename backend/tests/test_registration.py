@@ -119,7 +119,7 @@ def test_existing_account_is_not_overwritten(client, database):
 
 
 def test_resend_does_not_grant_privileges_and_old_links_are_consumed(client, database):
-    assert register(client, role="admin", course_group_id=1).status_code == 202
+    assert register(client, role="admin").status_code == 202
     first = raw_token(database)
     assert register(client).status_code == 202
     second = raw_token(database)
@@ -181,3 +181,32 @@ def test_registration_domain_validation_origin_throttle_and_configuration(
     for _ in range(4):
         assert register(client).status_code == 202
     assert register(client).status_code == 429
+
+
+def test_registration_assigns_selected_group_and_preserves_existing_account(client, database):
+    from app.db.models import CourseGroup, Faculty, Major
+
+    faculty = Faculty(name="Test faculty", code="TEST")
+    database.add(faculty)
+    database.flush()
+    major = Major(faculty_id=faculty.id, name="Test major", major_code=123,
+                  study_form="full", duration_yrs=4)
+    database.add(major)
+    database.flush()
+    group = CourseGroup(major_id=major.id, admission_year=2026,
+                        group_code="TEST-26", capacity=40)
+    database.add(group)
+    database.commit()
+    assert client.get("/api/auth/registration-groups").json() == [
+        {"id": group.id, "group_code": "TEST-26"}]
+    assert register(client, course_group_id=group.id + 100).status_code == 422
+    assert register(client, course_group_id=group.id).status_code == 202
+    account = database.scalar(select(Account).where(Account.email.like("mane%")))
+    assert account.course_group_id == group.id and account.role == "student"
+    assert register(client, course_group_id=group.id + 100).status_code == 202
+    assert account.course_group_id == group.id
+    assert client.post("/api/auth/verify-email", json={
+        "token": raw_token(database), "password": PASSWORD}).status_code == 204
+    assert client.post("/api/auth/login", json={
+        "email": account.email, "password": PASSWORD}).status_code == 200
+    assert client.get("/api/auth/me").json()["user"]["course_group_id"] == group.id

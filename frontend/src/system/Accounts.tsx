@@ -115,6 +115,18 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
   const { busy, error, setError, run } = useAction();
   const [mode, setMode] = useState<"login" | "reset" | "register">("login");
   const [message, setMessage] = useState("");
+  const [groups, setGroups] = useState<{ id: number; group_code: string }[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  useEffect(() => {
+    if (mode !== "register") return;
+    let active = true;
+    setGroupsLoading(true);
+    void api<{ id: number; group_code: string }[]>("/auth/registration-groups")
+      .then(items => { if (active) setGroups(items); })
+      .catch(failure => { if (active) setError(failure); })
+      .finally(() => { if (active) setGroupsLoading(false); });
+    return () => { active = false; };
+  }, [mode]);
   const [loginFieldsEditable, setLoginFieldsEditable] = useState(false);
   const { token, verification } = authLink;
   useEffect(() => {
@@ -144,7 +156,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
         submittedForm.reset();
         setMessage("reset_requested");
       } else if (mode === "register") {
-        await api("/auth/register", "POST", { email: f.get("email"), display_name: f.get("display_name") });
+        await api("/auth/register", "POST", { email: f.get("email"), display_name: f.get("display_name"), course_group_id: Number(f.get("course_group_id")) });
         submittedForm.reset();
         setMessage("registration_requested");
       } else {
@@ -215,6 +227,13 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
           ) : (
             <form key={mode} ref={form} onSubmit={submit} className="form-stack" aria-busy={busy} autoComplete="off">
               {mode === "register" && <label>{t("registrationName")}<input name="display_name" autoComplete="off" required maxLength={150} /></label>}
+              {mode === "register" && <label>{t("course_group_id")}
+                <select name="course_group_id" required defaultValue="" disabled={groupsLoading}>
+                  <option value="" disabled>{t("registrationGroupPrompt")}</option>
+                  {groups.map(group => <option key={group.id} value={group.id}>{group.group_code}</option>)}
+                </select>
+              </label>}
+              {mode === "register" && !groupsLoading && groups.length === 0 && <p role="status">{t("registrationNoGroups")}</p>}
               <label>
                 {t("email")}
                 <input
@@ -244,7 +263,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                 </div>
               )}
               <ErrorBox error={error} />
-              <button disabled={busy}>
+              <button disabled={busy || (mode === "register" && (groupsLoading || groups.length === 0))}>
                 {t(
                   busy
                     ? mode === "login" ? "authSigningIn" : "authSendingReset"
