@@ -6,12 +6,14 @@ import { addDays, Dialog, EmptyState, ErrorBox, LoadingState, localDay, useActio
 import { useLanguage } from "./i18n";
 import { LessonList } from "./Schedule";
 import { isRunActive, runStatusKey, RunCard, RunHistory } from "./Diagnostics";
+import { AdminDatedChanges, useDatedChangesEnabled } from "./DatedChanges";
 import { DraftWizard } from "./DraftWizard";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 export function Planner({ initialVersionId = null, createOnOpen = false, initialTermId = "", onOpenSetup }: {
   initialVersionId?: number | null; createOnOpen?: boolean; initialTermId?: string; onOpenSetup?: () => void;
 } = {}) {
   const { t } = useLanguage();
+  const datedChangesEnabled = useDatedChangesEnabled();
   const [data, setData] = useState<CatalogData>({});
   const [versions, setVersions] = useState<Row[]>([]);
   const [detail, setDetail] = useState<Row | null>(null);
@@ -21,6 +23,8 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
   const [algorithm, setAlgorithm] = useState("cp_sat");
   const [seed, setSeed] = useState(1);
   const [editing, setEditing] = useState<Row | null>(null);
+  const [oneTime, setOneTime] = useState(false);
+  const [moveReason, setMoveReason] = useState("");
   const [inspecting, setInspecting] = useState<Row | null>(null);
   const [slotOptions, setSlotOptions] = useState<Row[]>([]);
   const launchIntent = useRef<{ parameters: string; key: string } | null>(null);
@@ -94,6 +98,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
   const version = detail?.version;
   const searching = !!runInfo && isRunActive(runInfo);
   async function edit(row: Row) {
+    setOneTime(false); setMoveReason("");
     setEditing(row);
     const calendar = version.configuration.calendar;
     setSlotOptions(await api(`/admin/calendar/${calendar.id}/slots?count=12`));
@@ -221,6 +226,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
             )}
         {detail && (
           <>
+            <AdminDatedChanges version={version} groups={data.groups || []} disabled={busy || searching} onChanged={() => open(version.id)} onEdit={o => void run(() => edit({ occurrence_id: o.occurrence_id, day: "", slot: o.original.slot, room_id: o.original.room_id, pinned: false, subject: o.reason }))} />
             <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
             <h2 className="section-title">{t("schedule")}</h2>
             <PlannerTimetable key={version.id} detail={detail} disabled={busy || searching}
@@ -423,16 +429,19 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
         <Dialog labelledBy="move-title" closeDisabled={busy} onClose={() => setEditing(null)}>
           <h2 id="move-title">{t("edit")}</h2>
           <p>{editing.subject}</p>
+          {datedChangesEnabled && <label className="check"><input type="checkbox" checked={oneTime} onChange={e => setOneTime(e.target.checked)} />{t("recordOneTimeMove")}</label>}
+          {oneTime && <label>{t("changeReason")}<textarea value={moveReason} onChange={e => setMoveReason(e.target.value)} maxLength={500} /></label>}
           <form
             className="form-stack"
             onSubmit={(e) => {
               e.preventDefault();
               void run(async () => {
                 await api(
-                  `/admin/schedule/versions/${version.id}/assignments/${editing.occurrence_id}`,
-                  "PUT",
+                  `/admin/schedule/versions/${version.id}/assignments/${editing.occurrence_id}${oneTime ? "/once" : ""}`,
+                  oneTime ? "POST" : "PUT",
                   {
                     revision: version.revision,
+                    ...(oneTime ? { reason: moveReason } : {}),
                     day: editing.day,
                     slot: Number(editing.slot),
                     room_id: Number(editing.room_id),
@@ -499,7 +508,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
             </label>
             <ErrorBox error={error} />
             <div className="actions">
-              <button disabled={busy}>{t("save")}</button>
+              <button disabled={busy || (oneTime && !moveReason.trim())}>{t("save")}</button>
               <button
                 type="button"
                 className="secondary"

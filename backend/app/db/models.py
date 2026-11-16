@@ -449,3 +449,26 @@ class DataRevision(Base):
 
 # Register queue tables after the domain classes to avoid circular metadata imports.
 from app.jobs import models as _job_models  # noqa
+
+
+class ScheduleChangeEvent(Base):
+    __tablename__ = 'ScheduleChangeEvent'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    version_id: Mapped[int] = mapped_column(ForeignKey('ScheduleVersion.id'), index=True)
+    kind: Mapped[str] = mapped_column(String(20))
+    starts_on: Mapped[date] = mapped_column(Date)
+    ends_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(Unicode(500))
+    cohort_ids: Mapped[list] = mapped_column(JSON)
+    request_id: Mapped[int | None] = mapped_column(ForeignKey('ScheduleSuggestion.id'))
+    created_by: Mapped[int] = mapped_column(ForeignKey('User.id'))
+
+
+class LessonOverride(Base):
+    __tablename__ = 'LessonOverride'
+    __table_args__ = (UniqueConstraint('version_id', 'occurrence_id', name='uq_override_occurrence'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    version_id: Mapped[int] = mapped_column(ForeignKey('ScheduleVersion.id'), index=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey('ScheduleChangeEvent.id'))
+    occurrence_id: Mapped[int] = mapped_column(ForeignKey('LessonOccurrence.id'))
+    original: Mapped[dict] = mapped_column(JSON)

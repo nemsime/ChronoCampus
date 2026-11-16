@@ -154,8 +154,10 @@ def create_draft(body: DraftInput, db: Session = Depends(get_db), actor: m.Accou
     db.add(version)
     db.flush()
     snapshot = build_snapshot(db, version, materialize=True)
+    sources = {}
     for assignment, component in current_assignments(db):
         if component.term_id == body.term_id and component.course_group_id in groups:
+            sources.setdefault(assignment.version_id, set()).add(assignment.occurrence_id)
             db.add(assignment_model(version.id, record(assignment)))
             disruption = db.scalar(
                 select(m.Disruption).where(
@@ -173,6 +175,8 @@ def create_draft(body: DraftInput, db: Session = Depends(get_db), actor: m.Accou
                         reason=disruption.reason,
                     )
                 )
+    from app.scheduling.changes import copy_metadata
+    copy_metadata(db, version, sources)
     version.configuration = {"term": snapshot["term"], "calendar": snapshot["calendar"]}
     record_audit(db, actor, "draft.created", "schedule", version.id,
                  after={"term_id": body.term_id, "cohort_ids": groups})
@@ -221,6 +225,9 @@ def start_generation(
     identifier: int, body: GenerateInput, db: Session = Depends(get_db),
     actor: m.Account = Depends(administrator),
 ):
+    from app.scheduling.changes import available
+    if available(db) and db.scalar(select(m.ScheduleChangeEvent.id).where(m.ScheduleChangeEvent.version_id == identifier).limit(1)):
+        raise HTTPException(409, "dated_changes_manual_only")
     run = enqueue_generation(db, identifier, body, actor)
     db.commit()
     return run_view(run)
@@ -331,6 +338,23 @@ def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db),
     report = validate(snapshot, assignments)
     if not report["complete"]:
         raise HTTPException(409, {"code": "publication_blocked", "report": report})
+    from app.scheduling.changes import available
+    if available(db):
+        from app.review.service import transition
+        from app.scheduling.change_api import check_request_current
+        for event in db.scalars(select(m.ScheduleChangeEvent).where(m.ScheduleChangeEvent.version_id == identifier, m.ScheduleChangeEvent.request_id.is_not(None))):
+            suggestion = db.get(m.ScheduleSuggestion, event.request_id)
+            if suggestion.status == "implemented":
+                continue
+            if suggestion.status != "accepted":
+                raise HTTPException(409, "request_not_accepted")
+            check_request_current(db, suggestion)
+            replacement = db.scalar(select(m.Assignment).where(m.Assignment.version_id == identifier, m.Assignment.occurrence_id == suggestion.occurrence_id))
+            if (replacement is None or replacement.day != suggestion.proposed_day
+                    or replacement.slot != suggestion.proposed_slot
+                    or (suggestion.proposed_room_id is not None and replacement.room_id != suggestion.proposed_room_id)):
+                raise HTTPException(409, "request_placement_changed")
+            transition(db, suggestion, actor, "accepted", "implemented", version_id=identifier)
     for group_id in version.cohort_ids:
         pointer = db.get(m.PublishedGroup, (version.term_id, group_id))
         if not pointer:

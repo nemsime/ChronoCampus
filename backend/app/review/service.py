@@ -193,6 +193,7 @@ def suggestion_view(db, suggestion, *, comments=False):
     result = record(suggestion)
     version = db.get(m.ScheduleVersion, suggestion.version_id)
     result["author"] = db.scalar(select(m.Account.display_name).where(m.Account.id == suggestion.author_id))
+    result["author_role"] = db.scalar(select(m.Account.role).where(m.Account.id == suggestion.author_id))
     result["version_name"] = version.name
     assignment = None
     if suggestion.occurrence_id is not None:
@@ -205,6 +206,12 @@ def suggestion_view(db, suggestion, *, comments=False):
             "day": assignment.day.isoformat(), "slot": assignment.slot, "room_id": assignment.room_id
         }
     ))
+    if result["author_role"] == "lecturer" and suggestion.status in {"open", "accepted"}:
+        occurrence = db.get(m.Occurrence, suggestion.occurrence_id)
+        workload = db.get(m.Workload, occurrence.component_id) if occurrence else None
+        pointer = db.get(m.PublishedGroup, (workload.term_id, workload.course_group_id)) if workload else None
+        result["outdated"] = result["outdated"] or not pointer or pointer.version_id != suggestion.version_id or workload.teacher_id != suggestion.author_id
+        result["outdated"] = bool(result["outdated"])
     if comments:
         result["comments"] = [
             {**record(comment), "author": author}

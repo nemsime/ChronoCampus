@@ -5,6 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { changeWords } from "./changeWords";
 import { ruleMessages } from "./ruleMessages";
 import { diagnosticWords } from "./diagnosticWords";
 import { runtimeWords } from "./runtimeWords";
@@ -33,6 +34,7 @@ const words: Record<string, [string, string, string]> = {
   template_inferred: ["Выведено из дат", "Եզրակացված է ամսաթվերից", "Inferred from dates"],
   template_original: ["Было", "Նախկինը", "Originally"],
 
+  ...changeWords,
   ...ruleMessages,
   ...diagnosticWords,
   ...runtimeWords,

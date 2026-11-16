@@ -19,7 +19,7 @@ test("semester is the personal default; weekly preference remains independent", 
 });
 test("semester grid shows parity, changes and explicit irregular dates in all languages", () => {
   const base = { subject: "Calculus", lesson_type: "lecture", teacher: "Teacher", room: "101", group: "Group 1", weekday: 1, slot: 1 };
-  const semester = { term_id: 1, version_id: 1, term: "Autumn", grid: { weekdays: [0,1,2,3,4], slots: [] }, template_rows: [{ ...base, parity: "numerator" }, { ...base, weekday: 2, parity: "every" }], exceptions: [{ ...base, occurrence_id: 1, day: "2026-09-21", reason: "holiday_cancelled" }], irregular: [{ ...base, occurrence_id: 2, day: "2026-10-15" }] };
+  const semester = { term_id: 1, version_id: 1, term: "Autumn", grid: { weekdays: [0,1,2,3,4], slots: [] }, template_rows: [{ ...base, parity: "numerator" }, { ...base, weekday: 2, parity: "every" }], exceptions: [{ ...base, occurrence_id: 1, day: "2026-09-21", reason: "holiday_cancelled" }, { ...base, occurrence_id: 3, day: "2026-10-22", reason: "one_time_move", original: {day: "2026-09-01", slot: 1}, change_reason: "Conference" }, { ...base, occurrence_id: 4, day: "2026-10-23", reason: "makeup_pending", unresolved: true, change_reason: "Closure" }], irregular: [{ ...base, occurrence_id: 2, day: "2026-10-15" }] };
   for (const lang of ["ru", "hy", "en"]) {
     globalThis.localStorage = { getItem: () => lang };
     try {
@@ -29,6 +29,9 @@ test("semester grid shows parity, changes and explicit irregular dates in all la
       assert.match(html, /semester-half denominator/);
       assert.match(html, /semester-every/);
       assert.match(html, /semester-changes/);
+      assert.match(html, /Conference/);
+      assert.match(html, /Closure/);
+      assert.doesNotMatch(html, /template_one_time_move|template_makeup_pending/);
       assert.match(html, /semester-irregular/);
       assert.doesNotMatch(html, /template_holiday_cancelled|semesterTimetable|semesterIrregularHelp/);
     } finally { delete globalThis.localStorage; }

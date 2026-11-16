@@ -61,7 +61,7 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
         </div><aside className="semester-changes"><h3>{t("semesterChanges")}</h3>
           {!changes.length && <p>{t("semesterNoChanges")}</p>}
           {Array.from(new Set(changes.map(row => row.day))).sort().map(day => <section key={day}><h4>{dateLabel(day, lang)}</h4>{changes.filter(row => row.day === day).map(row => <div key={row.occurrence_id}>
-            <p>{t(`template_${row.reason}`)}{row.inferred && ` · ${t("template_inferred")}`} · {t("pair")} {row.slot * 2 - 1}–{row.slot * 2}</p>{lesson(row)}
+            <p>{t(`template_${row.reason}`)}{row.change_reason && ` · ${row.change_reason}`}{row.inferred && ` · ${t("template_inferred")}`} · {t("pair")} {row.slot * 2 - 1}–{row.slot * 2}</p>{lesson(row)}
             {row.original?.day && <small>{t("template_original")}: {dateLabel(row.original.day, lang)} · {t("pair")} {row.original.slot * 2 - 1}–{row.original.slot * 2}</small>}
           </div>)}</section>)}
         </aside></div>

@@ -3,6 +3,7 @@ import { BookOpen, CalendarDays, MapPin, RefreshCw, SlidersHorizontal, StickyNot
 import { Account, api, ApiError, Row } from "./api";
 import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
+import { LecturerRequestForm, LecturerRequests } from "./DatedChanges";
 import { SemesterTimetable } from "./SemesterTimetable";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
 export function LessonList({
@@ -382,11 +383,13 @@ export function PersonalSchedule({ account }: { account: Account }) {
         </>}
         </div>
       </section>
+      {account.role === "lecturer" && <LecturerRequests reload={reload} />}
       {selected && (
         <Dialog labelledBy="note-title" closeDisabled={busy} onClose={() => setSelected(null)}>
           <h2 id="note-title">{t("note")}</h2>
           <p>{selected.subject} · {selected.day} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)}</p>
           <p>{selected.teacher} · {t("room_id")} {selected.room} · {selected.group}</p>
+          {account.role === "lecturer" && <LecturerRequestForm key={selected.occurrence_id} lesson={selected} slots={facets?.grid[String(selected.term_id)]?.slots || []} onSaved={() => setReload(v => v + 1)} />}
           <form
             onSubmit={(e) => {
               e.preventDefault();

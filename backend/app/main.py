@@ -21,6 +21,7 @@ from app.observability import telemetry
 from app.observability.router import client_router, database_probe
 from app.observability.router import router as diagnostics_router
 from app.review.router import router as review_router
+from app.scheduling.change_api import router as change_router
 from app.scheduling.queries import router as schedule_queries_router
 from app.scheduling.router import router as scheduling_router
 from app.workspace.router import router as workspace_router
@@ -44,6 +45,7 @@ app.add_middleware(
     expose_headers=["X-Request-ID"],
 )
 app.add_middleware(telemetry.RequestTelemetry)
+app.include_router(change_router, prefix="/api")
 app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")

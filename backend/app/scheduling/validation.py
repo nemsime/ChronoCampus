@@ -43,6 +43,10 @@ def placement_errors(
     config = snapshot["calendar"]
     if day not in context["days"][component["course_group_id"]]:
         errors.append("outside_teaching_period")
+    for closure in snapshot.get("closures", []):
+        if (component["course_group_id"] in closure["cohort_ids"]
+                and as_date(closure["starts_on"]) <= day <= as_date(closure["ends_on"])):
+            errors.append("teaching_closed")
     key = (component["course_group_id"], day)
     if key not in context["slots"]:
         context["slots"][key] = allowed_slots(snapshot, key[0], day)
@@ -149,12 +153,15 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                 issues.append({"code": "teaching_week_count_mismatch",
                                "course_group_id": group_id,
                                "configured": configured, "actual": len(weeks)})
+    required_makeup = {o["occurrence_id"] for o in snapshot.get("overrides", [])}
     for assignment in assignments:
         identifier = assignment["occurrence_id"]
         if identifier not in occurrences or identifier in seen:
             issues.append({"occurrence_id": identifier, "code": "invalid_occurrence"})
             continue
         seen.add(identifier)
+        if identifier in required_makeup and assignment.get("cancelled"):
+            issues.append({"occurrence_id": identifier, "code": "makeup_required"})
         component = components[occurrences[identifier]["component_id"]]
         errors = placement_errors(snapshot, assignment, component, context)
         issues.extend({"occurrence_id": identifier, "code": code} for code in errors)

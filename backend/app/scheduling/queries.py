@@ -335,6 +335,10 @@ def semester_template(request: Request, response: Response,
         rows = db.execute(selection(scope, query_values, version_id).order_by(A.c.day, A.c.id).limit(20001)).mappings().all()
         if len(rows) > 20000:
             raise HTTPException(422, "template_scope_too_large", headers=PRIVATE)
+        from app.scheduling.changes import metadata, missing_template_rows
+        rows = list(rows) + missing_template_rows(db, scope, query_values, version_id)
+        if len(rows) > 20000:
+            raise HTTPException(422, "template_scope_too_large", headers=PRIVATE)
         batches = {}
         for row in rows:
             batches.setdefault((row['version_id'], row['term_id']), []).append(dict(row))
@@ -345,6 +349,7 @@ def semester_template(request: Request, response: Response,
             term_data = configuration.get('term') or record(term)
             config = dict(configuration.get('calendar') or record(db.get(m.CalendarConfig, term.calendar_id)))
             config['periods'] = [record(p) for p in db.scalars(select(m.TeachingPeriod).where(m.TeachingPeriod.term_id == tid))]
+            _, config['overrides'] = metadata(db, vid)
             config['disruptions'] = [record(d) for d in db.scalars(select(m.Disruption).where(m.Disruption.version_id == vid))]
             holidays = [record(h) for h in db.scalars(select(m.Holiday).where(m.Holiday.term_id == tid))]
             clean = [{k: v for k, v in row.items() if k not in {'configuration', 'starts_on'}} for row in assignments]

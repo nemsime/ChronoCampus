@@ -12,9 +12,23 @@ def derive_template(assignments, term, holidays, config):
     Ambiguous patterns remain dated rather than being silently normalized.
     """
     rows = [dict(a, day=str(a['day'])) for a in assignments]
+    explicit = {o['occurrence_id']: o for o in config.get('overrides', [])}
+    explicit_exceptions = []
+    originals = []
+    for row in rows:
+        override = explicit.get(row['occurrence_id'])
+        if override:
+            reason = 'makeup_pending' if row.get('_unresolved') else ('closure_makeup' if override['event_kind'] == 'closure' else 'one_time_move')
+            explicit_exceptions.append(dict(row, reason=reason, original=override['original'],
+                                            change_reason=override['reason'], unresolved=bool(row.get('_unresolved'))))
+            originals.append(dict(row, **{k: v for k, v in override['original'].items()
+                                         if k not in {'version_id', 'id'}}, _unresolved=False))
+        else:
+            originals.append(row)
+    rows = originals
     holiday_days = {str(h['day'] if isinstance(h, dict) else h) for h in holidays}
     disruptions = {d['occurrence_id']: d for d in config.get('disruptions', [])}
-    result = dict(template_rows=[], exceptions=[], irregular=[])
+    result = dict(template_rows=[], exceptions=explicit_exceptions, irregular=[])
     components = defaultdict(list)
     for row in rows:
         key = tuple(row.get(k) for k in ('version_id', 'course_group_id', 'component_id',
@@ -72,6 +86,7 @@ def derive_template(assignments, term, holidays, config):
                 if not members:
                     break
         result['irregular'].extend(dict(row, reason='irregular') for row in remaining)
+    result['irregular'] = [r for r in result['irregular'] if r['occurrence_id'] not in explicit]
     result['exceptions'].sort(key=lambda r: (r['day'], r['occurrence_id']))
     result['irregular'].sort(key=lambda r: (r['day'], r['occurrence_id']))
     return result
@@ -90,5 +105,8 @@ def expand_template(derived, term, holidays, config):
                     and key in bindings):
                 expanded[bindings[key]] = dict(row, occurrence_id=bindings[key], day=key, cancelled=False)
     for row in derived['exceptions'] + derived['irregular']:
-        expanded[row['occurrence_id']] = dict(row)
+        if row.get('unresolved'):
+            expanded.pop(row['occurrence_id'], None)
+        else:
+            expanded[row['occurrence_id']] = dict(row)
     return list(expanded.values())

@@ -74,3 +74,20 @@ def test_recorded_disruption_is_exception_and_inputs_are_unchanged():
     derived = assert_roundtrip(rows, config=config)
     assert derived['exceptions'][0]['reason'] == 'disrupted'
     assert rows == original
+
+
+def test_explicit_cross_week_override_preserves_template_and_roundtrip():
+    rows = [lesson(date(2026,9,1)+timedelta(weeks=i),i) for i in range(8)]
+    original = dict(rows[2])
+    rows[2] = dict(rows[2],day='2026-10-22',slot=2,room_id=2)
+    config = dict(CONFIG,overrides=[dict(occurrence_id=2,original=original,event_kind='one_time_move',reason='Unavailable once')])
+    derived = assert_roundtrip(rows,config=config)
+    assert derived['template_rows'][0]['parity']=='every'
+    assert len(derived['exceptions'])==1
+    assert derived['exceptions'][0]['reason']=='one_time_move'
+    assert derived['exceptions'][0]['original']['day']==original['day']
+    # A missing replacement remains explicit without inventing an assignment.
+    pending = [dict(r, _unresolved=True) if r['occurrence_id']==2 else r for r in rows]
+    derived = derive_template(pending,TERM,[],config)
+    expected = [r for r in rows if r['occurrence_id']!=2]
+    assert identity(expand_template(derived,TERM,[],config))==identity(expected)
