@@ -40,7 +40,7 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
     const kind = t(row.lesson_type === "lab" ? "compactLab" : row.lesson_type === "lecture" ? "compactLecture" : "compactPractical");
     const audience = row.lesson_type === "lab" ? row.lab_group : row.small_group;
     const full = [row.subject, t(row.lesson_type), row.teacher, `${t("room_id")} ${row.room}`, row.group, row.small_group ? `${t("small_group_id")} ${row.small_group}` : "", row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : ""].filter(Boolean).join(" · ");
-    return <button type="button" className={`semester-compact-lesson semester-lesson-${row.lesson_type}`} title={full} aria-label={full} onClick={() => setSelectedLesson(row)}>
+    return <button type="button" className={`semester-compact-lesson semester-lesson-${row.lesson_type}`} aria-label={full} onClick={() => setSelectedLesson(row)}>
       <strong>{shortSubject(row.subject || "")}</strong>
       <span className="compact-kind">{kind}{audience ? ` ${audience}` : ""}</span>
       <span className="compact-teacher">{shortLecturer(row.teacher || "")}</span>

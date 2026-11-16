@@ -493,9 +493,9 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 .semester-sheet-table thead tr:first-child th { font-size: 11px; }
 .semester-sheet-table thead tr:nth-child(2) th { padding: 4px 1px; font-size: 10px; }
 .semester-sheet-table .semester-sheet-group { padding: 6px 3px; font-size: 10px; }
-.semester-sheet-table .semester-half { display: flex; flex-direction: column; justify-content: center; padding: 2px; min-height: 90px; }
+.semester-sheet-table .semester-half { display: flex; flex-direction: column; justify-content: center; padding: 2px; min-height: 180px; }
 .semester-sheet-table .semester-every { padding: 2px; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
-.semester-sheet-table .semester-cell.only-every { min-height: 180px; }
+.semester-sheet-table .semester-cell.only-every { min-height: 360px; }
 .semester-sheet-table .semester-every > small { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); padding: 0; }
 .semester-sheet-table .semester-compact-lesson { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 1px; width: 100%; min-width: 0; min-height: 60px; padding: 3px 2px; margin: 0; border: 0; border-radius: 3px; background: transparent; color: var(--text); box-shadow: none; text-align: center; line-height: 1.25; }
 .semester-sheet-table .semester-compact-lesson:hover { background: #edf2e7; }
@@ -508,3 +508,9 @@ input::placeholder, textarea::placeholder { color: #6a776e; }
 @media print { .semester-sheet-table .semester-compact-lesson { padding: 1px; min-height: 0; } .semester-compact-lesson > strong { font-size: 7px; } .semester-compact-lesson > span { font-size: 6px; } }
 .semester-legend { position: relative; }
 .semester-legend > small.sr-only { width: 1px; }
+
+/* Keep every rendered label within its own ruled cell. */
+.semester-sheet-table td { overflow: hidden; }
+.semester-sheet-table .semester-cell, .semester-sheet-table .semester-half, .semester-sheet-table .semester-every { min-width: 0; max-width: 100%; overflow: hidden; }
+.semester-sheet-table .semester-compact-lesson, .semester-compact-lesson > strong, .semester-compact-lesson > span { min-width: 0; max-width: 100%; overflow: hidden; }
+.semester-compact-lesson > span { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
