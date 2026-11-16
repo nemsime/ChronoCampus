@@ -347,10 +347,10 @@ export function PersonalSchedule({ account }: { account: Account }) {
         {(loading || (!facets && !readError)) && <LoadingState label={t("scheduleLoading")} compact={rows.length > 0} />}
         {rows.length > 0 && <>
         <div className="schedule-results"><span className="count-label">{t("lessonsOnPage")}: {rows.length}</span></div>
-        <div className={view === "grid" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
+        <div className={view !== "list" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
           {grids.map(([termId, grid]) => <section key={termId}>
             {grids.length > 1 && <h3>{facets?.filters.term_id?.find((choice) => String(choice.id) === termId)?.label}</h3>}
-            <WeekGrid weekStart={range.start} lessons={rows.filter((row) => String(row.term_id) === termId)} grid={grid}
+            <WeekGrid layout={view === "overview" ? "overview" : "grid"} weekStart={range.start} lessons={rows.filter((row) => String(row.term_id) === termId)} grid={grid}
               perspective={account.role === "lecturer" || filters.teacher_id ? "lecturer" : filters.room_id ? "room" : "group"} onSelect={selectLesson}
               decorations={(row) => ({ badges: notes.some((memo) => memo.occurrence_id === row.occurrence_id)
                 ? <span className="badge"><StickyNote size={12} aria-hidden="true" />{t("note")}</span> : undefined })} />

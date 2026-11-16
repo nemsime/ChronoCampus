@@ -1,4 +1,12 @@
 export const scheduleWords: Record<string, [string, string, string]> = {
+  overviewDay: ["День", "Օր", "Day"],
+  overviewFullWeek: ["Вся неделя", "Ամբողջ շաբաթը", "Full week"],
+  overviewDayHint: ["Один день для удобного просмотра. Выберите всю неделю для сравнения.", "Մեկ օր՝ հարմար դիտման համար։ Համեմատելու համար ընտրեք ամբողջ շաբաթը։", "One day at a time. Choose the full week to compare."],
+  universityOverview: ["По группам", "Ըստ խմբերի", "Cohort overview"],
+  overviewScope: ["Выбранная неделя и текущие фильтры. Каждое занятие показано со своей подгруппой, преподавателем и аудиторией.", "Ընտրված շաբաթը և գործող զտիչները։ Յուրաքանչյուր դասի համար նշված են ենթախումբը, դասախոսը և լսարանը։", "Selected week and current filters. Each lesson keeps its subgroup, teacher and room together."],
+  compact_lecture: ["Лек.", "Դաս", "Lec."],
+  compact_practical: ["Практ.", "Գործ", "Prac."],
+  compact_lab: ["Лаб.", "Լաբ", "Lab"],
   lecturerScheduleIntro: ["Ваше опубликованное расписание. Здесь показаны только занятия, назначенные вам.", "Ձեր հրապարակված դասացուցակը։ Այստեղ ցուցադրվում են միայն ձեզ նշանակված դասերը։", "Your published timetable. Only lessons assigned to you are shown."],
   scheduleView: ["Вид расписания", "Դասացուցակի տեսք", "Timetable view"],
   gridView: ["Сетка", "Ցանց", "Grid"],

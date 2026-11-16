@@ -35,6 +35,8 @@ test("timeline defaults on desktop and mobile while remembering an explicit grid
     }
     globalThis.window.localStorage.getItem = () => "grid";
     assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>grid</span>");
+    globalThis.window.localStorage.getItem = () => "overview";
+    assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>overview</span>");
     globalThis.window.localStorage.getItem = () => { throw new Error("storage unavailable"); };
     assert.equal(renderToStaticMarkup(React.createElement(Preference)), "<span>list</span>");
   } finally { delete globalThis.window; }
@@ -165,4 +167,53 @@ test("long Armenian lesson details and badges stay available in the grid", () =>
   assert.match(html, /class="week-grid-slot-column"/);
   assert.match(html, /--week-grid-days:2/);
   assert.ok(html.includes("Առաջարկից հետո դասը փոխվել է"));
+});
+
+test("cohort overview keeps parallel subgroup teachers and Armenian room codes together", () => {
+  const html = render([
+    { ...lesson, subject: "Հայոց լեզու", lesson_type: "practical", small_group_id: 1, small_group: "1", teacher: "Հայրապետյան Լ.", room: "9907ա" },
+    { ...lesson, id: 2, occurrence_id: 102, subject: "Ֆիզիկա", lesson_type: "lab", small_group_id: 2, small_group: "2", lab_group_id: 3, lab_group: "3", teacher: "Մովսեսյան Ռ.", room: "9204" },
+    { ...lesson, id: 3, occurrence_id: 103, course_group_id: 6, group: "T2", subject: "Other cohort" },
+    { ...lesson, id: 4, occurrence_id: 104, day: "2026-11-23", subject: "Next week" },
+  ], "hy", { layout: "overview" });
+  assert.match(html, /university-overview/);
+  assert.equal((html.match(/scope="row"/g) || []).length, 2);
+  assert.equal((html.match(/scope="colgroup" colSpan="2"/g) || []).length, 1);
+  const cards = html.match(/<button\b[\s\S]*?<\/button>/g) || [];
+  assert.equal(cards.length, 3);
+  const armenian = cards.find(card => card.includes("Հայոց լեզու"));
+  assert.match(armenian, /Հայրապետյան Լ\./);
+  assert.match(armenian, /9907ա/);
+  assert.doesNotMatch(armenian, /Մովսեսյան/);
+  const lab = cards.find(card => card.includes("Ֆիզիկա"));
+  assert.match(lab, /Մովսեսյան Ռ\./);
+  assert.match(lab, /9204/);
+  assert.match(lab, /Լաբ/);
+  assert.doesNotMatch(html, /Next week/);
+  assert.match(html, /08:15–09:25/);
+  assert.doesNotMatch(html, /09:30–10:50/);
+});
+
+test("cohort overview retains occupied weekend and extra slots and comparison decorations", () => {
+  const html = render([{ ...lesson, day: "2026-11-22", slot: 3, cancelled: true }], "en", {
+    layout: "overview", perspective: "lecturer", disabled: true,
+    decorations: () => ({ badges: React.createElement("span", null, "Removed lesson"), className: "diff-removed-lesson" }),
+  });
+  assert.match(html, /2026-11-22/);
+  assert.match(html, /11:05–12:15/);
+  assert.match(html, /Hakobyan/);
+  assert.match(html, /R-204/);
+  assert.match(html, /diff-removed-lesson/);
+  assert.match(html, /Removed lesson/);
+  assert.match(html, /disabled=""/);
+  assert.match(html, /Cancelled/);
+});
+
+test("cohort overview has translated captions and does not invent enrollment counts", () => {
+  for (const [lang, caption] of [["en", "Cohort overview"], ["ru", "По группам"], ["hy", "Ըստ խմբերի"]]) {
+    const html = render([lesson], lang, { layout: "overview" });
+    assert.ok(html.includes(caption));
+    assert.doesNotMatch(html, /overviewScope|compact_lecture|undefined|NaN/);
+    assert.match(html, /<th scope="row">T1<\/th>/);
+  }
 });

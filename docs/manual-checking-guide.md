@@ -438,7 +438,7 @@ Keep student/lecturer browsers open on the baseline while the admin prepares rep
 
 ### Timetable
 
-The active Timetable opens as a weekly grid on desktop and a list on mobile; the list paginates at 25 rows. Use the week selector to inspect adjacent weeks. For the small fixture, check the weeks starting 2026-09-07 and 2026-09-14. API reads accept **1–31 inclusive days**. Clear filters before verifying fixture totals.
+The active Timetable defaults to Timeline on desktop and mobile and remembers an explicit Grid or Cohort overview choice; the list paginates at 25 rows. Use the week selector to inspect adjacent weeks. For the small fixture, check the weeks starting 2026-09-07 and 2026-09-14. API reads accept **1–31 inclusive days**. Clear filters before verifying fixture totals.
 
 | ID | Steps | Expected result |
 | --- | --- | --- |
@@ -451,6 +451,18 @@ The active Timetable opens as a weekly grid on desktop and a list on mobile; the
 | VIEW-07 | Test before any publication, then a date/filter with no matching lessons after publication. Simulate a temporary read/network failure and retry. | No-publication, no-match and failure states are understandable; failure is not presented as a successful empty schedule. |
 | VIEW-08 | Change a student's membership as admin while its old timetable browser remains open; issue another read. | Old session is revoked; new login uses new membership and authorized facets. Responses do not expose old/unrelated rows. Check `Cache-Control: private, no-store` in Network. |
 | VIEW-09 | Check Grid in all roles and RU/HY/EN with long subjects, names, rooms, subgroups and badges, including extra/weekend slots. Repeat at 360px, tablet and desktop widths. | Labels and lesson content wrap within cells; the slot label/time remain readable. Wide grids scroll within their own region and do not widen the page. Mobile starts in List unless a different preference was saved. |
+
+### Reference timetable overview
+
+Choose **Cohort overview** in Timetable, Planner, or dean timetable review. The layout is based on the cohort/day/period structure visible in `B1kurs1-1.doc`; exact Word page formatting has not been visually certified.
+
+| ID | Steps | Expected result |
+| --- | --- | --- |
+| VIEW-10 | Choose Cohort overview with two cohorts and parallel practical/lab lessons. Switch weeks and filters, then reload. | The overview initially shows the first day with lessons; use Day to switch dates or choose Full week. Cohorts form rows; dates group period columns using server bell times. Every lesson keeps its own subgroup/lab, subject, teacher and room together. Only the selected week and authorized filtered data appear; the view preference survives reload. |
+| VIEW-11 | Use Armenian room codes such as `9907ա`, long names, canceled lessons, occupied extra/weekend slots, dean comparison badges and Planner review issues. Repeat RU/HY/EN. | Details and badges remain visible; extra/weekend lessons are retained. Selecting a lesson opens the existing role-appropriate action. Disabled Planner lessons remain disabled. |
+| VIEW-12 | Use arrow keys within the overview, inspect at 360px, choose Full week, and print landscape across several cohorts. | Focus moves by cohort/period; the table scrolls inside its region. Print repeats day/period headers and keeps each cohort row together when it fits a page. Check actual print legibility; automated markup tests do not establish layout or pagination. |
+
+The overview does not infer student counts, language-group memberships or alternating-week rules from the Word document. Reference text supplies examples, not confirmed semester hours or academic-unit settings.
 
 ### Personal notes
 
