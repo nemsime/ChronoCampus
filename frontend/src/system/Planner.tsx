@@ -592,8 +592,8 @@ function PlannerTimetable({ detail, disabled, onSelect }: { detail: Row; disable
         {choices.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select></label>
     </div>
-    {grid && <div className={view === "grid" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
-      <WeekGrid weekStart={monday} lessons={rows} grid={grid} perspective={perspective} onSelect={onSelect} disabled={disabled}
+    {grid && <div className={view !== "list" ? "schedule-grid-content" : "schedule-grid-content schedule-grid-print"}>
+      <WeekGrid layout={view === "overview" ? "overview" : "grid"} weekStart={monday} lessons={rows} grid={grid} perspective={perspective} onSelect={onSelect} disabled={disabled}
         decorations={(row) => ({ badges: issueIds.has(row.occurrence_id)
           ? <span className="badge warn"><AlertCircle size={12} aria-hidden="true" />{t("needsReview")}</span> : undefined })} />
     </div>}
@@ -601,6 +601,6 @@ function PlannerTimetable({ detail, disabled, onSelect }: { detail: Row; disable
       <button type="button" className="secondary" disabled={disabled} onClick={() => onSelect(row)}>
         {t(detail.version.status === "draft" ? "edit" : "lessonDetails")}
       </button>} /></div>}
-    {view === "grid" && grid && !rows.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
+    {view !== "list" && grid && !rows.length && <EmptyState icon={CalendarDays} title={t("noLessonsTitle")} description={t("noLessonsHelp")} />}
   </div>;
 }

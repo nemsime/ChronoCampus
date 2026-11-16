@@ -413,3 +413,74 @@ p, small { color: var(--muted); }
   .personal-pagination { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
   .personal-pagination > button { font-size: 12px; padding-inline: 6px; }
 }
+
+/* Cohort rows and weekday/period columns follow the university timetable reference. */
+.schedule-view-toggle { flex-wrap: wrap; }
+.university-overview { min-width: calc(8rem + var(--overview-columns, 20) * 9rem); }
+.overview-cohort-column { width: 8rem; }
+.university-overview caption small { display: block; font-size: 12px; font-weight: 400; margin-top: 4px; }
+.university-overview thead th { position: static; text-align: center; }
+.university-overview thead th strong, .university-overview thead th small { display: block; }
+.university-overview thead th small { font-size: 11px; font-weight: 400; white-space: nowrap; }
+.university-overview tbody th { position: sticky; left: 0; z-index: 1; }
+.university-overview .grid-lesson { padding: 6px; gap: 3px; font-size: 12px; }
+.university-overview .grid-lesson + .grid-lesson { margin-top: 6px; border-top: 2px solid var(--border); }
+.university-overview .grid-lesson svg { display: none; }
+.university-overview .grid-lesson-flags:empty { display: none; }
+@media print {
+  .university-overview { min-width: 0; width: 100%; }
+  .overview-cohort-column { width: 45px; }
+  .university-overview thead { display: table-header-group; }
+  .university-overview tbody th { position: static; }
+  .university-overview th, .university-overview td { padding: 2px; font-size: 6pt; }
+  .university-overview thead th small { font-size: 5pt; white-space: normal; }
+  .university-overview caption small { font-size: 7pt; }
+  .university-overview .grid-lesson, .university-overview .grid-lesson strong,
+  .university-overview .grid-lesson small, .university-overview .grid-lesson .badge,
+  .university-overview .grid-lesson-kind { font-size: 5.5pt; padding: 1px; }
+}
+
+/* A daily board keeps the university layout readable during everyday use. */
+.cohort-board { min-width: 0; }
+.cohort-board-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 8px 0 18px; }
+.cohort-board-toolbar strong { font-size: 16px; font-weight: 600; }
+.cohort-board-toolbar p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.cohort-day-picker { display: flex; align-items: center; gap: 10px; margin: 0; flex-shrink: 0; }
+.cohort-day-picker > span { font-size: 12px; color: var(--muted); }
+.cohort-day-picker select { width: auto; max-width: 100%; min-width: 170px; min-height: 42px; }
+@media screen {
+  .schedule-view-toggle { background: var(--sage); border-color: transparent; padding: 4px; border-radius: 12px; }
+  .schedule-view-toggle button { color: var(--muted); border-radius: 9px; font-size: 12px; }
+  .schedule-view-toggle button[aria-pressed="true"] { background: var(--surface); color: var(--text); border-color: var(--border); box-shadow: 0 1px 3px #1f2d260a; }
+  .week-grid-region { border-radius: 14px; }
+  .week-grid td { padding: 10px; background: var(--surface); }
+  .week-grid th { background: #f5f6f2; }
+  .week-grid .grid-lesson { background: var(--surface); border-color: #e5e8e1; border-left-color: #648671; padding: 12px; gap: 7px; border-radius: 9px; }
+  .week-grid .grid-lesson-practical { background: var(--surface); border-left-color: #728da0; }
+  .week-grid .grid-lesson-lab { background: var(--surface); border-left-color: #a087a3; }
+  .week-grid .grid-lesson:hover:not(:disabled) { background: #f7f8f4; border-color: #9eafa2; }
+  .week-grid .grid-lesson strong { font-size: 13px; line-height: 1.5; font-weight: 600; }
+  .week-grid .grid-lesson-line, .week-grid .grid-lesson small { color: var(--muted); font-size: 11px; line-height: 1.5; }
+  .week-grid .grid-lesson-kind { font-size: 10px; letter-spacing: .02em; }
+  .week-grid .grid-empty { color: #7a877d; font-size: 12px; padding-top: 12px; }
+  .grid-keyboard-hint { color: var(--muted); border-top: 0; padding: 12px 2px; font-size: 11px; }
+  .university-overview { min-width: calc(7rem + var(--overview-columns, 4) * 11rem); }
+  .overview-cohort-column { width: 7rem; }
+  .university-overview caption { font-size: 12px; color: var(--muted); padding: 14px; font-weight: 400; }
+  .university-overview th[scope="colgroup"] { font-size: 13px; padding: 12px; }
+  .university-overview thead th strong { font-size: 11px; font-weight: 500; }
+  .university-overview thead th small { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .university-overview tbody th { padding: 18px 12px; font-size: 13px; border-right: 2px solid var(--border); }
+  .university-overview .grid-lesson + .grid-lesson { border-top: 1px solid #e5e8e1; margin-top: 8px; }
+}
+@media (max-width: 760px) {
+  .cohort-board-toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+  .cohort-day-picker { justify-content: space-between; }
+  .cohort-day-picker select { flex: 1; min-width: 0; }
+  .schedule-view-toggle { width: 100%; }
+  .schedule-view-toggle button { flex: 1; padding-inline: 8px; }
+  .schedule-view-toggle button svg { display: none; }
+}
+@media print {
+  .cohort-board-toolbar { display: none !important; }
+}
