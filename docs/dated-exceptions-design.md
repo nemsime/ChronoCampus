@@ -73,8 +73,8 @@ notifications are outside this first implementation; requests and decisions are
 shown in the application.
 
 The user approved implementation and isolated migration testing. Migration
-`0008_dated_changes` creates only the two new tables and their indexes. It has
-not been applied to the retained development database. Existing endpoints keep
+`0008_dated_changes` creates only the two new tables and their indexes. It was initially
+not applied to the retained database; see the completed rollout record below. Existing endpoints keep
 working on schema 0007; the feature capability endpoint returns false and new
 mutation endpoints return 503 until the additive migration is applied.
 
@@ -116,7 +116,7 @@ their existing non-binding workflow.
 ## Rollout boundary
 
 No retained accounts, assignments, occurrences, schedule versions or publication
-pointers were changed during implementation. Inactive student accounts are
+pointers were changed during implementation or the additive rollout. Inactive student accounts are
 untouched. Apply the migration only after explicit rollout approval and a verified
 backup according to the repository's existing migration instructions. Do not run
 `seed-demo`. Before rollout, all new flows were exercised only in isolated SQLite
@@ -143,3 +143,61 @@ Commands: `python -m pytest tests -q`,
 `python -m pytest tests/test_dated_changes.py tests/test_template.py -q`,
 `npm --prefix frontend run typecheck`, `npm --prefix frontend test`,
 `npm --prefix frontend run build`, and Ruff on changed Python files.
+
+## Approved rollout completed — 16 November 2026
+
+The user subsequently approved applying migration 0008. The rollout is complete:
+
+- Checked for zero queued/running/retry jobs, then paused only the ChronoCampus
+  API, generation coordinator and I/O worker containers.
+- Created native copy-only backup with checksum:
+  `/var/opt/mssql/data/ChronoCampus_Development_before_0008_20261116_fe6d8022.bak`.
+  SQL Server `RESTORE VERIFYONLY ... WITH CHECKSUM` confirmed it was valid.
+- Restored it into disposable database
+  `ChronoCampus_MigrationTest_20261116_0008_fe6d8022`, applied migration 0008 there,
+  and compared retained-data hashes before/after.
+- Applied the same additive migration to `ChronoCampus_Development` only after
+  the rehearsal passed. All retained hashes matched: 22 accounts, 1,974 lesson
+  assignments, 1,088 occurrences, 10 schedule versions, 3 publication pointers,
+  169 workload components and the application revision row.
+- Restarted the API/coordinator/I/O containers; health/readiness both returned
+  200. Both new tables exist and the Alembic revision is `0008_dated_changes`.
+- Removed only the newly created disposable rehearsal database. Retained the
+  verified backup, with an additional local copy in ignored `.runtime/backups/`.
+
+The application SQL user could create the backup but lacked restore/verify
+permissions. Verification and restoring/removing the disposable copy used the
+SQL Server container's existing administrator credentials, never printed or
+changed. Migration DDL ran through the configured application connection. No
+account activation, reseeding, lesson generation or publication was performed.
+
+## Timetable notifications and layout
+
+The main header now has a notification bell for authorized published timetable
+exceptions. It refreshes every 30 seconds and on window focus, clears content on
+fetch/authentication failure, and opens a drawer with lesson details, original
+placement, replacement and reason. Read markers are stored on this browser per
+account ID; no notification tables, account updates, emails or push messages are
+introduced. Irregular dated lessons remain separate from change notifications.
+
+The semester board uses the full content width. Changes open the same drawer
+instead of a narrow permanent side column. Weekday names have explicit Armenian,
+Russian and English translations. Numerator/denominator halves, every-week cards,
+room/teacher metadata, and a mobile horizontal-scroll hint are retained.
+
+Validation: TypeScript, all four frontend test files, production build and Git
+whitespace checks passed. Isolated headless Chrome fixtures used stored group 2
+data with a student subgroup/lab scope, without logging in or changing data.
+Assertions covered all five weekdays visible at desktop width, no page overflow,
+opening notifications, opening the selected lesson, clearing the unread badge,
+and a true emulated 390px mobile viewport with a fully contained drawer. The
+mobile timetable scrolls horizontally within its region. Screenshots are ignored
+under `.runtime/notification-qa/`; browser fixtures do not replace live role
+permission tests, which were covered by the backend suite before rollout.
+
+The university reference was clarified after the initial UI review: numerator
+is the upper half, denominator the lower half, and every-week lessons span both.
+The user preferred a readable screen layout closer to the paper rather than an
+exact copy. The grid therefore keeps weekdays across and pairs down the side,
+using thin ruled cells, subtle lesson-type text colours and group labels in the
+heading. Assertions explicitly check upper/lower order and unsplit weekly cells.

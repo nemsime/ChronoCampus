@@ -1,4 +1,17 @@
 export const changeWords: Record<string, [string, string, string]> = {
+  "semesterScrollHint": ["Прокрутите таблицу вправо, чтобы увидеть все дни.", "Բոլոր օրերը տեսնելու համար աղյուսակը սահեցրեք աջ։", "Scroll the timetable sideways to see every weekday."],
+"timetableNotifications": ["Изменения расписания", "Դասացուցակի փոփոխություններ", "Timetable changes"],
+"notificationHelp": ["Выберите изменение, чтобы посмотреть занятие и новую дату.", "Ընտրեք փոփոխությունը՝ դասը և նոր ամսաթիվը տեսնելու համար։", "Select a change to see the lesson and its updated details."],
+"allTimetableChanges": ["Все изменения", "Բոլոր փոփոխությունները", "All changes"],
+"markChangesRead": ["Отметить всё прочитанным", "Նշել բոլորը որպես կարդացված", "Mark all as read"],
+"semesterWeekday0": ["Понедельник", "Երկուշաբթի", "Monday"],
+"semesterWeekday1": ["Вторник", "Երեքշաբթի", "Tuesday"],
+"semesterWeekday2": ["Среда", "Չորեքշաբթի", "Wednesday"],
+"semesterWeekday3": ["Четверг", "Հինգշաբթի", "Thursday"],
+"semesterWeekday4": ["Пятница", "Ուրբաթ", "Friday"],
+"semesterWeekday5": ["Суббота", "Շաբաթ", "Saturday"],
+"semesterWeekday6": ["Воскресенье", "Կիրակի", "Sunday"],
+
   "request_no_change": ["Выберите другую дату, пару или аудиторию.", "Ընտրեք այլ ամսաթիվ, զույգ կամ լսարան։", "Choose a different date, slot or room."],
   "request_placement_changed": ["Размещение не соответствует принятому запросу.", "Տեղադրումը չի համապատասխանում ընդունված հարցմանը։", "The placement no longer matches the accepted request."],
   "requestOneTimeMove": [

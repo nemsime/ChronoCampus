@@ -25,6 +25,7 @@ import {
   reportClientError,
   setDiagnosticPage,
 } from "./api";
+import { ChangeNotificationBell } from "./ChangeNotifications";
 import { Diagnostics } from "./Diagnostics";
 import { DiagnosticBoundary } from "./DiagnosticBoundary";
 import { SignIn, PasswordForm, useAuthLink } from "./Accounts";
@@ -250,6 +251,7 @@ function Workspace() {
           </div>
           <div className="inline">
             <span className="topbar-date"><CalendarDays size={15} aria-hidden="true" />{lang === "hy" ? `${dateLabel(localDay(), lang)}, ${new Date().getFullYear()}` : new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric" }).format(new Date())}</span>
+            {!account.must_change_password && <ChangeNotificationBell key={account.id} account={account} />}
             <LanguageSwitch />
             <span className="topbar-separator" aria-hidden="true" />
             <button
