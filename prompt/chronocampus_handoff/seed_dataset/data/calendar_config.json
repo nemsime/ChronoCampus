@@ -1,0 +1,14 @@
+{
+  "weeks_per_semester": 16,
+  "academic_hours_per_pair": 2,
+  "first_week": "numerator",
+  "alternation": "numerator,denominator,...",
+  "holidays_shift_parity": false,
+  "ordinary_pairs_full_time": 4,
+  "ordinary_pairs_part_time": 5,
+  "subgroup_target_sizes": {
+    "lab": "13-16",
+    "practical": "19-23"
+  },
+  "hours_to_pairs": "pairs_per_week = semester_hours / 32 (16 weeks x 2h)"
+}

@@ -90,7 +90,8 @@ export const catalogSchema: Record<string, Field[]> = {
   ],
   subgroups: [ref("course_group_id", "groups"), text("label"), num("capacity")],
   "lab-groups": [
-    ref("small_group_id", "subgroups"),
+    ref("course_group_id", "groups"),
+    ref("small_group_id", "subgroups", true),
     text("label"),
     num("capacity"),
   ],
@@ -128,6 +129,7 @@ export const catalogSchema: Record<string, Field[]> = {
     num("academic_hours_per_lesson", undefined, true),
     num("academic_hour_minutes", undefined, true),
     num("teaching_weeks", 16),
+    choice("cross_partition_overlap", ["assume_overlap"]),
     choice("lecture_order", ["unconfirmed", "same_day", "off"]),
     {
       key: "quality_weights",

@@ -1,0 +1,131 @@
+﻿group_code,students,year_of_study,study_form,specialty_code,match_level,template_ids,note
+ՏՏ619,76,1,full_time,19,exact,B1kurs1-1.docx|ՏՏ419,
+ՏՏ655,66,1,full_time,55,exact,B1kurs1-1.docx|ՏՏ455,
+ՏՏ620,53,1,full_time,20,exact,B1kurs1-1.docx|ՏՏ420,
+ՏՏ650,20,1,full_time,50,exact,B1kurs1-1.docx|ՏՏ450,
+ՏՏ621,66,1,full_time,21,exact,B1kurs1-1.docx|ՏՏ421,
+ՏՏ661,47,1,full_time,61,exact,B1kurs1-1.docx|ՏՏ461,
+ՏՏ624,69,1,full_time,24,exact,B1kurs1-1.docx|ՏՏ424,
+ՏՏ618,32,1,full_time,18,exact,B1kurs1-1.docx|ՏՏ418,
+ՏՏ622,11,1,full_time,22,exact,B1kurs1-1.docx|ՏՏ422,
+ՏՏ638,6,1,full_time,38,exact,B1kurs1-1.docx|ՏՏ438,
+ՏՏ668,5,1,full_time,68,exact,B1kurs1-1.docx|ՏՏ468,
+ՏՏ660,10,1,full_time,60,exact,B1kurs1-1.docx|ՏՏ460,
+ՏՏ616,8,1,full_time,16,exact,B1kurs1-1.docx|ՏՏ416,
+ՏՏ609,26,1,full_time,09,exact,B1kurs1-1.docx|ՏՏ409,
+ՏՏ658,48,1,full_time,58,exact,B1kurs1-1.docx|ՏՏ458,
+ՏՏ669,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ666,10,1,full_time,66,none,,no template for this specialty
+ՏՏ607,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ519,51,2,full_time,19,exact,b2/html/B2.html|ՏՏ319,
+ՏՏ555,51,2,full_time,55,exact,b2/html/B2.html|ՏՏ355,
+ՏՏ520,36,2,full_time,20,exact,b2/html/B2.html|ՏՏ320,
+ՏՏ550,14,2,full_time,50,exact,b2/html/B2.html|ՏՏ350,
+ՏՏ521,31,2,full_time,21,exact,b2/html/B2.html|ՏՏ321,
+ՏՏ561,35,2,full_time,61,exact,b2/html/B2.html|ՏՏ361,
+ՏՏ524,50,2,full_time,24,exact,b2/html/B2.html|ՏՏ324,
+ՏՏ518,25,2,full_time,18,exact,b2/html/B2.html|ՏՏ318,
+ՏՏ522,3,2,full_time,22,exact,b2/html/B2.html|ՏՏ322,
+ՏՏ538,4,2,full_time,38,exact,b2/html/B2.html|ՏՏ338,
+ՏՏ568,7,2,full_time,68,exact,b2/html/B2.html|ՏՏ368,
+ՏՏ560,11,2,full_time,60,exact,b2/html/B2.html|ՏՏ360,
+ՏՏ516,5,2,full_time,16,exact,b2/html/B2.html|ՏՏ316,
+ՏՏ509,24,2,full_time,09,exact,b2/html/B2.html|ՏՏ309,
+ՏՏ558,25,2,full_time,58,nearest_year_same_specialty,B1kurs1-1.docx|ՏՏ458,year differs by 1
+ՏՏ569,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ566,13,2,full_time,66,none,,no template for this specialty
+ՏՏ507,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ419,49,3,full_time,19,exact,B3kurs1-1.docx|ՏՏ219;B3kurs1.docx|ՏՏ319,
+ՏՏ455,42,3,full_time,55,exact,B3kurs1-1.docx|ՏՏ255;B3kurs1.docx|ՏՏ355,
+ՏՏ420,39,3,full_time,20,exact,B3kurs1-1.docx|ՏՏ220;B3kurs1.docx|ՏՏ320,
+ՏՏ450,10,3,full_time,50,exact,B3kurs1.docx|ՏՏ350,
+ՏՏ421,36,3,full_time,21,exact,B3kurs1-1.docx|ՏՏ221;B3kurs1.docx|ՏՏ321,
+ՏՏ461,33,3,full_time,61,exact,B3kurs1-1.docx|ՏՏ261;B3kurs1.docx|ՏՏ361,
+ՏՏ424,44,3,full_time,24,exact,B3kurs1-1.docx|ՏՏ224;B3kurs1.docx|ՏՏ324,
+ՏՏ419Ս,17,3,full_time,19,exact,B3kurs1-1.docx|ՏՏ219;B3kurs1.docx|ՏՏ319,
+ՏՏ418,7,3,full_time,18,exact,B3kurs1-1.docx|ՏՏ218;B3kurs1.docx|ՏՏ318,
+ՏՏ418Ս,20,3,full_time,18,exact,B3kurs1-1.docx|ՏՏ218;B3kurs1.docx|ՏՏ318,
+ՏՏ422,16,3,full_time,22,exact,B3kurs1-1.docx|ՏՏ222;B3kurs1.docx|ՏՏ322,
+ՏՏ438,7,3,full_time,38,exact,B3kurs1-1.docx|ՏՏ238;B3kurs1.docx|ՏՏ338,
+ՏՏ468,3,3,full_time,68,exact,B3kurs1-1.docx|ՏՏ268;B3kurs1.docx|ՏՏ368,
+ՏՏ460,5,3,full_time,60,exact,B3kurs1-1.docx|ՏՏ260;B3kurs1.docx|ՏՏ360,
+ՏՏ416,11,3,full_time,16,exact,B3kurs1-1.docx|ՏՏ216;B3kurs1.docx|ՏՏ316,
+ՏՏ409,26,3,full_time,09,exact,B3kurs1-1.docx|ՏՏ209;B3kurs1.docx|ՏՏ309,
+ՏՏ458,23,3,full_time,58,other_year_same_specialty,B1kurs1-1.docx|ՏՏ458,
+ՏՏ407-1,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ407-2,0,,,,not_applicable,,master or empty group: no template source
+ՏՏ319,59,4,full_time,19,exact,B4kurs1.docx|ՏՏ119,
+ՏՏ355,49,4,full_time,55,exact,B4kurs1.docx|ՏՏ155,
+ՏՏ320,49,4,full_time,20,exact,B4kurs1.docx|ՏՏ120,
+ՏՏ350,7,4,full_time,50,nearest_year_same_specialty,B3kurs1.docx|ՏՏ350,year differs by 1
+ՏՏ321,36,4,full_time,21,exact,B4kurs1.docx|ՏՏ121-1;B4kurs1.docx|ՏՏ121-2,
+ՏՏ361,31,4,full_time,61,exact,B4kurs1.docx|ՏՏ161,
+ՏՏ324,56,4,full_time,24,exact,B4kurs1.docx|ՏՏ124,
+ՏՏ319Ս,30,4,full_time,19,exact,B4kurs1.docx|ՏՏ119,
+ՏՏ318,9,4,full_time,18,exact,B4kurs1.docx|ՏՏ118,
+ՏՏ318Ս,40,4,full_time,18,exact,B4kurs1.docx|ՏՏ118,
+ՏՏ322,19,4,full_time,22,exact,B4kurs1.docx|ՏՏ122,
+ՏՏ338,3,4,full_time,38,exact,B4kurs1.docx|ՏՏ138,
+ՏՏ368,7,4,full_time,68,exact,B4kurs1.docx|ՏՏ168,
+ՏՏ360,6,4,full_time,60,exact,B4kurs1.docx|ՏՏ160,
+ՏՏ316,12,4,full_time,16,exact,B4kurs1.docx|ՏՏ116,
+ՏՏ309,23,4,full_time,09,exact,B4kurs1.docx|ՏՏ109,
+ՄՏՏ619,25,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ655,16,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ620,17,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ658,4,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ621,7,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ624,14,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ661,17,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ618,12,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ622,8,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ638,4,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ616,0,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ609,16,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ629,14,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ630,24,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ519,13,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ555,14,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ520,6,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ550,5,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ521,5,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ524,10,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ561,12,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ518,10,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ522,2,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ538,4,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ516,8,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ509,7,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ529,13,,,,not_applicable,,master or empty group: no template source
+ՄՏՏ530,15,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ620,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ621,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ624,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ618,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ616,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ609,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ661,0,,,,not_applicable,,master or empty group: no template source
+ՀՏՏ520,27,2,part_time,20,exact,"heraka-2-kurs.docx|ՀՏՏ220(1,2)",
+ՀՏՏ521,22,2,part_time,21,exact,"heraka-2-kurs.docx|ՀՏՏ221(1,2)",
+ՀՏՏ524,47,2,part_time,24,exact,"heraka-2-kurs.docx|ՀՏՏ224(1,2)",
+ՀՏՏ518,10,2,part_time,18,nearest_year_same_specialty,"heraka-1-kurs.docx|ՀՏՏ318(1,2);heraka-3kurs.docx|ՀՏՏ118(1,2)",year differs by 1
+ՀՏՏ516,9,2,part_time,16,nearest_year_same_specialty,"heraka-1-kurs.docx|ՀՏՏ316(1,2)",year differs by 1
+ՀՏՏ561,32,2,part_time,61,none,,no template for this specialty
+ՀՏՏ420,32,3,part_time,20,exact,"heraka-3kurs.docx|ՀՏՏ120(1,2)",
+ՀՏՏ421,30,3,part_time,21,exact,"heraka-3kurs.docx|ՀՏՏ121(1,2)",
+ՀՏՏ424,46,3,part_time,24,exact,"heraka-3kurs.docx|ՀՏՏ124(1,2)",
+ՏՏ418,12,3,part_time,18,exact,"heraka-3kurs.docx|ՀՏՏ118(1,2)",
+ՀՏՏ416,11,3,part_time,16,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ016(1,2)",year differs by 1
+ՀՏՏ320,31,4,part_time,20,exact,"heraka-4-kurs.docx|ՀՏՏ020(1,2)",
+ՀՏՏ321,27,4,part_time,21,exact,"heraka-4-kurs.docx|ՀՏՏ021(1,2)",
+ՀՏՏ324,44,4,part_time,24,exact,"heraka-4-kurs.docx|ՀՏՏ024(1,2)",
+ՀՏՏ318,15,4,part_time,18,exact,"heraka-4-kurs.docx|ՀՏՏ018(1,2)",
+ՀՏՏ316,8,4,part_time,16,exact,"heraka-4-kurs.docx|ՀՏՏ016(1,2)",
+ՀՏՏ220,19,5,part_time,20,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ020(1,2)",year differs by 1
+ՀՏՏ221,20,5,part_time,21,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ021(1,2)",year differs by 1
+ՀՏՏ224,52,5,part_time,24,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ024(1,2)",year differs by 1
+ՀՏՏ222,9,5,part_time,22,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ022(1,2)",year differs by 1
+ՀՏՏ209,16,5,part_time,09,nearest_year_same_specialty,"heraka-4-kurs.docx|ՀՏՏ009(1,2)",year differs by 1
+ՀՄՏՏ624,0,,,,not_applicable,,master or empty group: no template source
+ՀՄՏՏ524,0,,,,not_applicable,,master or empty group: no template source
+ՀՄՏՏ424,9,,,,not_applicable,,master or empty group: no template source

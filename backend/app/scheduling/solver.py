@@ -329,7 +329,9 @@ def preferred_limits(snapshot):
     for component in snapshot["workloads"]:
         maximum = component.get("preferred_daily_max")
         if maximum:
-            for leaf in audience_leaves(snapshot, component):
+            for leaf, members in audience_leaves(snapshot, component).items():
+                if not members:
+                    continue
                 resource = "student:" + leaf
                 result[resource] = min(maximum, result.get(resource, maximum))
     return result
@@ -493,7 +495,7 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         occupied[key] = flag
     by_day = defaultdict(dict)
     for (resource, day, slot), variable in occupied.items():
-        if not resource.startswith("room:"):
+        if not resource.startswith(("room:", "student:cross:")):
             by_day[resource, day][slot] = variable
     groups = {c["id"]: c["course_group_id"] for c in snapshot["workloads"]}
     cohort_slots = defaultdict(list)

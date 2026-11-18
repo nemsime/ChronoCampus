@@ -1,0 +1,1302 @@
+﻿template_id,study_form,year_of_study,specialty_code,subject,lesson_type,subgroup_count,pairs_per_week_per_subgroup,implied_semester_hours,parity_note,teacher_ids,rooms_seen,slot_entries
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,(unknown),lab,1,0.5,16,"weekly=1, alternating=0.5",T006;T010,5103;5122,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,9404 Ինֆորմատիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T006,5103,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T119,2359,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,ԱԵ և ԳՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T119,2344;5601,2
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ինֆորմատիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T161,5608,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ինֆորմատիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T006;T010,5121,2
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T171;T173;T174,2127բ;2261բ;2438;2440;2441ա;2443ա;9705;9706;9708,3
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Հայոց լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T103,9903;9910,2
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T119,5402,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Մաթ. Անալիզ,practical,2,1.0,32,"weekly=1, alternating=0.5",T119,9210,2
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ֆիզիկա,lab,3,0.5,16,"weekly=1, alternating=0.5",T160,9204;9404,3
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T160,5601,1
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T160,5601,2
+B1kurs1-1.docx|ՏՏ409,full_time,1,09,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T162,5402,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,ԱԵ և ԳՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T162,5601,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ինֆորմատիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T010;T122,51006;5121,2
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T161,5608,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ինֆորմատիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T122,51006,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T171;T172,2127բ;2261;2338;2353;2434;2438,3
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T103,9302,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T125,2361,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T125,9206,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ֆիզիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T121,9201,2
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T160,5601,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T121,9104,1
+B1kurs1-1.docx|ՏՏ416,full_time,1,16,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,(unknown),lab,1,0.5,16,"weekly=1, alternating=0.5",T164,9201,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,(unknown),practical,2,1.5,48,"weekly=1, alternating=0.5",T068;T071;T072;T103;T165,9905ա;9906;9907բ;9909բ;9910,3
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T162,5402,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,ԱԵ և ԳՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T162,2430,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ինֆորմատիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T124,51006,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T161,5608,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ինֆորմատիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T122;T124,51006,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T125,2361,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Մաթ. Անալիզ,practical,2,1.0,32,"weekly=1, alternating=0.5",T125,5202;9110,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Մասնագ. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T163,5802,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Օտար լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ֆիզիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T115,9201,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T160,5601,1
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T121,5606,2
+B1kurs1-1.docx|ՏՏ418,full_time,1,18,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T113;T114,5212;5218,2
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,5212 Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T112,5606,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T119,2342,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,ԱԵ և ԳՀ,practical,3,1.0,32,"weekly=1, alternating=0.5",T116;T118,5404;5601;5602,4
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,ԱԼ և Ծ,lab,3,1.0,32,"weekly=1, alternating=0.5",T113,5212,4
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T113,5207,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,ԱԼ և Ծ,practical,3,0.5,16,"weekly=1, alternating=0.5",T113,5212,3
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T017;T107;T108;T109;T110,,3
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2342,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Հայոց պատմ.,practical,3,0.5,16,"weekly=1, alternating=0.5",T111,17413,3
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T073,1403,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Մաթ. Անալիզ,practical,3,1.0,32,"weekly=1, alternating=0.5",T073;T117,5202,3
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Ֆիզիկա,lab,5,0.5,16,"weekly=1, alternating=0.5",T115,9201;9404,5
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T112,5608,1
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T112,5606,2
+B1kurs1-1.docx|ՏՏ419,full_time,1,19,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,(unknown),lab,3,1.33,43,"weekly=1, alternating=0.5",T012;T120;T121;T122;T123;T124,51006;5710;5901;5902;9201;9204,5
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,(unknown),practical,1,0.5,16,"weekly=1, alternating=0.5",T012;T123;T126,5604;5901;5902,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T130,5608,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,ԱԵ և ԳՀ,practical,3,1.0,32,"weekly=1, alternating=0.5",T130,5602;5608,3
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,ԱԼ և Ծ,lab,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,ԱԼ և Ծ Գործ1,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T003;T107;T110;T127;T128;T129,2127ա;2127բ;2261;2338;2353ա;2434;2436;2438,3
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,5402,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Հայոց պատմ.,practical,3,0.5,16,"weekly=1, alternating=0.5",T111,17413,3
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T125,5608,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Մաթ. Անալիզ,practical,3,1.0,32,"weekly=1, alternating=0.5",T125,5608,4
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Ֆիզիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T120,5608,1
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Ֆիզիկա,practical,3,0.5,16,"weekly=1, alternating=0.5",T120;T121,5606,3
+B1kurs1-1.docx|ՏՏ420,full_time,1,20,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,(unknown),lab,3,1.0,32,"weekly=1, alternating=0.5",T122;T123;T124,,6
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,(unknown),practical,2,0.5,16,"weekly=1, alternating=0.5",T012;T123;T126,5604;5901;5902,2
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T136,5608,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,ԱԵ և ԳՀ,practical,3,1.0,32,"weekly=1, alternating=0.5",T136,5404;5602;5606,5
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,ԱԼ և Ծ,lab,1,1.0,32,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,ԱԼ և Ծ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T109;T138;T139;T140;T141;T142,2353ա;2434;2438;2440;2441ա;2443ա;9706;9708;9717,3
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T075,5402,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Հայոց պատմ.,practical,3,0.5,16,"weekly=1, alternating=0.5",T075,5609,3
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T136,5404,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Մաթ. Անալիզ,practical,3,1.0,32,"weekly=1, alternating=0.5",T136,5601;5609,3
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Ֆիզիկա,lab,4,0.5,16,"weekly=1, alternating=0.5",T121;T137,9204;9404,4
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T137,5608,1
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Ֆիզիկա,practical,3,0.5,16,"weekly=1, alternating=0.5",T121;T137,5606,3
+B1kurs1-1.docx|ՏՏ421,full_time,1,21,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,(unknown),practical,1,1.0,32,"weekly=1, alternating=0.5",T035;T053,9907ա;9907բ,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T135,5402,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,ԱԵ և ԳՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T135,9110,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ինֆորմատիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T098;T166,5121,2
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T166,5202,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ինֆորմատիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T106,2361,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5404,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T133,9107,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Մասնագ. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T167,ՕԼ,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Օտար լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ֆիզիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T078,9204,2
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ422,full_time,1,22,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,(unknown),lab,3,1.0,32,"weekly=1, alternating=0.5",T012;T076;T091;T115;T123,5901;5902;9201;9204;9404,4
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,(unknown),practical,1,0.5,16,"weekly=1, alternating=0.5",T012;T123,5901;5902,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T143,5402,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,ԱԵ և ԳՀ,practical,3,1.0,32,"weekly=1, alternating=0.5",T143;T146,5404;5609,3
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,ԱԼ և Ծ,lab,3,1.0,32,"weekly=1, alternating=0.5",T012,5902,4
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,ԱԼ և Ծ,practical,2,0.5,16,"weekly=1, alternating=0.5",T126,5604,2
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T145,,3
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2342,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Հայոց պատմ.,practical,3,0.5,16,"weekly=1, alternating=0.5",T111,17413,3
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T009,12208,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Մաթ. Անալիզ,practical,3,1.0,32,"weekly=1, alternating=0.5",T134;T144,5202;5601;5602,4
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Ֆիզիկա,lab,3,0.5,16,"weekly=1, alternating=0.5",T115,9201,3
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T091,2342,1
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Ֆիզիկա,practical,3,0.5,16,"weekly=1, alternating=0.5",T091,2359;5602,3
+B1kurs1-1.docx|ՏՏ424,full_time,1,24,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T135,5402,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,ԱԵ և ԳՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T135,9110,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ինֆորմատիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T166,5202,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ինֆորմատիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T106,2361,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5404,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T133,9107,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Մասնագ. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T168,5014,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Օտար լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T068,9907ա,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ֆիզիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T078,9404,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ438,full_time,1,38,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,(unknown),lab,1,1.0,32,"weekly=1, alternating=0.5",T122;T124,51001;51006,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T135,5402,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,ԱԵ և ԳՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T131,5202;5608,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,ԱԼ և Ծ,lab,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,ԱԼ և Ծ,practical,1,0.5,16,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T132,,3
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Հայոց պատմ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T111,17413,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5404,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Մաթ. Անալիզ,practical,2,1.0,32,"weekly=1, alternating=0.5",T134,5606;5609,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Ֆիզիկա,lab,2,0.5,16,"weekly=1, alternating=0.5",T076,9201,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T076,5606,1
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T076,5606,2
+B1kurs1-1.docx|ՏՏ450,full_time,1,50,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,(unknown),lab,3,0.83,27,"weekly=1, alternating=0.5",T113;T114;T115;T147,5212;5218;9201;9204,3
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T133,5602,1
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,ԱԵ և ԳՀ,practical,3,1.0,32,"weekly=1, alternating=0.5",T133,5202;5402;5608,5
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,ԱԼ և Ծ,lab,3,1.0,32,"weekly=1, alternating=0.5",T114,5218,4
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T113,5207,1
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,ԱԼ և Ծ,practical,3,0.5,16,"weekly=1, alternating=0.5",T113,5212,3
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T015;T016;T110;T148;T149;T150,2127ա;2127բ;2261;2338;2353;2353ա;2434;2436;2438;2440,3
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,5402,1
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Հայոց պատմ.,practical,3,0.5,16,"weekly=1, alternating=0.5",T111,17413,3
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5402,1
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Մաթ. Անալիզ,practical,3,1.0,32,"weekly=1, alternating=0.5",T133,5402;5404;5608,5
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Ֆիզիկա,lab,4,0.5,16,"weekly=1, alternating=0.5",T083;T115,9201;9204,4
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T147,5608,1
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Ֆիզիկա,practical,3,0.5,16,"weekly=1, alternating=0.5",T147,5602;5606,3
+B1kurs1-1.docx|ՏՏ455,full_time,1,55,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T113;T114,5212;5218,3
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,5218 Ֆիզիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T028,9201,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T153,5601,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,ԱԵ և ԳՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T153,2346;5606;5609,3
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,ԱԼ և Ծ,lab,2,1.0,32,"weekly=1, alternating=0.5",,,3
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T113,5207,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,ԱԼ և Ծ,practical,2,0.5,16,"weekly=1, alternating=0.5",T113,5212,2
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T014;T029;T108;T151;T152,2127ա;2127բ;2261;2338;2353;9706;9708;9711,3
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T075,5609,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Հայոց պատմ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T075,5202;5609,2
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T123,5601,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Մաթ. Անալիզ,practical,2,1.0,32,"weekly=1, alternating=0.5",T123,5602;5609,2
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Ֆիզիկա,lab,3,0.5,16,"weekly=1, alternating=0.5",T028,9201;9204,3
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T005,5602,1
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T028,5602,2
+B1kurs1-1.docx|ՏՏ458,full_time,1,58,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T135,5402,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,ԱԵ և ԳՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T135,5404,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ինֆորմատիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T166,5202,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ինֆորմատիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T103,9910,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5404,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T133,5402,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Մասնագ. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T169,5205,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Օտար լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T043,9906,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ֆիզիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T078,9404,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ460,full_time,1,60,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T012;T122;T123,51006;5901;5902,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,9110 Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T003,5606,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T154,2359,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,ԱԵ և ԳՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T154,9107,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,ԱԼ և Ծ,lab,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,ԱԼ և Ծ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T126,5604,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,ԱԼ և Ծ,practical,2,0.5,16,"weekly=1, alternating=0.5",T012;T123,5901;5902,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Խորացվ.անգլերեն,practical,1,3.0,96,"weekly=1, alternating=0.5",T152;T155;T156;T157;T158,2127ա;2338;2353;2353ա;2441ա;2443ա;9703;9705;9706;9708;9711;9717,3
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T003,5404,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T003,5606,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Հայրապետյան Ա. 9107 Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T073,9110,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T117,2344,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T073,9110,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Ֆիզիկա,lab,3,0.5,16,"weekly=1, alternating=0.5",T028,9201;9204,3
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T159,12305,1
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Ֆիզիկա,practical,2,0.5,16,"weekly=1, alternating=0.5",T028,9210,2
+B1kurs1-1.docx|ՏՏ461,full_time,1,61,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,ԱԵ և ԳՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T135,5402,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,ԱԵ և ԳՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T135,5404,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ինֆորմատիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ինֆորմատիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T166,5202,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ինֆորմատիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T166,5121,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T103,9910,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Մաթ. Անալիզ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T133,5404,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Մաթ. Անալիզ,practical,1,1.0,32,"weekly=1, alternating=0.5",T133,5402,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Մասն. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T170,,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Օտար լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T068,9907ա,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ֆիզիկա,lab,1,0.5,16,"weekly=1, alternating=0.5",T078,9404,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ֆիզիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ֆիզիկա,practical,1,0.5,16,"weekly=1, alternating=0.5",T078,5602,1
+B1kurs1-1.docx|ՏՏ468,full_time,1,68,Ֆիզկուլտուրա,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,10301 ԳԲՀ սարքեր.,lab,1,0.5,16,"weekly=1, alternating=0.5",T377,9803,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Անալ. Էլեկ. սխեմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T379,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Անալ. Էլեկ. սխեմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T381,9810,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,ԳԲՀ սարքեր,lab,2,0.5,16,"weekly=1, alternating=0.5",T377,9803,2
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,ԳԲՀ սարքեր.,lab,1,0.5,16,"weekly=1, alternating=0.5",T377,9803,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,ԳԲՀ սարքեր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T377,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Էլ. ձևափ սարք.,lab,2,0.5,16,"weekly=1, alternating=0.5",T380,10202,2
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Էլ. ձևափ. սարք.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T380,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Էլ. ձևափ. սարք.,practical,1,0.5,16,"weekly=1, alternating=0.5",T380,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Հեռուս. հիմ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T378,10301;9710,4
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Հեռուս. հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T378,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Ռ/Հ սարք.,lab,2,0.5,16,"weekly=1, alternating=0.5",T375,10303;9704,2
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Ռ/Հ սարք.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T375,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Ռադ. տեխ. շղթ. ազդան.,lab,2,0.5,16,"weekly=1, alternating=0.5",T376,10301,2
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Ռադ. տեխ. շղթ. ազդան.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T379,9812,1
+B3kurs1-1.docx|ՏՏ209,full_time,3,09,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T329,5404,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Անալ. Էլեկ. սխեմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T379,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Անալ. Էլեկ. սխեմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T381,9810,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,ԳԲՀ սարքեր.,lab,1,1.0,32,"weekly=1, alternating=0.5",T377,9810,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,ԳԲՀ սարքեր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T377,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Էլ. ձևափ սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T380,10202,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Էլ. ձևափ. սարք.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T380,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Էլ. ձևափ. սարք.,practical,1,0.5,16,"weekly=1, alternating=0.5",T380,9701,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Հեռուս. հիմ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T378,10301;9710,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Հեռուս. հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T378,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Ռ/Հ սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T375,10303;9704,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Ռ/Հ սարք.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T375,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Ռադ. տեխ. շղթ. ազդան.,lab,1,0.5,16,"weekly=1, alternating=0.5",T376,10301,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Ռադ. տեխ. շղթ. ազդան.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T379,9812,1
+B3kurs1-1.docx|ՏՏ216,full_time,3,16,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T329,5404,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Ազ. թվ. մշ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T353,5802,2
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Ազ. թվ. մշ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T353,5802,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Ազ. թվ. մշ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T353,5802,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Էլեկ. և սխեմատ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T350,10204,2
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Էլեկ. և սխեմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T350,5802,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Թվային էլեկտր.,lab,2,1.0,32,"weekly=1, alternating=0.5",T352,5806,2
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Թվային էլեկտր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T356,5003,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Թվային էլեկտր.,practical,1,0.5,16,"weekly=1, alternating=0.5",T355,5205,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,ԻՍ տեխնոլոգ,lab,2,0.5,16,"weekly=1, alternating=0.5",T354,5012,2
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,ԻՍ տեխնոլոգ,practical,1,0.5,16,"weekly=1, alternating=0.5",T354,5012,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,ԻՍ տեխնոլոգ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T354,5012,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Տեղ. առաջ. կերպ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T310,5808,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Տեղ. առաջ. կերպ,practical,1,0.5,16,"weekly=1, alternating=0.5",T310,5808,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Օպտոէլեկ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T351,10201;10204,2
+B3kurs1-1.docx|ՏՏ218,full_time,3,18,Օպտոէլեկ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T351,5014,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,WEB ծրագր.,lab,5,1.0,32,"weekly=1, alternating=0.5",T315,5218;5301,6
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,WEB ծրագր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T315,5207,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ԾՀՊ,lab,5,1.0,32,"weekly=1, alternating=0.5",T106,5214;5303;5306;5308,6
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ԾՀՊ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T090,5207,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ԾՏ,lab,5,1.0,32,"weekly=1, alternating=0.5",T316,5207ա;5214;5216;5306,7
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ԾՏ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T312,5207,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ԾՏ,practical,3,0.5,16,"weekly=1, alternating=0.5",T312,5209,3
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,Ծր. ապ. նախ.,lab,5,0.5,16,"weekly=1, alternating=0.5",T314,5308,5
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,Ծր. ապ. նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T317,5207,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ՀՀԾԱ և Ճ,lab,5,0.5,16,"weekly=1, alternating=0.5",T318,51110,5
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ՀՀԾԱ և Ճ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T318,51109,1
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,ՀՀԾԱ և Ճ,practical,3,0.5,16,"weekly=1, alternating=0.5",T313;T318,51110;5209,3
+B3kurs1-1.docx|ՏՏ219,full_time,3,19,Քաղաքագիտություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,2342,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,51102 ԹՀՆ,practical,1,0.5,16,"weekly=1, alternating=0.5",T227,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,511048 ԹՀՆ,lab,1,1.0,32,"weekly=1, alternating=0.5",T320,10302,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ԹՀՆ,lab,2,1.0,32,"weekly=1, alternating=0.5",T227;T320,10301;10302,2
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ԹՀՆ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T320,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ԹՀՆ,practical,1,0.5,16,"weekly=1, alternating=0.5",T227,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ Ճարտ.,lab,3,1.0,32,"weekly=1, alternating=0.5",T227;T320,51104,3
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ Ճարտ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T320,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ Ճարտ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T227,51110,2
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ արատ.,lab,3,1.0,32,"weekly=1, alternating=0.5",T319,51101;51102,3
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ արատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T324,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՀ արատ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T324,51102,2
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՑՀ,lab,3,1.0,32,"weekly=1, alternating=0.5",T321;T323,51102;51204բ,3
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,ՀՑՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T321,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,Համ. ինտ. սխեմա,lab,3,1.0,32,"weekly=1, alternating=0.5",T322,51108,3
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,Համ. ինտ. սխեմա,lecture,1,0.5,16,"weekly=1, alternating=0.5",T322,51109,1
+B3kurs1-1.docx|ՏՏ220,full_time,3,20,Քաղաքագիտություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,2342,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ԱԲՄՈՒ,lab,4,1.0,32,"weekly=1, alternating=0.5",T326,5502;5903,4
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ԱԲՄՈՒ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T326,5903,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,Գումրոյան Ն: 5504 ՀՎԳՀ,lab,3,1.0,32,"weekly=1, alternating=0.5",T293,5910,3
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,Գումրոյան Ն: 5508 ՀՎԳՀ,lab,1,1.0,32,"weekly=1, alternating=0.5",T293,5910,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄ,lab,4,1.0,32,"weekly=1, alternating=0.5",,,4
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T326,5903,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄ,practical,2,0.5,16,"weekly=1, alternating=0.5",T326,5502,2
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄԿՏ,lab,4,0.5,16,"weekly=1, alternating=0.5",T328,5504,4
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄԿՏ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T325,5903,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՄԿՏ,practical,2,0.5,16,"weekly=1, alternating=0.5",T325,5501,2
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՎԳՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T293,5903,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՀՎԳՀ,practical,2,0.5,16,"weekly=1, alternating=0.5",T293,5910,2
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՎԿՄ,lab,4,1.0,32,"weekly=1, alternating=0.5",T327,5908,4
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՎԿՄ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T327,5908,1
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,ՎԿՄ,practical,2,0.5,16,"weekly=1, alternating=0.5",T327,5908,2
+B3kurs1-1.docx|ՏՏ221,full_time,3,21,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T329,5404,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Matlab կիր. ԿՀ նախ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T361,10304,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Matlab կիր. ԿՀ նախ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T361,10304,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Matlab կիր. ԿՀ նախ.,practical,2,1.0,32,"weekly=1, alternating=0.5",T361,10304,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Արդ. կարգ. լոկ. համ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T359,10305,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Արդ. կարգ. լոկ. համ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T359,51202,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Արդ. կարգ. լոկ. համ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T359,51202,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Էլեկ. և սխեմատ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T362,10204,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Էլեկ. և սխեմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T362,5801,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Իմպ. և թվ. ԿՀ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T358,10301,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Իմպ. և թվ. ԿՀ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T357,51202,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Իմպ. և թվ. ԿՀ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T357,51202,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Ոչ գծ. ԿՀ,lab,2,0.5,16,"weekly=1, alternating=0.5",T360,10305,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Ոչ գծ. ԿՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T360,51208,1
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Ոչ գծ. ԿՀ,practical,2,1.0,32,"weekly=1, alternating=0.5",T360,51208,2
+B3kurs1-1.docx|ՏՏ222,full_time,3,22,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,2342,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,(unknown),lab,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,WEB Տեխն,lab,3,1.0,32,"weekly=1, alternating=0.5",T343,51010,3
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,WEB Տեխն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T343,51010,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,WEB Տեխն,practical,2,1.0,32,"weekly=1, alternating=0.5",T343,51010,2
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,Բարսեղյան Ն: 5109 ՏԲԿՀ,lab,1,1.0,32,"weekly=1, alternating=0.5",T345,5107,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՃՄ,lab,4,1.25,40,"weekly=1, alternating=0.5",T346;T347;T348,51002;51008;5103,5
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏԲԿՀ,lab,3,1.0,32,"weekly=1, alternating=0.5",T342;T349,5103;5105,3
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏԲԿՀ,practical,1,1.0,32,"weekly=1, alternating=0.5",T345,5107,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏՏ Ռեսուրս պլան,lab,2,1.0,32,"weekly=1, alternating=0.5",T341;T344,51008;5103,2
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏՏ Ռեսուրս պլան,lecture,1,1.0,32,"weekly=1, alternating=0.5",T341,51008,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏՏսոց էթ հարց,lab,1,1.0,32,"weekly=1, alternating=0.5",T343,51010,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,ՏՏսոց էթ հարց,lecture,1,1.0,32,"weekly=1, alternating=0.5",T343,51010,1
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,Ցանց տեխն կառ,lab,4,1.25,40,"weekly=1, alternating=0.5",T341,51008,5
+B3kurs1-1.docx|ՏՏ224,full_time,3,24,Քաղագագիտություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,2342,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Ախտ. բուժ. ակուս. սարք.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T351,5016,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Ախտ. բուժ. ակուս. սարք.,practical,1,0.5,16,"weekly=1, alternating=0.5",T351,5014,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Էլեկ. և սխեմատ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T362,10204,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Էլեկ. և սխեմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T362,5801,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ ազդ. կերպ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T365,10205,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ ազդ. կերպ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T365,5409,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ ազդ. կերպ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T365,5409,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ սարք. սարքավ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T366,10205;5014,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ սարք. սարքավ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T366,5014,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ տեխ. տար.հան,lecture,1,0.5,16,"weekly=1, alternating=0.5",T364,5014,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ տեխ. տար.հան,practical,1,1.0,32,"weekly=1, alternating=0.5",T364,5016,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Կ/բ տեխ. տար.հան.,lab,1,0.5,16,"weekly=1, alternating=0.5",T364,5014,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Նեյրոինֆորմ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T363,10201,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Նեյրոինֆորմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Նեյրոինֆորմ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T363,5801,1
+B3kurs1-1.docx|ՏՏ238,full_time,3,38,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,5404,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ԾՏ,lab,4,1.0,32,"weekly=1, alternating=0.5",T338,5308,4
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ԾՏ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T338,5211,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՀՀԾԱ և Ճ,lab,4,0.5,16,"weekly=1, alternating=0.5",T339,5216,4
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՀՀԾԱ և Ճ,practical,2,0.5,16,"weekly=1, alternating=0.5",T339,5212,2
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՀՀԾԱ և Ճ ԿԱ 1 Զամհարյան Թ. 5209 ՏԳԹՊ,lab,1,1.0,32,"weekly=1, alternating=0.5",T337,5306,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,"Հակավիր, պաշտպ,",lab,4,1.0,32,"weekly=1, alternating=0.5",T336,5301;5308,4
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,"Հակավիր, պաշտպ,",lecture,1,1.0,32,"weekly=1, alternating=0.5",T255,5211,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՏԳԹՊ,lab,3,1.0,32,"weekly=1, alternating=0.5",T337,5306,3
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՏԳԹՊ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T335,5211,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,ՏԳԹՊ,practical,2,0.5,16,"weekly=1, alternating=0.5",T107,5209,2
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,Ցանց կիր. ԾԱ,lab,4,0.5,16,"weekly=1, alternating=0.5",T340,5303,4
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,Ցանց կիր. ԾԱ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T340,5211,1
+B3kurs1-1.docx|ՏՏ255,full_time,3,55,Քաղաքագիտություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T329,2342,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Էլեկ. և սխեմատ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T362,10204,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Էլեկ. և սխեմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T362,,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Կ/հ նանո. հետ. հսկ. մեթ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T372,5016,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Կ/հ նանո. հետ. հսկ. մեթ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T372,5016,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Կ/հ սարք. ֆիզ. կոնս. տեխ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T373,5022,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Կ/հ սարք. ֆիզ. կոնս. տեխ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T373,,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Միկ.նան. ճարտ. հիմ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T372,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Միկ.նան. ճարտ. հիմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T372,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Միկ.նան. ճարտ. հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T372,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Նանո. էլ. տար. սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T374,10203,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Նանո. էլ. տար. սարք.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T374,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Նանո. էլ. տար. սարք.,practical,1,1.0,32,"weekly=1, alternating=0.5",T374,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Պ/մ սարք. ֆիզ. հիմ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T350,10204,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Պ/մ սարք. ֆիզ. հիմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T350,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Պ/մ սարք. ֆիզ. հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T350,5014,1
+B3kurs1-1.docx|ՏՏ260,full_time,3,60,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T329,5404,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,. Ալգ. տես. դաս. ալգ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T331,5906,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,. Նեյրոն. ցանց.,practical,1,0.5,16,"weekly=1, alternating=0.5",T333,5501,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ալգ. տես. դաս. ալգ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T331,5501,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ալգ. տես. դաս. ալգ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T331,5906,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ալգ. տես. դաս. ալգ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T331,5906,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ամպ. հաշվ. Համակ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T334,5502,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ամպ. հաշվ. համակ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T334,5910,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,ԲՏՀ,lab,2,1.0,32,"weekly=1, alternating=0.5",T330,5504,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,ԲՏՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T330,5909,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,ԲՏՀ,practical,2,0.5,16,"weekly=1, alternating=0.5",T330,5909,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Նեյրոն. ցանց.,lab,2,1.0,32,"weekly=1, alternating=0.5",T333,5504,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Նեյրոն. ցանց.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T333,5903,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Նեյրոն. ցանց.,practical,1,0.5,16,"weekly=1, alternating=0.5",T333,5501,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ուսուց. առանց. ուսուչ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T332,5908,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ուսուց. առանց. ուսուչ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T332,5910,1
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Ուսուց. առանց. ուսուչ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T332,5908,2
+B3kurs1-1.docx|ՏՏ261,full_time,3,61,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,5404,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Անալոգ. էլեկտ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T370,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Անալոգ. էլեկտ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T370,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Երկ. էլ. սն. աղբ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T163,5808,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Երկ. էլ. սն. աղբ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T163,5808,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Էլ. համ. արատորոշում,lab,1,0.5,16,"weekly=1, alternating=0.5",T367,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Էլ. համ. արատորոշում,lecture,1,1.0,32,"weekly=1, alternating=0.5",T367,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Էլ. շղթ. մոդ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T368,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Էլ. շղթ. մոդ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T368,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Էլ. շղթ. մոդ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T368,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Թվային էլեկտ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T371,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Թվային էլեկտ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T371,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Կառ. համ. ժամ. մեթ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T369,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Կառ. համ. ժամ. մեթ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T369,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Կառ. համ. ժամ. մեթ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T369,ԻՔ,1
+B3kurs1-1.docx|ՏՏ268,full_time,3,68,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,5404,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Անալ. Էլեկտրոնիկա 4,lab,1,1.0,32,"weekly=1, alternating=0.5",T370,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Անալ. Էլեկտրոնիկա 4,lecture,1,1.0,32,"weekly=1, alternating=0.5",T370,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,ԳԲՀ սարքեր.,lab,1,1.0,32,"weekly=1, alternating=0.5",T377,9803,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,ԳԲՀ սարքեր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T377,9812,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Էլ. ձևափ. սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T380,10202,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Էլ. ձևափ. սարք.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T380,9812,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Էլ. ձևափ. սարք.,practical,1,0.5,16,"weekly=1, alternating=0.5",T380,9701,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Թվային էլեկտրոնիկա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T371,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Թվային էլեկտրոնիկա 2,lab,1,0.5,16,"weekly=1, alternating=0.5",T371,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Ռ/Հ սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T375,10303;9704,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Ռ/Հ սարք.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T375,9812,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Ռադ. տեխ. շղթ. ազդան.,lab,1,0.5,16,"weekly=1, alternating=0.5",T383,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Ռադ. տեխ. շղթ. ազդան.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T382,ԻՔ,1
+B3kurs1-1.docx|ՏՏ269,full_time,3,69,Քաղաքագիտութ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,5404,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,10305 Անտենաներ,lab,1,0.5,16,"weekly=1, alternating=0.5",T431,,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,17413 Օպտիկ.տարրեր և համ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T432,9810,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Ազդանշ. Մշակում,lab,2,1.0,32,"weekly=1, alternating=0.5",T399,9701;9706,2
+B3kurs1.docx|ՏՏ309,full_time,3,09,Ազդանշ. Մշակում,lecture,1,1.0,32,"weekly=1, alternating=0.5",T399,9802,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Անտենաներ,lab,1,0.5,16,"weekly=1, alternating=0.5",T431,,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Անտենաներ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T431,9802,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Կառավ. համ. հիմ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T360,10305,2
+B3kurs1.docx|ՏՏ309,full_time,3,09,Կառավ. համ. հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T360,51208,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Կոնֆլիկտաբան.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2444,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Կոնֆլիկտաբան.,practical,2,0.5,16,"weekly=1, alternating=0.5",T111,17413,2
+B3kurs1.docx|ՏՏ309,full_time,3,09,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Օպտիկ.տարրեր և համ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T432,9810,2
+B3kurs1.docx|ՏՏ309,full_time,3,09,Օպտիկ.տարրեր և համ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T432,9810,1
+B3kurs1.docx|ՏՏ309,full_time,3,09,Օպտիկ.տարրեր և համ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T432,9810,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Էլեկտրամ դաշտ.և ռադիոալ. տար.,lab,1,0.5,16,"weekly=1, alternating=0.5",T059,10303,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Էլեկտրամ դաշտ.և ռադիոալ. տար.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T431,9802,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Կառավ. համ. հիմ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T360,10305,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Կառավ. համ. հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T360,51208,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Կոնֆլիկտաբան.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2444,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Կոնֆլիկտաբան.,practical,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T430,9710,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ուժեղարար. և իմպ. Սարք.,lab,1,0.5,16,"weekly=1, alternating=0.5",T381,9803,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ուժեղարար. և իմպ. Սարք.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T381,9803,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ուժեղարար. և իմպ. Սարք.,practical,1,0.5,16,"weekly=1, alternating=0.5",T381,9803,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ռադիոտեխն. Շղթան. և ազդանշ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T430,9701,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ռադիոտեխն. Շղթան. և ազդանշ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T430,9701,1
+B3kurs1.docx|ՏՏ316,full_time,3,16,Ռադիոտեխն. Շղթան. և ազդանշ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T430,9701,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Էլեկտր. և սխեմատ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T422,10204,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Էլեկտր. և սխեմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T422,5802,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Էլեկտր. և սխեմատ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T422,5802,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Ինտեգ. Սխեմ. Տեխնոլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T421,5012,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Ինտեգ. Սխեմ. Տեխնոլ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T421,5012,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կիսահաղ. Ֆիզիկա և տեխնոլ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T373,5010,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կիսահաղ. Ֆիզիկա և տեխնոլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T373,5010,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կիսահաղ. Ֆիզիկա և տեխնոլ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T373,5010,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կոնֆլիկտաբ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2435,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կոնֆլիկտաբ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T111,17413,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T423;T424;T425,5809,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Օպտոէլ. և օպտոէլ. Սարքեր,lab,2,0.5,16,"weekly=1, alternating=0.5",T021,10203,2
+B3kurs1.docx|ՏՏ318,full_time,3,18,Օպտոէլ. և օպտոէլ. Սարքեր,lecture,1,1.0,32,"weekly=1, alternating=0.5",T021,5012,1
+B3kurs1.docx|ՏՏ318,full_time,3,18,Օպտոէլ. և օպտոէլ. Սարքեր,practical,2,0.5,16,"weekly=1, alternating=0.5",T021,5012,2
+B3kurs1.docx|ՏՏ319,full_time,3,19,5220 Քոմփ. Ցանց. ծրագր.,lab,1,1.0,32,"weekly=1, alternating=0.5",T313,5301,1
+B3kurs1.docx|ՏՏ319,full_time,3,19,Համ. ծրագրավ.,lab,5,1.0,32,"weekly=1, alternating=0.5",T316,5220,5
+B3kurs1.docx|ՏՏ319,full_time,3,19,Համ. ծրագրավ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T411,5207,1
+B3kurs1.docx|ՏՏ319,full_time,3,19,Տվյալ. Հենք. Նախ.,lab,5,1.0,32,"weekly=1, alternating=0.5",T107,5303,5
+B3kurs1.docx|ՏՏ319,full_time,3,19,Տվյալ. Հենք. Նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T107,5207,1
+B3kurs1.docx|ՏՏ319,full_time,3,19,Փիլիսոփ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,1403,1
+B3kurs1.docx|ՏՏ319,full_time,3,19,Քոմփ. Ցանց. ծրագր.,lab,4,1.0,32,"weekly=1, alternating=0.5",T313,5301,4
+B3kurs1.docx|ՏՏ319,full_time,3,19,Քոմփ. Ցանց. ծրագր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T401,5207,1
+B3kurs1.docx|ՏՏ319,full_time,3,19,Օպ. Համ.հատ. բաժ.,lab,5,1.0,32,"weekly=1, alternating=0.5",T410,5214,5
+B3kurs1.docx|ՏՏ319,full_time,3,19,Օպ. Համ.հատ. բաժ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T139,5211,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,(unknown),lab,4,1.0,32,"weekly=1, alternating=0.5",T231;T320,51101;51102,4
+B3kurs1.docx|ՏՏ320,full_time,3,20,(unknown),lecture,1,1.0,32,"weekly=1, alternating=0.5",T320,51110,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համ. թվ. բազ. Սխ. Նախ.,lab,3,1.0,32,"weekly=1, alternating=0.5",T216;T231,51101;51104,3
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համ. թվ. բազ. Սխ. Նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T231,51109,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համ. համակարգ. Մոդել.,lab,4,1.0,32,"weekly=1, alternating=0.5",T323,51101;51102,4
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համ. համակարգ. Մոդել.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T323,51109,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համ. սարք. և սարքավ. Նախ.,practical,1,5.0,160,"weekly=1, alternating=0.5",,,5
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համակ. համ. տեխն. և ճարտ.,lab,4,1.0,32,"weekly=1, alternating=0.5",T216;T227;T318,51101;51102;51108,4
+B3kurs1.docx|ՏՏ320,full_time,3,20,Համակ. համ. տեխն. և ճարտ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T318,51109,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,Փիլիսոփ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,5608,1
+B3kurs1.docx|ՏՏ320,full_time,3,20,Քամալյան Ա.. 51101 Համ. թվ. բազ. Սխ. Նախ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T216,51102,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,5502 Բաշխվ. Տեղ. Համ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T074,5504,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Բաշխվ. Տեղ. Համ.,lab,3,0.83,27,"weekly=1, alternating=0.5",T074,5502;5504,3
+B3kurs1.docx|ՏՏ321,full_time,3,21,Բաշխվ. Տեղ. Համ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T074,5910,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Գործող Հետազ,lab,1,0.5,16,"weekly=1, alternating=0.5",T293,5908,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Գործող Հետազ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T293,5908,2
+B3kurs1.docx|ՏՏ321,full_time,3,21,Գործող Հետազ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T293,5903,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Գործող Հետազ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T293,5908,2
+B3kurs1.docx|ՏՏ321,full_time,3,21,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T074;T293;T326;T413,,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Համակարգ. Մոդել.,lab,3,0.5,16,"weekly=1, alternating=0.5",T413,5502,3
+B3kurs1.docx|ՏՏ321,full_time,3,21,Համակարգ. Մոդել.,lecture,1,2.0,64,"weekly=1, alternating=0.5",T326,5903;5910,3
+B3kurs1.docx|ՏՏ321,full_time,3,21,Հաշվ. Մեթ. Ճարտ. Խնդ.,lab,3,0.5,16,"weekly=1, alternating=0.5",T414,5502;5504,3
+B3kurs1.docx|ՏՏ321,full_time,3,21,Հաշվ. Մեթ. Ճարտ. Խնդ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T325,5903,1
+B3kurs1.docx|ՏՏ321,full_time,3,21,Հաշվ. Մեթ. Ճարտ. Խնդ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T325,5502,2
+B3kurs1.docx|ՏՏ321,full_time,3,21,Փիլիսոփայություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,5609,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Դիսկր. Կառ. Համ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T357,51202,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Դիսկր. Կառ. Համ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T357,51202,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համ. Վիճ. Տար. Մեթ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T359,51202,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համ. Վիճ. Տար. Մեթ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T359,51202,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համ. տարր.  և համաս.,lab,2,1.0,32,"weekly=1, alternating=0.5",T167,ՕԼ,2
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համ. տարր.  և համաս.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T360,51208,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համակ. համ. վերլ. MATLAB փաթ. Միջ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T361,10304,2
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կառ. Համակ. համ. վերլ. MATLAB փաթ. Միջ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T361,10304,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կոնֆլիկտաբ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2435,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կոնֆլիկտաբ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1.docx|ՏՏ322,full_time,3,22,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T359,51202,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,U1/UX Դիզայն,lab,4,1.0,32,"weekly=1, alternating=0.5",T417;T419,5106;5108,4
+B3kurs1.docx|ՏՏ324,full_time,3,24,U1/UX Դիզայն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T417,5107,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,WEB տեխնոլ.,lab,4,1.0,32,"weekly=1, alternating=0.5",T418,51010,4
+B3kurs1.docx|ՏՏ324,full_time,3,24,WEB տեխնոլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T418,51010,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T089;T417;T418,5013;51010;5106,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,Տեղեկատվ. Կառ.,lab,4,1.0,32,"weekly=1, alternating=0.5",T089;T124;T420,5013;5105;5107,4
+B3kurs1.docx|ՏՏ324,full_time,3,24,Տեղեկատվ. Կառ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T124,5107,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,Տվյալն. Կառ. և ալգ.,lab,4,1.0,32,"weekly=1, alternating=0.5",T012;T089;T123,5013;5901;5902,4
+B3kurs1.docx|ՏՏ324,full_time,3,24,Տվյալն. Կառ. և ալգ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T089,5107,1
+B3kurs1.docx|ՏՏ324,full_time,3,24,Փիլիսոփայություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,2355,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,(unknown),lecture,1,1.0,32,"weekly=1, alternating=0.5",T426,5016,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,(unknown),practical,1,1.0,32,"weekly=1, alternating=0.5",T426,5014,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կենսապոտ. Արտ. մեթ. և կենսաէլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T373,5014,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կենսապոտ. Արտ. մեթ. և կենսաէլ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T373,5014,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կիսահ. Էլեկտրոն. Հիմ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T168,5806,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կիսահ. Էլեկտրոն. Հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T168,5806,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կիսահ. Էլեկտրոն. Հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T168,5806,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կոնֆլիկտաբ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2435,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կոնֆլիկտաբ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T089;T427;T428,5809,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Համակ.տեխնոլ.կենսաբժշկ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T253,5409,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,Համակ.տեխնոլ.կենսաբժշկ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T253,5409,1
+B3kurs1.docx|ՏՏ338,full_time,3,38,"Մարդու ֆիզ.,կենսաքիմ.և կենսաֆիզ.",practical,1,2.0,64,"weekly=1, alternating=0.5",,,2
+B3kurs1.docx|ՏՏ350,full_time,3,50,Զուգահ.համ. ճարտ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T318,51104,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Զուգահ.համ. ճարտ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T318,51110,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T216;T322;T323,,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Փիլիսոփ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,5608,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Համ. և ցանց. պաշտպ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T412,51204ա,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Համ. և ցանց. պաշտպ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T412,51204ա,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Ցանց. ապար. Ինտերֆ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T319,51110,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Ցանց. ապար. Ինտերֆ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T319,51110,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Ցանց. նախ. Տեխն.,lab,1,1.0,32,"weekly=1, alternating=0.5",T321,10504,1
+B3kurs1.docx|ՏՏ350,full_time,3,50,Քոմփ. Ցանց. նախ. Տեխն.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T321,51109,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,5308 Տվյալների հենք. Անվտանգ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T416,5310,2
+B3kurs1.docx|ՏՏ355,full_time,3,55,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Վնաս. Ծրագր. Կանխ.,lab,4,1.0,32,"weekly=1, alternating=0.5",T314,5308,4
+B3kurs1.docx|ՏՏ355,full_time,3,55,Վնաս. Ծրագր. Կանխ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T393,5211,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Տեղ. Գաղտն. Պաշտպ.,lab,4,0.5,16,"weekly=1, alternating=0.5",T337,5306,4
+B3kurs1.docx|ՏՏ355,full_time,3,55,Տեղ. Գաղտն. Պաշտպ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T107,5211,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Տեղ. Գաղտն. Պաշտպ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T107,5209,2
+B3kurs1.docx|ՏՏ355,full_time,3,55,Տվյալների հենք. Անվտանգ.,lab,2,1.0,32,"weekly=1, alternating=0.5",T416,5310,2
+B3kurs1.docx|ՏՏ355,full_time,3,55,Տվյալների հենք. Անվտանգ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T416,5211,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Փիլիսոփայություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,2355,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Օպեր. համ. անվտանգ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T139,5211,1
+B3kurs1.docx|ՏՏ355,full_time,3,55,Օպեր. համ. անվտանգ.,lab,3,1.0,32,"weekly=1, alternating=0.5",T139,5110,3
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կիսահ. Սարք. Ֆիզ. հիմ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T422,5808,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կիսահ. Սարք. Ֆիզ. հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T422,5808,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կիսահ. Սարք. Ֆիզ. հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T422,5808,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,"Կիսահ. Ֆիզ.միկրոէլ.,ամորֆ և օրգ կիսահ.",lab,1,0.5,16,"weekly=1, alternating=0.5",T422,5802,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,"Կիսահ. Ֆիզ.միկրոէլ.,ամորֆ և օրգ կիսահ.",lecture,1,1.0,32,"weekly=1, alternating=0.5",T422,5802,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,"Կիսահ. Ֆիզ.միկրոէլ.,ամորֆ և օրգ կիսահ.",practical,1,0.5,16,"weekly=1, alternating=0.5",T422,5802,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կիսահաղ. Սարք. և ինտեգ.սխ. տեխն.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T373,5014,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կիսահաղ. Սարք. և ինտեգ.սխ. տեխն.,practical,1,0.5,16,"weekly=1, alternating=0.5",T429,5014,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կոնֆլիկտաբ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T111,2435,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կոնֆլիկտաբ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T089;T427;T428,5808,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Օպտոէլ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T169,5016,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Օպտոէլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T169,5016,1
+B3kurs1.docx|ՏՏ360,full_time,3,60,Օպտոէլ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T169,5016,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,5504 Ալգորիթմների տես .,practical,1,0.5,16,"weekly=1, alternating=0.5",T415,5906,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,5504 Ալգորիթմների տես.,practical,1,0.5,16,"weekly=1, alternating=0.5",T415,5906,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Ալգորիթմների տես.,lab,3,0.5,16,"weekly=1, alternating=0.5",T176,5906,3
+B3kurs1.docx|ՏՏ361,full_time,3,61,Ալգորիթմների տես.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T415,5903,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Արհեստ. Բան. Մեթ. և մոդ.,lab,3,0.5,16,"weekly=1, alternating=0.5",T326,5908,3
+B3kurs1.docx|ՏՏ361,full_time,3,61,Արհեստ. Բան. Մեթ. և մոդ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T326,5903,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Արհեստ. Բան. Մեթ. և մոդ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T326,5903,2
+B3kurs1.docx|ՏՏ361,full_time,3,61,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",T326;T333,,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Մեք. Ուս. Հիմ.,lab,3,0.5,16,"weekly=1, alternating=0.5",T326,5501;5504,3
+B3kurs1.docx|ՏՏ361,full_time,3,61,Մեք. Ուս. Հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T326,5501,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Մեք. Ուս. Հիմ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T326,5903,2
+B3kurs1.docx|ՏՏ361,full_time,3,61,Նեյրոնային ցանցեր,lab,3,0.5,16,"weekly=1, alternating=0.5",T333,5501;5504,3
+B3kurs1.docx|ՏՏ361,full_time,3,61,Նեյրոնային ցանցեր,lecture,1,1.0,32,"weekly=1, alternating=0.5",T333,5903,1
+B3kurs1.docx|ՏՏ361,full_time,3,61,Նեյրոնային ցանցեր,practical,2,0.5,16,"weekly=1, alternating=0.5",T333,,2
+B3kurs1.docx|ՏՏ361,full_time,3,61,Փիլիսոփայություն,lecture,1,1.0,32,"weekly=1, alternating=0.5",T175,2344,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Ազդանշ. և համակ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T382,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Ազդանշ. և համակ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T383,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Անալոգ. Թվային Էլեկտր.,lab,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Անալոգ. Թվային Էլեկտր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Կոնֆլիկտաբ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,2435,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Կոնֆլիկտաբ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T111,17413,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Կուրսային աշխատանք,coursework,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Ներկ. Համակ. Նախ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T421,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Ներկ. Համակ. Նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T421,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Չափմ. Միջ. և կիր. Չափ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T170,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Չափմ. Միջ. և կիր. Չափ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T170,ԻՔ,1
+B3kurs1.docx|ՏՏ368,full_time,3,68,Չափմ. Միջ. և կիր. Չափ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T170,ԻՔ,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,"Արբան, և ռադիոէլ, կապի համ,",lab,1,0.5,16,"weekly=1, alternating=0.5",T511,9802,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,"Արբան, և ռադիոէլ, կապի համ,",lecture,1,1.0,32,"weekly=1, alternating=0.5",T511,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Կապի միջ. ավտ. նախ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T509,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Կապի միջ. ավտ. նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T509,9815,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Հեռ. Համ. և ցանցեր,lab,1,0.5,16,"weekly=1, alternating=0.5",T399,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Հեռ. Համ. և ցանցեր,lecture,1,0.5,16,"weekly=1, alternating=0.5",T399,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Հեռ. Համ. և ցանցեր,practical,1,0.5,16,"weekly=1, alternating=0.5",T399,9802,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Հեռ. Համ.և ցանց. կառ. Հիմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T399,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Հեռ. Համ.և ցանց. կառ. Հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T399,9802,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Ճյուղի տնտես․,lecture,1,1.0,32,"weekly=1, alternating=0.5",T502,9712,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Ճյուղի տնտես․,practical,1,0.5,16,"weekly=1, alternating=0.5",T502,9309,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Միկ. նան.ռադ. էլ. սար.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T432,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,Միկ. նան.ռադ. էլ. սար.,practical,1,0.5,16,"weekly=1, alternating=0.5",T432,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,"Ռադիոլոկ, և ռադիոնով, համ,",lecture,1,0.5,16,"weekly=1, alternating=0.5",T512,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,"Ռադիոլոկ, և ռադիոնով, համ,",practical,1,0.5,16,"weekly=1, alternating=0.5",T512,9810,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T247,2342,1
+B4kurs1.docx|ՏՏ109,full_time,4,09,ՔՊ և ԱԻՀ,practical,1,0.5,16,"weekly=1, alternating=0.5",T247,1409,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ազ. թվ. մշ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T507,10301,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ազ. թվ. մշ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T507,9701,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ազ. թվ. մշ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T507,9701,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Կապի միջ. ավտ. նախ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T509,9810,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Կապի միջ. ավտ. նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T509,9815,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ճյուղի տնտես․,lecture,1,1.0,32,"weekly=1, alternating=0.5",T502,9712,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ճյուղի տնտես․,practical,1,0.5,16,"weekly=1, alternating=0.5",T502,9309,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Միկ. նան.ռադ. էլ. սար.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T432,9810,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Միկ. նան.ռադ. էլ. սար.,practical,1,0.5,16,"weekly=1, alternating=0.5",T399,9810,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ռադ.տեխ. համ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T508,9705,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ռադ.տեխ. համ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T510,9701,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ռադ.տեխ. համ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T508,10301;10303;9710,2
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ռադիոավտոմատ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T507,10305;9705,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,Ռադիոավտոմատ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T507,9705,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T247,1414,1
+B4kurs1.docx|ՏՏ116,full_time,4,16,ՔՊ և ԱԻՀ,practical,1,0.5,16,"weekly=1, alternating=0.5",T247,1414,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,Էլ․ համ․ ավտ․ նախ․,lab,1,0.5,16,"weekly=1, alternating=0.5",T501,5806,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,"Թվային սխ, թեսթ,",lab,1,0.5,16,"weekly=1, alternating=0.5",T345,10202,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,"Թվային սխ, թեսթ,",lecture,1,1.0,32,"weekly=1, alternating=0.5",T345,10202,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,"Թվային սխ, թեսթ,",practical,1,1.0,32,"weekly=1, alternating=0.5",T345,10202,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,Ճյուղի տնտես․,lecture,1,1.0,32,"weekly=1, alternating=0.5",T502,9712,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,Ճյուղի տնտես․,practical,1,0.5,16,"weekly=1, alternating=0.5",T502,9305,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,Միկրոկ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T354,5012,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T247,2342,1
+B4kurs1.docx|ՏՏ118,full_time,4,18,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T247,1409,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,ԾԹ,lab,5,1.0,32,"weekly=1, alternating=0.5",T477,5306;5310,5
+B4kurs1.docx|ՏՏ119,full_time,4,19,ԾԹ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T477,5211,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,"ԾՏ ԿԱ 2 Գանովիչ Տ, 5212 ՕԿԾ",lab,1,0.5,16,"weekly=1, alternating=0.5",T483,5303,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,Ճյուղ տնտես,practical,3,0.5,16,"weekly=1, alternating=0.5",T484,9302;9307,3
+B4kurs1.docx|ՏՏ119,full_time,4,19,Ճյուղի տնտես.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T484,5609,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T206,2129,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՔՊ և ԱԻՀ,practical,3,0.5,16,"weekly=1, alternating=0.5",T206,1409;2129,3
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՔՑԾ,lab,5,1.0,32,"weekly=1, alternating=0.5",T478,5214;5216,7
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՔՑԾ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T482,5211,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՕԿԾ,lab,4,0.5,16,"weekly=1, alternating=0.5",T483,5306,4
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՕԿԾ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T483,5307,1
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՕՀ,lab,5,1.0,32,"weekly=1, alternating=0.5",T479;T480,5212;5214,5
+B4kurs1.docx|ՏՏ119,full_time,4,19,ՕՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T481,5211,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,ԲԱ ՀՀ,lab,2,1.0,32,"weekly=1, alternating=0.5",T227,51104,2
+B4kurs1.docx|ՏՏ120,full_time,4,20,ԲԱ ՀՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՀՑՄՕՀ,lab,2,1.0,32,"weekly=1, alternating=0.5",T323;T486,51102;51204բ,3
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՀՑՄՕՀ,lecture,1,2.0,64,"weekly=1, alternating=0.5",T486,51204ա,2
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՀՑՊԱՄ,lab,1,1.0,32,"weekly=1, alternating=0.5",T412,51102,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՀՑՊԱՄ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T412,51204ա,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T084,9712,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,Ճյուղ տնտես,practical,2,0.75,24,"weekly=1, alternating=0.5",T084,9705,2
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՏՊՑՇՀ,lab,2,1.0,32,"weekly=1, alternating=0.5",T485,51101,2
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՏՊՑՇՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T485,51204ա,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T278,2129,1
+B4kurs1.docx|ՏՏ120,full_time,4,20,ՔՊ և ԱԻՀ,practical,2,0.75,24,"weekly=1, alternating=0.5",T278,1414,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,(unknown),lab,1,1.0,32,"weekly=1, alternating=0.5",,,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ավտ. համ. հուս.,lab,2,0.5,16,"weekly=1, alternating=0.5",T488,5909,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ավտ. համ. հուս.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ավտ. համ. հուս.,practical,1,1.0,32,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ինֆ. մշակ. կառ. ավտ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T487,5909,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ինֆ. մշակ. կառ. ավտ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T487,5903,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ինֆ. մշակ. կառ. ավտ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T487,5909,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՀՎՄԿ ԿԿՀ,lab,2,0.5,16,"weekly=1, alternating=0.5",T489,5908,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՀՎՄԿ ԿԿՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T489,5909,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՀՎՄԿ ԿԿՀ,practical,2,0.5,16,"weekly=1, alternating=0.5",T489,5908,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T084,9712,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,Ճյուղ տնտես,practical,2,0.5,16,"weekly=1, alternating=0.5",T084,9717,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՏԲԿՀ,lab,2,1.0,32,"weekly=1, alternating=0.5",T328,5502;5504,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՏԲԿՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T328,5910,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՏՀԳՕ,lab,1,0.5,16,"weekly=1, alternating=0.5",T491,5502,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՏՀԳՕ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T490,5908,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՏՀԳՕ,practical,2,0.5,16,"weekly=1, alternating=0.5",T490,5501,2
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T278,2129,1
+B4kurs1.docx|ՏՏ121-1,full_time,4,21,ՔՊ և ԱԻՀ,practical,2,0.5,16,"weekly=1, alternating=0.5",T278,1409,2
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԱՀՀ,lab,1,0.5,16,"weekly=1, alternating=0.5",T159,5908,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԱՀՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T159,5910,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԱՀՀ,practical,1,0.5,16,"weekly=1, alternating=0.5",T159,5910,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԲԱԿ,lab,1,0.5,16,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԲԱԿ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ԲԱԿ,practical,1,0.5,16,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T084,9712,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,Ճյուղ տնտես,practical,1,0.5,16,"weekly=1, alternating=0.5",T084,9708,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՏԲԿՀ,lab,1,1.0,32,"weekly=1, alternating=0.5",T328,5504,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՏԲԿՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T328,5910,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՏՀԳՕ,lab,1,0.5,16,"weekly=1, alternating=0.5",T491,5906,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՏՀԳՕ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T490,5908,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՏՀԳՕ,practical,1,0.5,16,"weekly=1, alternating=0.5",T490,5501,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T278,2129,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՔՊ և ԱԻՀ,practical,1,0.5,16,"weekly=1, alternating=0.5",T278,1408,1
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՖԱԿՀՆ,lab,1,1.0,32,"weekly=1, alternating=0.5",T488,5906;5909,2
+B4kurs1.docx|ՏՏ121-2,full_time,4,21,ՖԱԿՀՆ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T488,5909,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,ԿՀ նախ․ մոդ ․ Labview,lecture,1,0.5,16,"weekly=1, alternating=0.5",T361,10304,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,ԿՀ նախ․ մոդ ․ Labview,practical,1,0.5,16,"weekly=1, alternating=0.5",T361,10304,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T494,2342,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ճյուղի տնտես․,practical,1,0.5,16,"weekly=1, alternating=0.5",T494,9303,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,ՄՊ ԿՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T369,10304,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ռոբ․ կատ․ մակ․ ԿՀ նա խ․,lecture,1,0.5,16,"weekly=1, alternating=0.5",T369,10402,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ռոբ․ կատ․ մակ․ ԿՀ նա խ․,practical,1,1.0,32,"weekly=1, alternating=0.5",T369,10402,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ռոբ․ ման․ կին․ դին․ կառ․ մեթ․,lecture,1,1.0,32,"weekly=1, alternating=0.5",T503,ՕԼ,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,Ռոբ․ ման․ կին․ դին․ կառ․ մեթ․,practical,1,1.0,32,"weekly=1, alternating=0.5",T503,10302,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ122,full_time,4,22,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T296,1408,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,5105 Մուլտի մեդիա,lab,1,0.5,16,"weekly=1, alternating=0.5",T500,51009,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,5107 Մուլտի մեդիա,lab,1,0.5,16,"weekly=1, alternating=0.5",T499,5106,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,WEB տեխն,lab,4,0.5,16,"weekly=1, alternating=0.5",T074;T499,51008;5106;5108,4
+B4kurs1.docx|ՏՏ124,full_time,4,24,WEB տեխն,lecture,1,1.5,48,"weekly=1, alternating=0.5",T074,5108,2
+B4kurs1.docx|ՏՏ124,full_time,4,24,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T484,2435,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,Ճյուղ տնտես,practical,3,0.5,16,"weekly=1, alternating=0.5",T484,12105;2361,3
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՄՄՓ,lab,4,1.5,48,"weekly=1, alternating=0.5",T344;T419,5102;5103;5105;5106;5108;5118,12
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՄՄՓ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T419,5107,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,Մուլտի մեդիա,lab,2,0.5,16,"weekly=1, alternating=0.5",T500,51009,2
+B4kurs1.docx|ՏՏ124,full_time,4,24,Մուլտի մեդիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T500,51009,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՔՊ և ԱԻՀ,practical,3,0.5,16,"weekly=1, alternating=0.5",T296,1408,3
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՕՀԿՕ,lab,4,1.0,32,"weekly=1, alternating=0.5",T498;T499,5105;5107;5108,8
+B4kurs1.docx|ՏՏ124,full_time,4,24,ՕՀԿՕ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T498,5107,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Կբ. Ազդ. Տվ.ստաց. մեթ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T365,5408,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Կբ. Ազդ. Տվ.ստաց. մեթ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T365,5408,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Կբ. Ազդ. Տվ.ստաց. մեթ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T365,5408,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Կենսամեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T504,5016,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Համակ. Տեխ. Կիր. Կբ-ում,lab,1,0.5,16,"weekly=1, alternating=0.5",T505,10201,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Համակ. Տեխ. Կիր. Կբ-ում,lecture,1,1.0,32,"weekly=1, alternating=0.5",T505,5408,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Համակ. Տեխ. Կիր. Կբ-ում,practical,1,1.0,32,"weekly=1, alternating=0.5",T505,5408,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Ճյուղի տնտես․,lecture,1,1.0,32,"weekly=1, alternating=0.5",T502,9712,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,Ճյուղի տնտես․,practical,1,0.5,16,"weekly=1, alternating=0.5",T502,9309,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T247,2342,1
+B4kurs1.docx|ՏՏ138,full_time,4,38,ՔՊ և ԱԻՀ,practical,1,0.5,16,"weekly=1, alternating=0.5",T247,1409,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,ԾԹ,lab,4,1.0,32,"weekly=1, alternating=0.5",T477,5310,4
+B4kurs1.docx|ՏՏ155,full_time,4,55,ԾԹ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T477,5207,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T087,9712,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,Ճյուղ տնտես,practical,2,0.5,16,"weekly=1, alternating=0.5",T497,9303;9309,2
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՔՊ և ԱԻՀ․,practical,2,0.5,16,"weekly=1, alternating=0.5",T296,1408,2
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՔՑՊ,lab,4,1.0,32,"weekly=1, alternating=0.5",T478,5216,4
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՔՑՊ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T478,5207,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՕԿԿԾ,lab,4,1.0,32,"weekly=1, alternating=0.5",T483,5306,4
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՕԿԿԾ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T483,5211,1
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՕՀ,lab,4,1.0,32,"weekly=1, alternating=0.5",T015,5214;5216;5220,4
+B4kurs1.docx|ՏՏ155,full_time,4,55,ՕՀ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T015,5211,1
+B4kurs1.docx|ՏՏ160,full_time,4,60,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T494,2342,1
+B4kurs1.docx|ՏՏ160,full_time,4,60,Ճյուղ տնտես,practical,1,0.5,16,"weekly=1, alternating=0.5",T494,9303,1
+B4kurs1.docx|ՏՏ160,full_time,4,60,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ160,full_time,4,60,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T296,1408,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Բնական լեզվի մշ:,lab,1,1.0,32,"weekly=1, alternating=0.5",T496,5501,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Բնական լեզվի մշ:,lecture,1,1.0,32,"weekly=1, alternating=0.5",T496,5501,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Գեներատիվ. Մոդել.,lab,1,1.0,32,"weekly=1, alternating=0.5",T495,5501,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Գեներատիվ. Մոդել.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T495,5501,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T494,2342,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,Ճյուղ տնտես,practical,1,0.5,16,"weekly=1, alternating=0.5",T494,9305,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,"Մեքեն, ուսուցումխրախուսմ",lab,1,1.0,32,"weekly=1, alternating=0.5",T493,5908,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,"Մեքեն, ուսուցումխրախուսմ,",lecture,1,1.0,32,"weekly=1, alternating=0.5",T493,5903,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,"Վճ: կայ: մեթ,",lab,1,1.0,32,"weekly=1, alternating=0.5",T492,5908,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,"Վճ: կայ: մեթ,",lecture,1,1.0,32,"weekly=1, alternating=0.5",T492,5908,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,"Վճ: կայ: մեթ,",practical,1,0.5,16,"weekly=1, alternating=0.5",T492,5909,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ161,full_time,4,61,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T296,1408,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,ԱԲ և տվյալագ. Հիմ.,lecture,1,2.0,64,"weekly=1, alternating=0.5",T369,ԻՔ,3
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T494,2342,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ճյուղ տնտես,practical,1,0.5,16,"weekly=1, alternating=0.5",T494,9303,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ներառ. Համ. նախ.,lab,1,1.0,32,"weekly=1, alternating=0.5",T421,ԻՔ,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ներառ. Համ. նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T421,ԻՔ,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ուժային էլեկտր.,lab,1,1.5,48,"weekly=1, alternating=0.5",T163,10202;5808,2
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ուժային էլեկտր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T163,5808,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ռադիոտեխն. Հիմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T506,ԻՔ,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,Ռադիոտեխն. Հիմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T506,ԻՔ,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ168,full_time,4,68,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T296,1408,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,ԳԲՀ միկրոէլ.,lab,1,0.5,16,"weekly=1, alternating=0.5",,,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,ԳԲՀ միկրոէլ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T513,ԻՔ,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Կապի միջ. ավտ. նախ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T509,9810,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Կապի միջ. ավտ. նախ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T509,9815,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ճյուղ տնտես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T494,2342,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ճյուղ տնտես,practical,1,0.5,16,"weekly=1, alternating=0.5",T494,9305,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Միկ. նան.ռադ. էլ. սար.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T432,9810,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Միկ. նան.ռադ. էլ. սար.,practical,1,0.5,16,"weekly=1, alternating=0.5",T399,9810,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադ.տեխ. համ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T508,10301,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադ.տեխ. համ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T510,9701,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադ.տեխ. համ.,practical,1,1.0,32,"weekly=1, alternating=0.5",T508,10301;9710,2
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադիոհաճ. Չափ. համ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T436,ԻՔ,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադիոհաճ. Չափ. համ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T514,ԻՔ,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,Ռադիոհաճ. Չափ. համ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T436,ԻՔ,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,ՔՊ և ԱԻՀ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T296,2129,1
+B4kurs1.docx|ՏՏ169,full_time,4,69,ՔՊ և ԱԻՀ․,practical,1,0.5,16,"weekly=1, alternating=0.5",T296,1408,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,(unknown),lab,1,0.5,16,"weekly=1, alternating=0.5",T207;T219,2235,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,(unknown),practical,2,4.0,128,"weekly=1, alternating=0.5",T035;T043;T046;T047;T052;T064;T147;T177;T240,9107;9110;9205;9207;9601;9603;9905ա;9909ա;9909բ;9910,8
+b2/html/B2.html|ՏՏ309,full_time,2,09,Էլ ռադ նյութ,lab,2,0.5,16,"weekly=1, alternating=0.5",T207;T219,2235,2
+b2/html/B2.html|ՏՏ309,full_time,2,09,Էլ ռադ նյութ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T207,2435,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Էլեկտր. Տեխն.,lab,3,0.67,21,"weekly=1, alternating=0.5",T243,10206,3
+b2/html/B2.html|ՏՏ309,full_time,2,09,Էլեկտր. Տեխն.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T243,2441,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Էլեկտր. Տեխն.,practical,2,0.75,24,"weekly=1, alternating=0.5",T243,5202,2
+b2/html/B2.html|ՏՏ309,full_time,2,09,Հայոց պատմ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T111,5402,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Հայոց պատմ.,practical,2,0.75,24,"weekly=1, alternating=0.5",T111,17413,2
+b2/html/B2.html|ՏՏ309,full_time,2,09,Հավան տես,lecture,1,0.5,16,"weekly=1, alternating=0.5",T011,5609,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Հավան տես,practical,2,1.0,32,"weekly=1, alternating=0.5",T011,5606;5609,2
+b2/html/B2.html|ՏՏ309,full_time,2,09,Ճ և ՀԳ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T064,9602,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Ճ և ՀԳ,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Ռուսաց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,Քիմիա,lab,3,0.83,27,"weekly=1, alternating=0.5",T027;T237,1313;1315;1316,3
+b2/html/B2.html|ՏՏ309,full_time,2,09,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T027,1302,1
+b2/html/B2.html|ՏՏ309,full_time,2,09,ՕԼՀԴ,practical,1,2.0,64,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ309,full_time,2,09,Ֆիզկուլտ,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,(unknown),practical,1,2.0,64,"weekly=1, alternating=0.5",T089;T147;T187;T197,9604;9703;9911;9913,3
+b2/html/B2.html|ՏՏ316,full_time,2,16,5602 Էլեկտր. Տեխն.,practical,2,0.75,24,"weekly=1, alternating=0.5",T243,5202,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Էլ ռադ նյութ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T207,2435,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Էլեկտր. Տեխն.,lab,2,0.75,24,"weekly=1, alternating=0.5",T243,10206,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Էլեկտր. Տեխն.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T243,2441,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T236,5402,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Հայոց պատմ.,practical,2,0.75,24,"weekly=1, alternating=0.5",T236,,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Հավան տես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T011,5404,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Հավան տես,practical,2,1.0,32,"weekly=1, alternating=0.5",T011,5602;5609,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Ճ և ՀԳ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T187,9604,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Ճ և ՀԳ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,Ռուսաց լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T046;T098,9906;9910,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Քիմիա,lab,2,0.75,24,"weekly=1, alternating=0.5",T237,1313,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1302,1
+b2/html/B2.html|ՏՏ316,full_time,2,16,ՕԼՀԴ,practical,1,1.5,48,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ316,full_time,2,16,Ֆիզկուլտ,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ318,full_time,2,18,(unknown),practical,2,2.5,80,"weekly=1, alternating=0.5",T021;T043;T046;T047;T064;T068;T177;T186;T240;T242,9603;9604;9611;9909բ;9910;9911;9913,7
+b2/html/B2.html|ՏՏ318,full_time,2,18,. ՕԼՀԴ,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Էլ տեխ,lab,3,0.5,16,"weekly=1, alternating=0.5",T238,10206,3
+b2/html/B2.html|ՏՏ318,full_time,2,18,Էլ տեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T238,2441,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Էլ տեխ,practical,2,0.5,16,"weekly=1, alternating=0.5",T238,2346,2
+b2/html/B2.html|ՏՏ318,full_time,2,18,Կիր մեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T239,9102,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Կիրառ. Մեխ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T239,9101,2
+b2/html/B2.html|ՏՏ318,full_time,2,18,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T236,5402,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Հայոց պատմ.,practical,2,0.5,16,"weekly=1, alternating=0.5",T236,5601,2
+b2/html/B2.html|ՏՏ318,full_time,2,18,Հավան տես,lecture,1,0.5,16,"weekly=1, alternating=0.5",T011,5404,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Հավան տես,practical,2,1.0,32,"weekly=1, alternating=0.5",T011,5601;5602,2
+b2/html/B2.html|ՏՏ318,full_time,2,18,Ճ և ՀԳ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T064,9611,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Ճ և ՀԳ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Ռուսաց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,Քիմիա,lab,3,0.5,16,"weekly=1, alternating=0.5",T237,1313,3
+b2/html/B2.html|ՏՏ318,full_time,2,18,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1302,1
+b2/html/B2.html|ՏՏ318,full_time,2,18,ՕԼՀԴ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,(unknown),practical,5,1.4,45,"weekly=1, alternating=0.5",T037;T046;T047;T066;T098;T106;T180;T188;T223,9903;9904;9905ա;9906;9907ա;9907բ,7
+b2/html/B2.html|ՏՏ319,full_time,2,19,2120 Ինֆորմ մաթ հիմունք,practical,1,1.0,32,"weekly=1, alternating=0.5",T216,51104,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,51110 Ճարտար. Ներած.,lab,1,1.0,32,"weekly=1, alternating=0.5",T218;T219,2120;2235,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,9903 Օբյեկտ. Կողմն. Ծրագր.,lab,1,1.0,32,"weekly=1, alternating=0.5",T217,5207ա,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T216,2435,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ինֆորմ մաթ հիմունք,practical,3,1.0,32,"weekly=1, alternating=0.5",T216,51110,3
+b2/html/B2.html|ՏՏ319,full_time,2,19,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T032;T099;T149;T150;T158;T220;T221;T222,2434;2436;2438;2440;2441ա;2443ա;9708;9711;9717,2
+b2/html/B2.html|ՏՏ319,full_time,2,19,Հայոց լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T047,,2
+b2/html/B2.html|ՏՏ319,full_time,2,19,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T215,2444,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Հավան տես. և վիճ. տարր.,practical,4,1.0,32,"weekly=1, alternating=0.5",T011;T215,2430;5602;5606,4
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ճարտար. Ներած.,lab,5,1.0,32,"weekly=1, alternating=0.5",T205;T207;T218;T219,2120;2235,5
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T207;T218,2435;2441,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ռ.լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Օբյեկտ. Կողմն. Ծրագր.,lab,5,1.0,32,"weekly=1, alternating=0.5",T217,5207ա,5
+b2/html/B2.html|ՏՏ319,full_time,2,19,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T217,5207,1
+b2/html/B2.html|ՏՏ319,full_time,2,19,Ֆիզկուլտ,pe,1,2.0,64,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ320,full_time,2,20,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T012;T123,5901;5902,2
+b2/html/B2.html|ՏՏ320,full_time,2,20,(unknown),practical,3,1.0,32,"weekly=1, alternating=0.5",T037;T066;T098;T180,9905ա;9906;9907ա;9909ա,3
+b2/html/B2.html|ՏՏ320,full_time,2,20,5609 Ճարտար. Ներած.,lab,1,1.0,32,"weekly=1, alternating=0.5",T207;T226,2131;2235,1
+b2/html/B2.html|ՏՏ320,full_time,2,20,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T227,51109,1
+b2/html/B2.html|ՏՏ320,full_time,2,20,Ինֆորմ մաթ հիմունք,practical,2,1.5,48,"weekly=1, alternating=0.5",T227,51110,3
+b2/html/B2.html|ՏՏ320,full_time,2,20,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T099;T155;T156;T157;T224;T225,2353;2436;2440;2441ա;2443ա;9708;9711;9717,2
+b2/html/B2.html|ՏՏ320,full_time,2,20,Հայոց լեզու,practical,3,1.0,32,"weekly=1, alternating=0.5",T018,9903;9906,3
+b2/html/B2.html|ՏՏ320,full_time,2,20,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T215,2444,1
+b2/html/B2.html|ՏՏ320,full_time,2,20,Հավան տես. և վիճ. տարր.,practical,3,1.0,32,"weekly=1, alternating=0.5",T011,5601;5609,3
+b2/html/B2.html|ՏՏ320,full_time,2,20,Ճարտար. Ներած.,lab,3,1.0,32,"weekly=1, alternating=0.5",T205;T207;T226,2131;2235,3
+b2/html/B2.html|ՏՏ320,full_time,2,20,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T205;T226,2435;2441,1
+b2/html/B2.html|ՏՏ320,full_time,2,20,Ռ.լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ320,full_time,2,20,Օբյեկտ. Կողմն. Ծրագր.,lab,2,1.0,32,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ320,full_time,2,20,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T126,5604,1
+b2/html/B2.html|ՏՏ321,full_time,2,21,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T012;T123,5901;5902,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,(unknown),practical,2,1.0,32,"weekly=1, alternating=0.5",T047;T066;T180,9903;9904;9905ա;9906,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T216,51109,1
+b2/html/B2.html|ՏՏ321,full_time,2,21,Ինֆորմ մաթ հիմունք,practical,3,1.0,32,"weekly=1, alternating=0.5",T216,51104;51204բ,3
+b2/html/B2.html|ՏՏ321,full_time,2,21,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T099;T107;T172;T225;T228;T232,2441ա;2443ա;9706;9708;9711;9717,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,Հակոբյան Է. Ալավերդյան Ս 2235 2131 Հավան տես. և վիճ. տարր.,practical,1,1.0,32,"weekly=1, alternating=0.5",T008,5606,1
+b2/html/B2.html|ՏՏ321,full_time,2,21,Հայոց լեզու,practical,3,1.0,32,"weekly=1, alternating=0.5",T047,9205;9906;9908,3
+b2/html/B2.html|ՏՏ321,full_time,2,21,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T008,1401,1
+b2/html/B2.html|ՏՏ321,full_time,2,21,Հավան տես. և վիճ. տարր.,practical,2,1.0,32,"weekly=1, alternating=0.5",T008,5402;9104,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,Ճարտար. Ներած.,lab,4,1.0,32,"weekly=1, alternating=0.5",,,4
+b2/html/B2.html|ՏՏ321,full_time,2,21,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ321,full_time,2,21,Ռ.լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T046,9904,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,Օբյեկտ. Կողմն. Ծրագր.,lab,2,1.0,32,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ321,full_time,2,21,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T126,5604,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,(unknown),practical,1,2.0,64,"weekly=1, alternating=0.5",T071;T072;T186;T187,9604;9608;9907բ;9908;9909ա;9909բ,3
+b2/html/B2.html|ՏՏ322,full_time,2,22,Էլ տեխ,lab,2,0.5,16,"weekly=1, alternating=0.5",T211,10206,2
+b2/html/B2.html|ՏՏ322,full_time,2,22,Էլ տեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T209,2441,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Էլ տեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",T209,2346,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T236,5402,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T236,2346,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Հավան տես,lecture,1,0.5,16,"weekly=1, alternating=0.5",T153,5404,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Հավան տես,practical,1,1.0,32,"weekly=1, alternating=0.5",T153,5606,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Ճ և ՀԳ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T186,9608,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Ճ և ՀԳ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Չափագ. և սերտիֆ.,lab,2,0.5,16,"weekly=1, alternating=0.5",T235,10205;5408,2
+b2/html/B2.html|ՏՏ322,full_time,2,22,Չափագ. և սերտիֆ.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T235,5408,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,Ռուսաց լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T046;T066,9909,2
+b2/html/B2.html|ՏՏ322,full_time,2,22,Քիմիա,lab,2,0.5,16,"weekly=1, alternating=0.5",T237,1313,2
+b2/html/B2.html|ՏՏ322,full_time,2,22,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1401,1
+b2/html/B2.html|ՏՏ322,full_time,2,22,ՕԼՀԴ,practical,1,1.5,48,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ324,full_time,2,24,(unknown),lab,2,1.0,32,"weekly=1, alternating=0.5",T012;T123,5901;5902,2
+b2/html/B2.html|ՏՏ324,full_time,2,24,(unknown),practical,4,1.0,32,"weekly=1, alternating=0.5",T037;T046;T047;T066,9904;9906;9907ա;9908,4
+b2/html/B2.html|ՏՏ324,full_time,2,24,9908 Ինֆորմ մաթ հիմունք,practical,1,1.0,32,"weekly=1, alternating=0.5",T231,51204ա,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T227,51109,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Ինֆորմ մաթ հիմունք,practical,2,1.0,32,"weekly=1, alternating=0.5",T227,51204ա,2
+b2/html/B2.html|ՏՏ324,full_time,2,24,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T014;T029;T099;T172;T221;T225;T228;T232,2434;2436;2440;2441ա;2443ա;9708;9711;9717,2
+b2/html/B2.html|ՏՏ324,full_time,2,24,Կիրակոսյան Ա. Պողոսյան Հ. 2235 2120 Հավան տես. և վիճ. տարր.,practical,1,1.0,32,"weekly=1, alternating=0.5",T202,5202,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Համբարյան Վ. Պողոսյան Հ. 2235 2120 Ինֆորմ մաթ հիմունք,practical,1,1.0,32,"weekly=1, alternating=0.5",T231,51204ա,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Հայոց լեզու,practical,4,1.0,32,"weekly=1, alternating=0.5",T001,9903;9908,4
+b2/html/B2.html|ՏՏ324,full_time,2,24,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T202,2342,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Հավան տես. և վիճ. տարր.,practical,3,1.0,32,"weekly=1, alternating=0.5",T202,5202;5602,3
+b2/html/B2.html|ՏՏ324,full_time,2,24,Ճարտար. Ներած.,lab,5,1.0,32,"weekly=1, alternating=0.5",T204;T218,2120;2235,5
+b2/html/B2.html|ՏՏ324,full_time,2,24,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T204;T218,2435;2441,1
+b2/html/B2.html|ՏՏ324,full_time,2,24,Ռ.լեզու,practical,2,1.0,32,"weekly=1, alternating=0.5",T098,9303,2
+b2/html/B2.html|ՏՏ324,full_time,2,24,Օբյեկտ. Կողմն. Ծրագր.,lab,3,1.0,32,"weekly=1, alternating=0.5",T123,5901,3
+b2/html/B2.html|ՏՏ324,full_time,2,24,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T126,564,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Էլ տեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T209,2441,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Էլ տեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",T209,2359,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Էլ. Տես. Հիմ.,lab,1,0.5,16,"weekly=1, alternating=0.5",T211,10206,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Կիր մեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",T003,9101,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Կիր.մեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T003,2342,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T236,5402,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T236,5601,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Հավան տես,lecture,1,0.5,16,"weekly=1, alternating=0.5",T153,5404,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Հավան տես,practical,1,1.0,32,"weekly=1, alternating=0.5",T153,5609,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Ճ և ՀԳ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T186,9604,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Ճ և ՀԳ,practical,1,0.5,16,"weekly=1, alternating=0.5",T186;T199,9607;9610,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Ռուսաց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T100,9904,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Քիմիա,lab,1,0.5,16,"weekly=1, alternating=0.5",T237,1313,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1401,1
+b2/html/B2.html|ՏՏ338,full_time,2,38,ՕԼՀԴ,practical,1,1.5,48,"weekly=1, alternating=0.5",T053,9904;9911,2
+b2/html/B2.html|ՏՏ350,full_time,2,50,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T231,51109,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Ինֆորմ մաթ հիմունք,practical,1,1.0,32,"weekly=1, alternating=0.5",T231,51204ա,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T145;T228,2436;2443ա;9706;9717,2
+b2/html/B2.html|ՏՏ350,full_time,2,50,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T047,9903,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T079,5404,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Հավան տես. և վիճ. տարր.,practical,1,1.0,32,"weekly=1, alternating=0.5",T079,5202,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Ճարտար. Ներած.,lab,2,1.0,32,"weekly=1, alternating=0.5",T204;T229;T230,2131;2235,2
+b2/html/B2.html|ՏՏ350,full_time,2,50,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T229;T230,2435;2441,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Ռ.լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T038;T100,9908;9909բ,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Օբյեկտ. Կողմն. Ծրագր.,lab,1,1.0,32,"weekly=1, alternating=0.5",T123,5901,1
+b2/html/B2.html|ՏՏ350,full_time,2,50,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T012,5902,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,(unknown),practical,4,1.5,48,"weekly=1, alternating=0.5",T037;T038;T047;T066;T098;T106;T165;T180,9903;9904;9905ա;9906;9907ա;9909ա;9909բ;9913,6
+b2/html/B2.html|ՏՏ355,full_time,2,55,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T231,51109,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,Ինֆորմ մաթ հիմունք,practical,3,1.0,32,"weekly=1, alternating=0.5",T216;T231,51104;51110,3
+b2/html/B2.html|ՏՏ355,full_time,2,55,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T016;T029;T149;T172;T174;T225;T232,2353;2436;2440;2441ա;2443ա;9705;9706;9708;9711;9717,2
+b2/html/B2.html|ՏՏ355,full_time,2,55,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T215,2444,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,Հավան տես. և վիճ. տարր.,practical,3,1.0,32,"weekly=1, alternating=0.5",T233,5404;9205,3
+b2/html/B2.html|ՏՏ355,full_time,2,55,Ճարտար. Ներած.,lab,5,1.0,32,"weekly=1, alternating=0.5",T204;T207;T226;T234,2131;2235,5
+b2/html/B2.html|ՏՏ355,full_time,2,55,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T204;T226,2435;2441,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,Ռ.լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ355,full_time,2,55,Օբյեկտ. Կողմն. Ծրագր.,lab,5,1.0,32,"weekly=1, alternating=0.5",T217,5207ա,5
+b2/html/B2.html|ՏՏ355,full_time,2,55,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T217,5207,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,(unknown),practical,1,2.5,80,"weekly=1, alternating=0.5",T054;T177;T180;T210,9207;9909ա;9909բ;9910;9913,3
+b2/html/B2.html|ՏՏ360,full_time,2,60,10206 Քիմիա,lab,1,0.5,16,"weekly=1, alternating=0.5",T237,1313,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Էլ տեխ,lab,2,0.5,16,"weekly=1, alternating=0.5",T238,10206,2
+b2/html/B2.html|ՏՏ360,full_time,2,60,Էլ տեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T238,2441,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Էլ տեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",T238,2344,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Կիր մեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T239,9102,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Կիր մեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T236,5402,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T236,5601,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Հավան տես,lecture,1,0.5,16,"weekly=1, alternating=0.5",T153,5404,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Հավան տես,practical,1,1.0,32,"weekly=1, alternating=0.5",T153,5606,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Ճ և ՀԳ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T186,9608,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Ճ և ՀԳ,practical,1,0.5,16,"weekly=1, alternating=0.5",T186;T240,9603;9604,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Ռուսաց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Քիմիա,lab,1,0.5,16,"weekly=1, alternating=0.5",T237,1313,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1401,1
+b2/html/B2.html|ՏՏ360,full_time,2,60,ՕԼՀԴ,practical,1,1.5,48,"weekly=1, alternating=0.5",,,2
+b2/html/B2.html|ՏՏ361,full_time,2,61,(unknown),lab,1,1.0,32,"weekly=1, alternating=0.5",T012;T123,5901;5902,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,(unknown),practical,2,1.5,48,"weekly=1, alternating=0.5",T001;T046;T100;T106;T188,9904;9906;9909բ;9911;9913,3
+b2/html/B2.html|ՏՏ361,full_time,2,61,Ինֆորմ մաթ հիմունք,lecture,1,1.0,32,"weekly=1, alternating=0.5",T231,51109,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,Ինֆորմ մաթ հիմունք,practical,2,1.0,32,"weekly=1, alternating=0.5",T231,51109,2
+b2/html/B2.html|ՏՏ361,full_time,2,61,Խորացվ. անգլերեն,practical,1,2.0,64,"weekly=1, alternating=0.5",T155;T156;T157;T220,2338;2434;2436;2441ա;9708;9711;9717,2
+b2/html/B2.html|ՏՏ361,full_time,2,61,Հայոց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,Հավան տես. և վիճ. տարր.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T202,2359,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,Հավան տես. և վիճ. տարր.,practical,2,1.0,32,"weekly=1, alternating=0.5",T202,5202;5602,2
+b2/html/B2.html|ՏՏ361,full_time,2,61,Ճարտար Ներած.,lab,3,1.0,32,"weekly=1, alternating=0.5",T204;T229;T230,2131;2235,3
+b2/html/B2.html|ՏՏ361,full_time,2,61,Ճարտար. Ներած.,lecture,1,1.0,32,"weekly=1, alternating=0.5",T229;T230,2435;2441,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,Ռ.լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",,,1
+b2/html/B2.html|ՏՏ361,full_time,2,61,Օբյեկտ. Կողմն. Ծրագր.,lab,2,1.0,32,"weekly=1, alternating=0.5",T012,5902,2
+b2/html/B2.html|ՏՏ361,full_time,2,61,Օբյեկտ. Կողմն. Ծրագր.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T012,5902,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Էլ տեխ,lab,1,0.5,16,"weekly=1, alternating=0.5",T209,10206,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Էլ տեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T209,2441,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Էլ տեխ,practical,1,1.0,32,"weekly=1, alternating=0.5",T209,2359,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Կիր մեխ,practical,1,0.5,16,"weekly=1, alternating=0.5",T003,9101,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Կիր.մեխ,lecture,1,1.0,32,"weekly=1, alternating=0.5",T003,2342,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Հայոց պատմ.,lecture,1,0.5,16,"weekly=1, alternating=0.5",T241,5402,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Հայոց պատմ.,practical,1,0.5,16,"weekly=1, alternating=0.5",T241,5601,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Հավան տես,lecture,1,1.0,32,"weekly=1, alternating=0.5",T153,5404,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Հավան տես,practical,1,1.0,32,"weekly=1, alternating=0.5",T153,5609,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Ճ և ՀԳ,lecture,1,0.5,16,"weekly=1, alternating=0.5",T186,9604,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Ճ և ՀԳ,practical,1,1.0,32,"weekly=1, alternating=0.5",T186;T199,9607;9610,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Ռուսաց լեզու,practical,1,1.0,32,"weekly=1, alternating=0.5",T188,9909բ,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Քիմիա,lab,1,1.0,32,"weekly=1, alternating=0.5",T237,1313,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,Քիմիա,lecture,1,1.0,32,"weekly=1, alternating=0.5",T237,1401,1
+b2/html/B2.html|ՏՏ368,full_time,2,68,ՕԼՀԴ,practical,1,2.0,64,"weekly=1, alternating=0.5",T105,9910;9913,2
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,ԱԵ և Գ,lecture,1,2.0,64,part_time_parity_unknown,T116,2342,2
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,ԱԵ և Գ,practical,1,3.0,96,part_time_parity_unknown,T116;T523,12301;2344,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T047,12301;9204,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Մաթ. Անալիզ,lecture,1,3.0,96,part_time_parity_unknown,T116,12305;2444,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Մաթ. Անալիզ,practical,1,3.0,96,part_time_parity_unknown,T116,12305,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Մասնագ. Ներած.,practical,1,3.0,96,part_time_parity_unknown,T525,9705,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,T055,12301,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Ֆիզիկա,lab,1,2.0,64,part_time_parity_unknown,T115,9404,2
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Ֆիզիկա,lecture,1,3.0,96,part_time_parity_unknown,T012,9412,3
+"heraka-1-kurs.docx|ՀՏՏ316(1,2)",part_time,1,16,Ֆիզիկա,practical,1,2.0,64,part_time_parity_unknown,T083,9204,2
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,ԱԵ և Գ,lecture,1,2.0,64,part_time_parity_unknown,T116,2342,2
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,ԱԵ և Գ,practical,1,3.0,96,part_time_parity_unknown,T116,12301;2344,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T047,12301;9204,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Մաթ. Անալիզ,lecture,1,3.0,96,part_time_parity_unknown,T116,12305;2444,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Մաթ. Անալիզ,practical,1,3.0,96,part_time_parity_unknown,T116,12305,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Մասնագ. Ներած.,practical,1,3.0,96,part_time_parity_unknown,T163,5808,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,T055,12301,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Ֆիզիկա,lab,1,2.0,64,part_time_parity_unknown,T115,9404,2
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Ֆիզիկա,lecture,1,3.0,96,part_time_parity_unknown,T012,9412,3
+"heraka-1-kurs.docx|ՀՏՏ318(1,2)",part_time,1,18,Ֆիզիկա,practical,1,2.0,64,part_time_parity_unknown,T083,9204,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,ԱԵ և Գ,lecture,1,2.0,64,part_time_parity_unknown,T116,2342,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,ԱԵ և Գ,practical,1,3.0,96,part_time_parity_unknown,T116,12106;51206,3
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Ալգ. և ծրագրավ,lab,2,2.0,64,part_time_parity_unknown,T122;T124,51001;5108,4
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Ալգ. և ծրագրավ.,lab,1,2.0,64,part_time_parity_unknown,T122,5108,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Ալգ. և ծրագրավ.,lecture,1,3.0,96,part_time_parity_unknown,T161,2342;5404,3
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Ալգ. և ծրագրավ.,practical,1,2.0,64,part_time_parity_unknown,T124,5108,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Հայոց. Պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T111,2435,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Հայոց. Պատմ.,practical,1,2.0,64,part_time_parity_unknown,T111,17413,2
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Մաթ. Անալիզ,lecture,1,3.0,96,part_time_parity_unknown,T116,12305;2444,3
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Մաթ. Անալիզ,practical,1,3.0,96,part_time_parity_unknown,T116,2430,3
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Մասնագ. Ներած.,practical,1,3.0,96,part_time_parity_unknown,T322,51101,3
+"heraka-1-kurs.docx|ՀՏՏ320(1,2)",part_time,1,20,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,T055,5903;5908,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,ԱԵ և Գ,lecture,1,2.0,64,part_time_parity_unknown,T116,2342,2
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,ԱԵ և Գ,practical,1,3.0,96,part_time_parity_unknown,T116,12301;2344,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Ալգ. և ծրագրավ.,lab,1,3.0,96,part_time_parity_unknown,T122,51010;5119,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Ալգ. և ծրագրավ.,lecture,1,3.0,96,part_time_parity_unknown,T161,2342;5404,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Ալգ. և ծրագրավ.,practical,1,2.0,64,part_time_parity_unknown,T122,51001,2
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Հայոց. Պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T111,2435,2
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Հայոց. Պատմ.,practical,1,2.0,64,part_time_parity_unknown,T111,17413,2
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Մաթ. Անալիզ,lecture,1,3.0,96,part_time_parity_unknown,T116;T523,12305;2444,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Մաթ. Անալիզ,practical,1,3.0,96,part_time_parity_unknown,T116;T523,12305,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Մասնագ. Ներած.,practical,1,3.0,96,part_time_parity_unknown,T524,5906,3
+"heraka-1-kurs.docx|ՀՏՏ321(1,2)",part_time,1,21,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,T242,12305;51110,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,(unknown),lab,2,1.5,48,part_time_parity_unknown,T012;T122;T123,51001;5108;5901;5902,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,(unknown),practical,1,5.0,160,part_time_parity_unknown,T012;T053;T088;T123,12201;12304;5102;5105;9206;9208,5
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,ԱԵ և Գ,lecture,1,2.0,64,part_time_parity_unknown,T116,2342,2
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,ԱԵ և Գ,practical,1,3.0,96,part_time_parity_unknown,T116;T523,12101;12301,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Ալգ. և ծրագրավ.,lab,3,2.0,64,part_time_parity_unknown,T012;T122,51001;5902,6
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Ալգ. և ծրագրավ.,lecture,1,3.0,96,part_time_parity_unknown,T161,2342;5404,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Ալգ. և ծրագրավ.,practical,1,2.0,64,part_time_parity_unknown,,,2
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Հայոց. Պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T111,2435,2
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Հայոց. Պատմ.,practical,1,2.0,64,part_time_parity_unknown,T111,17413,2
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Մաթ. Անալիզ,lecture,1,3.0,96,part_time_parity_unknown,T116,12305;2444,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Մաթ. Անալիզ,practical,1,3.0,96,part_time_parity_unknown,T116,12105;12301,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Մասնագ. Ներած.,practical,1,3.0,96,part_time_parity_unknown,T161,5108;5604,3
+"heraka-1-kurs.docx|ՀՏՏ324(1,2)",part_time,1,24,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,,,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Էլ. Դին. և ռադ. Տար.,lab,1,2.0,64,part_time_parity_unknown,T059,10303,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Էլ. Դին. և ռադ. Տար.,lecture,1,3.0,96,part_time_parity_unknown,T059,9810,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Կիր. Մեխան.,lecture,1,3.0,96,part_time_parity_unknown,T534,2444,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Կիր. Մեխան.,practical,1,2.0,64,part_time_parity_unknown,T534,2444,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T535,5202,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Հայոց պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T527,5404,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Հայոց պատմ.,practical,1,2.0,64,part_time_parity_unknown,,,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Հավ. Տես.,lecture,1,2.0,64,part_time_parity_unknown,T011,9206,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Հավ. Տես.,practical,1,3.0,96,part_time_parity_unknown,T011,2435;9915,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Ռադիոէլ. Հի մ.,lab,1,2.0,64,part_time_parity_unknown,T539,9706,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Ռադիոէլ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T539,9702,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Ռադիոէլ. Հիմ.,practical,1,2.0,64,part_time_parity_unknown,T539,9706,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Ռուսաց լեզու,practical,1,3.0,96,part_time_parity_unknown,T100,51110;9207,3
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Փիլիսոփ.,lecture,1,2.0,64,part_time_parity_unknown,T532,2359,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Փիլիսոփ.,practical,1,2.0,64,part_time_parity_unknown,T532,9110,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Օտ ար լեզու,practical,1,2.0,64,part_time_parity_unknown,T242,9905բ,2
+"heraka-2-kurs.docx|ՀՏՏ209(1,2)",part_time,2,09,Օտար լեզու,practical,1,2.0,64,part_time_parity_unknown,T242,9909բ,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Թվ  . սխ. Նախ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T231,51109,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Թվ. սխ. Նախ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T231,51109,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Կիր. Մեխան.,lecture,1,3.0,96,part_time_parity_unknown,T534,2444,3
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Կիր. Մեխան.,practical,1,2.0,64,part_time_parity_unknown,T534,2444,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T535,5202,3
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Հայոց պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T527,5404,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Հայոց պատմ.,practical,1,2.0,64,part_time_parity_unknown,T527,2344,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Հավ. Տես.,lecture,1,2.0,64,part_time_parity_unknown,T011,9206,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Հավ. Տես.,practical,1,3.0,96,part_time_parity_unknown,T011,5609;9206,3
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Ռուսաց լեզու,practical,1,3.0,96,part_time_parity_unknown,T066;T177,1409;51108;51110;9112,3
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Տեղ. Պաշ տ. Հիմ.,practical,1,2.0,64,part_time_parity_unknown,T243,5212,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Տեղ. Պաշտ. Հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T314,5211,3
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Փիլիսոփ.,lecture,1,2.0,64,part_time_parity_unknown,T532,2342,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Փիլիսոփ.,practical,1,2.0,64,part_time_parity_unknown,T532,5202,2
+"heraka-2-kurs.docx|ՀՏՏ220(1,2)",part_time,2,20,Օտար լեզու,practical,1,6.0,192,part_time_parity_unknown,T206,12301;9902ա,6
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Ինֆ. Կիր. Տես.,lab,1,2.0,64,part_time_parity_unknown,T536,5906;5910,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Ինֆ. Կիր. Տես.,lecture,1,2.0,64,part_time_parity_unknown,T536,5502;5906,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Կիր. Մեխան.,lecture,1,3.0,96,part_time_parity_unknown,T534,2444,3
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Կիր. Մեխան.,practical,1,2.0,64,part_time_parity_unknown,T534,12305,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T535,1414;9206,3
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Հայոց պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T527,5404,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Հայոց պատմ.,practical,1,2.0,64,part_time_parity_unknown,T527,2435,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Հավ. Տես.,lecture,1,2.0,64,part_time_parity_unknown,T011,9206,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Հավ. Տես.,practical,1,3.0,96,part_time_parity_unknown,T011,2435;9915,3
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Ռուսաց լեզու,practical,1,3.0,96,part_time_parity_unknown,T100,9207;9915,3
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Տեղ պաշտ. Հիմ.,lab,1,2.0,64,part_time_parity_unknown,T243,5209,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Տեղ պաշտ. Հիմ.,lecture,1,1.0,32,part_time_parity_unknown,T314,5211,1
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Տեղ. Պաշտ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T314,5211,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Փիլիսոփ.,lecture,1,2.0,64,part_time_parity_unknown,T532,2342,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Փիլիսոփ.,practical,1,2.0,64,part_time_parity_unknown,T532,5202,2
+"heraka-2-kurs.docx|ՀՏՏ221(1,2)",part_time,2,21,Օտար լեզու,practical,1,6.0,192,part_time_parity_unknown,T054,2435;5601;9905բ,6
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Կառ. Համ.տարր,lecture,1,3.0,96,part_time_parity_unknown,T358,51208,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Կառ. Համ.տարր.,lab,1,2.0,64,part_time_parity_unknown,T358,51208,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Կառ. Համ.տարր.,practical,1,3.0,96,part_time_parity_unknown,T358,51208,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Կիր. Մեխան.,lecture,1,3.0,96,part_time_parity_unknown,T213,9101;9102,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Կիր. Մեխան.,practical,1,2.0,64,part_time_parity_unknown,T213,9102,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,T535,5202,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Հայոց պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T527,5404,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Հայոց պատմ.,practical,1,2.0,64,part_time_parity_unknown,T527,2435,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Հավ. Տես.,lecture,1,2.0,64,part_time_parity_unknown,T011,9206,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Հավ. Տես.,practical,1,3.0,96,part_time_parity_unknown,T011,2435;9915,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Ռուսաց լեզու,practical,1,3.0,96,part_time_parity_unknown,T100,9205;9909ա,3
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Փիլիսոփ.,lecture,1,2.0,64,part_time_parity_unknown,T532,2359,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Փիլիսոփ.,practical,1,2.0,64,part_time_parity_unknown,T532,9110,2
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Օտ ար լեզու,practical,1,1.0,32,part_time_parity_unknown,T242,9905բ,1
+"heraka-2-kurs.docx|ՀՏՏ222(1,2)",part_time,2,22,Օտար լեզու,practical,1,3.0,96,part_time_parity_unknown,T242,9905բ;9909բ,3
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,(unknown),practical,1,12.0,384,part_time_parity_unknown,T021;T043;T047;T100;T177;T180;T535,2344;2359;51104;51108;51110;9110;9207;9904;9906;9907բ;9908;9909ա;9912;9915,12
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Կիր. Ծրագր,lab,1,1.0,32,part_time_parity_unknown,T419;T538,5108;5109,1
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Կիր. Ծրագր.,lab,1,2.0,64,part_time_parity_unknown,T419;T538,5102;5109,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Կիր. Մեխան.,lecture,1,3.0,96,part_time_parity_unknown,T534,2444,3
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Կիր. Մեխան.,practical,1,2.0,64,part_time_parity_unknown,T534,2444,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հ ավ. Տես.,practical,1,1.0,32,part_time_parity_unknown,,,1
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հայոց լեզու,practical,1,3.0,96,part_time_parity_unknown,,,3
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հայոց պատմ,practical,1,2.0,64,part_time_parity_unknown,T527,51110,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հայոց պատմ.,lecture,1,2.0,64,part_time_parity_unknown,T527,2342,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հավ. Տես.,practical,1,2.0,64,part_time_parity_unknown,T537,5609;9110,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Հավ.Տես.,lecture,1,2.0,64,part_time_parity_unknown,T537,9206,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Ռուսաց լեզո ւ,practical,1,2.0,64,part_time_parity_unknown,,,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Ռուսաց լեզու,practical,1,1.0,32,part_time_parity_unknown,,,1
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Տեղ. Պաշտ. Հիմ.,lab,1,2.0,64,part_time_parity_unknown,T243,5220,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Տեղ. Պաշտ. Հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T314,5211,3
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Փիլիսոփ.,lecture,1,2.0,64,part_time_parity_unknown,T532,2342,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Փիլիսոփ.,practical,1,2.0,64,part_time_parity_unknown,T532,5609,2
+"heraka-2-kurs.docx|ՀՏՏ224(1,2)",part_time,2,24,Օտար լեզու,practical,1,6.0,192,part_time_parity_unknown,,,6
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,(unknown),lab,1,7.0,224,part_time_parity_unknown,,,7
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլ. Տեխ. Տես. Հիմ.,lab,1,2.0,64,part_time_parity_unknown,T540,10206,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլ. Տեխ. Տես. Հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T540,2131,3
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլ. Տեխ. Տես. Հիմ.,practical,1,2.0,64,part_time_parity_unknown,T540,2131,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլ.ռադ,lab,1,2.0,64,part_time_parity_unknown,T205,2235,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլ.ռադ,lecture,1,3.0,96,part_time_parity_unknown,T205,2135,3
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլեկտ. և սխեմ.,lab,1,2.0,64,part_time_parity_unknown,T541,10204;5806,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Էլեկտ. և սխեմ.,lecture,1,3.0,96,part_time_parity_unknown,T541,5802;5806,3
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Ընդհ. տնտ.,lecture,1,2.0,64,part_time_parity_unknown,T542,9107,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Ընդհ. տնտ.,practical,1,2.0,64,part_time_parity_unknown,T542,9107,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Նան. Ճարտ. Հիմ.,lab,1,3.0,96,part_time_parity_unknown,T549,5806;5808,3
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Նան. Ճարտ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T549,5808,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Նան. Ճարտ. Հիմ.,practical,1,2.0,64,part_time_parity_unknown,T549,5808,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Փորձ. Հիմ.,lab,1,3.0,96,part_time_parity_unknown,T373,5014;5020,3
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Փորձ. Հիմ.,lecture,1,2.0,64,part_time_parity_unknown,T373,5018,2
+"heraka-3kurs.docx|ՀՏՏ118(1,2)",part_time,3,18,Փորձ. Հիմ.,practical,1,2.0,64,part_time_parity_unknown,T373,5020,2
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Ընդհ. էլ. Տեխ.,lab,1,2.0,64,part_time_parity_unknown,T229,2131,2
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Ընդհ. էլ. Տեխ.,lecture,1,3.0,96,part_time_parity_unknown,T229,2441,3
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Ընդհ. էլ. Տեխ.,practical,1,2.0,64,part_time_parity_unknown,T229,2137,2
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Ծրագրավորմ. Հիմ.,lab,1,3.0,96,part_time_parity_unknown,T012,5108;5902,3
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Ծրագրավորմ. Հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T123,5105;5109,3
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Համ. սխեմ.,lab,1,2.0,64,part_time_parity_unknown,T548,51109,2
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Համ. սխեմ.,lecture,1,6.0,192,part_time_parity_unknown,T548,51101;51102;51109;51110,6
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Հաշ. Համ.թվ.տրամ.,lecture,1,3.0,96,part_time_parity_unknown,T231,51108;51110,3
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Քոմփ. Կազմ.,lab,1,2.0,64,part_time_parity_unknown,T227,51110,2
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Քոմփ. Կազմ.,lecture,1,3.0,96,part_time_parity_unknown,T227,51102;51110,3
+"heraka-3kurs.docx|ՀՏՏ120(1,2)",part_time,3,20,Քոմփ. Կազմ.,practical,1,2.0,64,part_time_parity_unknown,T227,51108,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Արհ. Բան. և մեք.,lab,1,3.0,96,part_time_parity_unknown,T327,5906;5908,3
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Արհ. Բան. և մեք.,lecture,1,2.0,64,part_time_parity_unknown,T327,5908,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ընդհ. էլ. Տեխ.,lab,1,2.0,64,part_time_parity_unknown,T229,2131,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ընդհ. էլ. Տեխ.,lecture,1,3.0,96,part_time_parity_unknown,T229,2441,3
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ընդհ. էլ. Տեխ.,practical,1,2.0,64,part_time_parity_unknown,T229,2137,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ծրագր Լեզուն,lecture,1,2.0,64,part_time_parity_unknown,T414,5504,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ծրագր. Լեզուն,lab,1,2.0,64,part_time_parity_unknown,T414,5504,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ծրագր. Լեզուն.,lab,1,1.0,32,part_time_parity_unknown,T414,5909,1
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Ծրագր. Լեզուն.,lecture,1,1.0,32,part_time_parity_unknown,T414,5906,1
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Հաշ. Մեթ. Կիր. Տես.,lab,1,2.0,64,part_time_parity_unknown,T414,5504,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Հաշ. Մեթ. Կիր. Տես.,lecture,1,3.0,96,part_time_parity_unknown,T414,5909,3
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Հաշ. Մեթ. Կիր. Տես.,practical,1,2.0,64,part_time_parity_unknown,T414,5504;5906,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Քոմփ. Կազմ.,lab,1,2.0,64,part_time_parity_unknown,T216,51102;51204բ,2
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Քոմփ. Կազմ.,lecture,1,3.0,96,part_time_parity_unknown,T216,51102;51109,3
+"heraka-3kurs.docx|ՀՏՏ121(1,2)",part_time,3,21,Քոմփ. Կազմ.,practical,1,2.0,64,part_time_parity_unknown,T216,51102,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,"Դիսկ Մաթ,ալգ.",lecture,1,2.0,64,part_time_parity_unknown,T013,5105,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,"Դիսկ. Մաթ,ալգ.",lecture,1,2.0,64,part_time_parity_unknown,T013,5108,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,"ԴիսկՄաթ,ալգ.",lab,1,2.0,64,part_time_parity_unknown,T013,5108,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Ընդհ. էլ. Տեխ.,lab,1,2.0,64,part_time_parity_unknown,T229,2131,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Ընդհ. էլ. Տեխ.,lecture,1,3.0,96,part_time_parity_unknown,T229,2441,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Ընդհ. էլ. Տեխ.,practical,1,2.0,64,part_time_parity_unknown,T229,2131,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Ծրագրավորմ. Հիմ.,lab,1,3.0,96,part_time_parity_unknown,T012;T123,5107;5108,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Ծրագրավորմ. Հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T123,5105;5109,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Տվ. Կառ. և ալգ.,lab,1,3.0,96,part_time_parity_unknown,T089,51010;5108,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Տվ. Կառ. և ալգ.,lecture,1,3.0,96,part_time_parity_unknown,T089,5107,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Քոմփ. Կազմ.,lab,1,2.0,64,part_time_parity_unknown,T216,51204բ,2
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Քոմփ. Կազմ.,lecture,1,3.0,96,part_time_parity_unknown,T216,51102;51109,3
+"heraka-3kurs.docx|ՀՏՏ124(1,2)",part_time,3,24,Քոմփ. Կազմ.,practical,1,2.0,64,part_time_parity_unknown,T216,51109,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,1403,3
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Բջջային կապի հիմ.,lab,1,3.0,96,part_time_parity_unknown,T539,10301;10303,3
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Բջջային կապի հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T539,9710,3
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,2446,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադ. Շղթ. և ազդ.,lecture,1,4.0,128,part_time_parity_unknown,T566,9706;9708,4
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադ. Շղթ. և ազդ.,practical,1,2.0,64,part_time_parity_unknown,T566,9708,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադիոընդ. Սարքեր,lab,1,2.0,64,part_time_parity_unknown,T430,10303,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադիոընդ. Սարքեր,lecture,1,4.0,128,part_time_parity_unknown,T430,9703;9706,4
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադիոհաղորդ. Սարք.,lab,1,2.0,64,part_time_parity_unknown,T567,10303,2
+"heraka-4-kurs.docx|ՀՏՏ009(1,2)",part_time,4,09,Ռադիոհաղորդ. Սարք.,lecture,1,3.0,96,part_time_parity_unknown,T567,9711;9717,3
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,1403,3
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Բջջային կապի հիմ.,lab,1,3.0,96,part_time_parity_unknown,T539,10301;10303,3
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Բջջային կապի հիմ.,lecture,1,3.0,96,part_time_parity_unknown,T539,9710,3
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադ. Շղթ. և ազդ.,lecture,1,4.0,128,part_time_parity_unknown,T566,9706;9708,4
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադ. Շղթ. և ազդ.,practical,1,2.0,64,part_time_parity_unknown,T566,9708,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադիոընդ. Սարքեր,lab,1,2.0,64,part_time_parity_unknown,T430,10303,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադիոընդ. Սարքեր,lecture,1,4.0,128,part_time_parity_unknown,T430,9703;9706,4
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադիոհաղորդ. Սարք.,lab,1,2.0,64,part_time_parity_unknown,T567,10303,2
+"heraka-4-kurs.docx|ՀՏՏ016(1,2)",part_time,4,16,Ռադիոհաղորդ. Սարք.,lecture,1,3.0,96,part_time_parity_unknown,T567,9711;9717,3
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,. ԻՍ-ների Նախ.,practical,1,1.0,32,part_time_parity_unknown,T564,5008,1
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Ազդան. Թվ. մշակ.,lab,1,2.0,64,part_time_parity_unknown,T565,5806,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Ազդան. Թվ. մշակ.,lecture,1,2.0,64,part_time_parity_unknown,T565,5806,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Ազդան. Թվ. մշակ.,practical,1,3.0,96,part_time_parity_unknown,T565,5806,3
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,1403,3
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների Նախ.,lab,1,2.0,64,part_time_parity_unknown,T564,5008,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների Նախ.,lecture,1,2.0,64,part_time_parity_unknown,T564,5205,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների Նախ.,practical,1,2.0,64,part_time_parity_unknown,T564,5008;5020,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների տեխն.,lab,1,2.0,64,part_time_parity_unknown,T563,5014,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների տեխն.,lecture,1,2.0,64,part_time_parity_unknown,T563,5014,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԻՍ-ների տեխն.,practical,1,2.0,64,part_time_parity_unknown,T563,5014,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Օպտոէլ.,lab,1,3.0,96,part_time_parity_unknown,T563,10203,3
+"heraka-4-kurs.docx|ՀՏՏ018(1,2)",part_time,4,18,Օպտոէլ.,lecture,1,3.0,96,part_time_parity_unknown,T563,5008;5016,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,2336,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Էլ. Կառ. Ցանց համակ,lab,1,1.0,32,part_time_parity_unknown,T128,51102,1
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Էլ. Կառ. Ցանց համակ.,lab,1,2.0,64,part_time_parity_unknown,T128,51102,2
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Էլ. Կառ. Ցանց համակ.,lecture,1,6.0,192,part_time_parity_unknown,T559,51101;51102,6
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Էլ. Կառ. Ցանց համակ.,practical,1,3.0,96,part_time_parity_unknown,T559,51101;51102,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,2446,2
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Հաշվ. Համ. արատ.,lab,1,3.0,96,part_time_parity_unknown,T324,51108,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Հաշվ. Համ. արատ.,lecture,1,3.0,96,part_time_parity_unknown,T324,51104;51109,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Հաշվ. Համ. արատ.,practical,1,2.0,64,part_time_parity_unknown,T324,51101,2
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Միկրոպր. Համակ.,lab,1,3.0,96,part_time_parity_unknown,T560,10302,3
+"heraka-4-kurs.docx|ՀՏՏ020(1,2)",part_time,4,20,Միկրոպր. Համակ.,lecture,1,3.0,96,part_time_parity_unknown,T560,51204ա,3
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Բնապահպ.,practical,1,2.0,64,part_time_parity_unknown,T545,2336,2
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,,2
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Համ վերլ. Գործ. Հետ.,lab,1,3.0,96,part_time_parity_unknown,T536,5501;5910,3
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Համ վերլ. Գործ. Հետ.,lecture,1,3.0,96,part_time_parity_unknown,T536,5501;5910,3
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Համակ. Մոդ.,lab,1,1.0,32,part_time_parity_unknown,T327,5908,1
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Համակ. Մոդ.,lecture,1,3.0,96,part_time_parity_unknown,T327,5908;5983,3
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Համակ. Մոդ.,practical,1,1.0,32,part_time_parity_unknown,T327,5908,1
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,"Համակ. Մոդ. Գործ,",lab,1,1.0,32,part_time_parity_unknown,T327,5908,1
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Մեծած. Տվյալն.,lecture,1,6.0,192,part_time_parity_unknown,T561,5501;5909;5910,6
+"heraka-4-kurs.docx|ՀՏՏ021(1,2)",part_time,4,21,Մեծած. Տվյալն.,practical,1,3.0,96,part_time_parity_unknown,T561,5504;5910,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Malab կիր. Կառ. Համ.,lab,1,3.0,96,part_time_parity_unknown,T361,10201;10302,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Malab կիր. Կառ. Համ.,lecture,1,2.0,64,part_time_parity_unknown,T361,10302,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Malab կիր. Կառ. Համ.,practical,1,3.0,96,part_time_parity_unknown,T361,10302;10304,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Ազդ. Տես. և ձև. Մեթ.,lecture,1,3.0,96,part_time_parity_unknown,T358,51208,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Ազդ. Տես. և ձև. Մեթ.,practical,1,3.0,96,part_time_parity_unknown,T358,51208,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,2336,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Իմպ. և թվ. կառ. Համ.,lab,1,4.0,128,part_time_parity_unknown,T357,51202,4
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Իմպ. և թվ. կառ. Համ.,lecture,1,2.0,64,part_time_parity_unknown,T357,51202,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Իմպ. և թվ. կառ. Համ.,practical,1,2.0,64,part_time_parity_unknown,T357,51202,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Կառ. Համ.նախ.և մոդ.,lecture,1,3.0,96,part_time_parity_unknown,T361,10304,3
+"heraka-4-kurs.docx|ՀՏՏ022(1,2)",part_time,4,22,Կառ. Համ.նախ.և մոդ.,practical,1,3.0,96,part_time_parity_unknown,T361,10304,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,SEO որանմ. Համ. օպտ.,lab,1,2.0,64,part_time_parity_unknown,T418,51009,2
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,SEO որանմ. Համ. օպտ.,lecture,1,3.0,96,part_time_parity_unknown,T418,51009;51010,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,WEB տեխն,lab,1,2.0,64,part_time_parity_unknown,T418,51002,2
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,WEB տեխն.,lab,1,1.0,32,part_time_parity_unknown,T418,51010,1
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,WEB տեխն.,lecture,1,3.0,96,part_time_parity_unknown,T418,51006;51010,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Բնապահպ.,lecture,1,2.0,64,part_time_parity_unknown,T545,1302,2
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Բնապահպ.,practical,1,3.0,96,part_time_parity_unknown,T545,20420,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,ԿԱ,lab,1,2.0,64,part_time_parity_unknown,T557,,2
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,ԿԱ,lecture,1,2.0,64,part_time_parity_unknown,T557,2129,2
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Տեխն. Աջակց.,lab,1,3.0,96,part_time_parity_unknown,T562,51002;51008,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Տեխն. Աջակց.,lecture,1,3.0,96,part_time_parity_unknown,T562,51002;51008,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Տվյ. Բազ. Կառ համ.,lab,1,3.0,96,part_time_parity_unknown,T085,5108,3
+"heraka-4-kurs.docx|ՀՏՏ024(1,2)",part_time,4,24,Տվյ. Բազ. Կառ համ.,lecture,1,3.0,96,part_time_parity_unknown,T085,5105,3

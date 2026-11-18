@@ -37,7 +37,8 @@ class SmallGroupInput(Input):
 
 
 class LabGroupInput(Input):
-    small_group_id: int = Field(gt=0)
+    course_group_id: int | None = Field(default=None, gt=0)
+    small_group_id: int | None = Field(default=None, gt=0)
     label: str = Field(min_length=1, max_length=50)
     capacity: int = Field(gt=0, le=2000)
 
@@ -102,6 +103,7 @@ class CalendarInput(Input):
             "preferences": 1,
         }
     )
+    cross_partition_overlap: Literal["assume_overlap"] = "assume_overlap"
     lecture_order: Literal["unconfirmed", "same_day", "off"] = "unconfirmed"
 
     @model_validator(mode="after")

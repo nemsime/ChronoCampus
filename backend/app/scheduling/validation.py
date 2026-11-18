@@ -32,6 +32,7 @@ def validation_context(snapshot):
         "slots": {},
         "times": {},
         "external": external,
+        "independent_labs": {lab["id"] for lab in snapshot["lab_groups"] if lab.get("small_group_id") is None},
     }
 
 
@@ -120,7 +121,7 @@ def placement_errors(
                     errors.append("external_teacher_conflict")
                 if other["room_id"] == room["id"]:
                     errors.append("external_room_conflict")
-                if audiences_overlap(component, other):
+                if audiences_overlap(component, other, context["independent_labs"]):
                     errors.append("external_group_conflict")
     return sorted(set(errors))
 
@@ -186,7 +187,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                         other_component["teacher_id"] == component["teacher_id"],
                         "teacher_conflict",
                     ),
-                    (audiences_overlap(component, other_component), "group_conflict"),
+                    (audiences_overlap(component, other_component, context["independent_labs"]), "group_conflict"),
                 ):
                     if condition:
                         issues.append(
