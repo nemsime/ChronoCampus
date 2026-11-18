@@ -91,3 +91,22 @@ def test_explicit_cross_week_override_preserves_template_and_roundtrip():
     derived = derive_template(pending,TERM,[],config)
     expected = [r for r in rows if r['occurrence_id']!=2]
     assert identity(expand_template(derived,TERM,[],config))==identity(expected)
+
+
+def test_generated_weekly_series_with_a_one_date_room_pin_roundtrips():
+    from test_scheduling import sample_snapshot
+
+    from app.scheduling.solver import generate
+
+    snapshot = sample_snapshot()
+    snapshot["rooms"].append(dict(snapshot["rooms"][0], id=3))
+    snapshot["pins"] = [dict(occurrence_id=1, day="2026-09-11", starts_at="09:30",
+                             ends_at="10:50", slot=1, room_id=3, cancelled=False)]
+    result = generate(snapshot, seconds=1)
+    assert result["report"]["complete"]
+    rows = [dict(row, course_group_id=1, component_id=1 if row["occurrence_id"] < 3 else 2)
+            for row in result["assignments"]]
+    config = {**snapshot["calendar"], "periods": snapshot["periods"]}
+    derived = derive_template(rows, snapshot["term"], [], config)
+    assert identity(expand_template(derived, snapshot["term"], [], config)) == identity(rows)
+    assert next(r["room_id"] for r in rows if r["occurrence_id"] == 1) == 3

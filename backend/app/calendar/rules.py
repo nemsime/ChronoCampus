@@ -132,23 +132,41 @@ def audience_size(snapshot: dict, component: dict) -> int:
     raise ValueError("invalid_audience")
 
 
-def audiences_overlap(first: dict, second: dict) -> bool:
+def audiences_overlap(first: dict, second: dict, independent_labs=()) -> bool:
     if first["course_group_id"] != second["course_group_id"]:
         return False
-    if first.get("small_group_id") and second.get("small_group_id"):
-        if first["small_group_id"] != second["small_group_id"]:
-            return False
-        if first.get("lab_group_id") and second.get("lab_group_id"):
-            return first["lab_group_id"] == second["lab_group_id"]
-    return True
+    small_a, small_b = first.get("small_group_id"), second.get("small_group_id")
+    lab_a, lab_b = first.get("lab_group_id"), second.get("lab_group_id")
+    if lab_a and lab_b:
+        # Missing parent on a historical nested workload meant broad membership.
+        # New independent labs have their own explicit cohort parent in the catalog.
+        if bool(small_a) == bool(small_b) or lab_a in independent_labs or lab_b in independent_labs:
+            return lab_a == lab_b
+    return not (small_a and small_b and small_a != small_b)
 
 
 def audience_leaves(snapshot: dict, component: dict) -> dict[str, int]:
-    """Disjoint student segments for conflict/gap accounting; include unsplit remainders."""
+    """Conflict resources and known audience sizes, including unpartitioned remainders."""
     group_id = component["course_group_id"]
     group = next(g for g in snapshot["groups"] if g["id"] == group_id)
     smalls = [s for s in snapshot["subgroups"] if s["course_group_id"] == group_id]
     leaves = {}
+    independent = [lab for lab in snapshot["lab_groups"] if lab.get("small_group_id") is None
+                   and lab.get("course_group_id") == group_id]
+    if independent and snapshot["calendar"].get("cross_partition_overlap", "assume_overlap") != "assume_overlap":
+        raise ValueError("invalid_cross_partition_overlap")
+    for lab in independent:
+        lab_id = lab["id"]
+        if component.get("lab_group_id") == lab_id:
+            # One token per possible intersection enforces P/L exclusion without
+            # treating a hypothetical intersection as a known number of students.
+            return {f"lab:{lab_id}": lab["capacity"],
+                    **{f"cross:{s['id']}:{lab_id}": 0 for s in smalls}}
+        if not component.get("lab_group_id"):
+            if component.get("small_group_id"):
+                leaves[f"cross:{component['small_group_id']}:{lab_id}"] = 0
+            else:
+                leaves[f"lab:{lab_id}"] = lab["capacity"]
     for small in smalls:
         if (
             component.get("small_group_id")
@@ -181,3 +199,20 @@ def required_pairs(hours: int, units: int | None) -> int:
     if hours <= 0 or hours % units:
         raise ValueError("indivisible_workload")
     return hours // units
+
+
+def window_count(slots) -> int:
+    return max(slots) - min(slots) + 1 - len(slots) if slots else 0
+
+
+def cohort_compactness(occupied) -> dict:
+    """Summarize the union of delivered slots per occupied (cohort, date)."""
+    gaps = [window_count(slots) for slots in occupied.values()]
+    with_windows = sum(gap > 0 for gap in gaps)
+    return {
+        "occupied_cohort_days": len(gaps),
+        "cohort_windows": sum(gaps),
+        "cohort_days_with_windows": with_windows,
+        "cohort_window_day_percent": round(100 * with_windows / len(gaps), 2) if gaps else 0,
+        "cohort_late_starts": sum(min(slots) - 1 for slots in occupied.values()),
+    }

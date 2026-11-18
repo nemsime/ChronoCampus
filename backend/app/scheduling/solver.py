@@ -13,11 +13,13 @@ from app.calendar.rules import (
     as_date,
     audience_leaves,
     audiences_overlap,
+    cohort_compactness,
     lesson_slot,
     minutes,
     resource_rule_matches,
     teaching_dates,
     week_index,
+    window_count,
 )
 from app.scheduling.validation import placement_errors, validate, validation_context
 
@@ -77,6 +79,7 @@ def candidates_for(snapshot):
     pins = {p["occurrence_id"]: p for p in snapshot["pins"]}
     disruptions = {d["occurrence_id"]: d for d in snapshot.get("disruptions", [])}
     holidays = {h["day"] for h in snapshot["holidays"]}
+    room_stability = snapshot.get("room_stability", True)
     for component in snapshot["workloads"]:
         occurrences = sorted(
             (
@@ -105,6 +108,8 @@ def candidates_for(snapshot):
         for series_index, alternatives in enumerate(
             series_weeks(len(occurrences), weeks)
         ):
+            # A pin or makeup has no recurring pattern and only affects its own date.
+            series_patterns = []
             for index in range(len(alternatives[0])):
                 occurrence = occurrences[offset + index]
                 identifier = occurrence["id"]
@@ -151,7 +156,8 @@ def candidates_for(snapshot):
                                 for room in snapshot["rooms"]:
                                     options.append(
                                         (
-                                            (option_index, weekday, slot),
+                                            (option_index, weekday, slot, room["id"])
+                                            if room_stability else (option_index, weekday, slot),
                                             {
                                                 "day": day.isoformat(),
                                                 "slot": slot,
@@ -232,13 +238,27 @@ def candidates_for(snapshot):
                     reasons[identifier] = [
                         {"code": "emergency_extra_permission_required"}
                     ]
+                if room_stability and not pinned and identifier not in disruptions:
+                    series_patterns.append((identifier, {c.pattern for c in found}))
+            # Distinguish a proven local room-pattern failure from a search timeout.
+            if len(series_patterns) > 1:
+                patterns = [p for _, p in series_patterns]
+                shared_times = set.intersection(*[{p[:3] for p in choices} for choices in patterns])
+                if shared_times and not set.intersection(*patterns):
+                    for identifier, _ in series_patterns:
+                        reasons[identifier].insert(0, {"code": "room_pattern_unsatisfiable",
+                                                      "series": f"{component['id']}:{series_index}"})
             offset += len(alternatives[0])
     return by_occurrence, reasons, weights
 
 
 def metrics(selected, weights, snapshot):
     occupied = defaultdict(set)
+    cohort_slots = defaultdict(set)
+    components = {c["id"]: c for c in snapshot["workloads"]}
     for candidate in selected:
+        if not candidate.cancelled:
+            cohort_slots[components[candidate.component_id]["course_group_id"], candidate.day].add(candidate.slot)
         for resource in candidate.resources:
             occupied[resource, candidate.day].add(candidate.slot)
     student_gaps, teacher_gaps, balance = 0, 0, 0
@@ -264,7 +284,7 @@ def metrics(selected, weights, snapshot):
         for (resource, day), slots in occupied.items()
         if resource in limits
     )
-    components = {c["id"]: c for c in snapshot["workloads"]}
+    compactness = cohort_compactness(cohort_slots)
     inverted = 0
     if snapshot["calendar"].get("lecture_order") == "same_day":
         for first in selected:
@@ -288,10 +308,13 @@ def metrics(selected, weights, snapshot):
         + quality.get("preferences", 1) * preference
         + quality.get("daily_overload", 1) * overload
         + quality.get("lecture_order", 1) * inverted
+        + quality.get("late_start", 1) * compactness["cohort_late_starts"]
     )
     return {
         "placed": len(selected),
-        "student_gaps": student_gaps,
+        **compactness,
+        "student_gaps": compactness["cohort_windows"],
+        "student_leaf_gaps": student_gaps,
         "daily_imbalance": balance,
         "teacher_gaps": teacher_gaps,
         "preference_cost": preference,
@@ -306,7 +329,9 @@ def preferred_limits(snapshot):
     for component in snapshot["workloads"]:
         maximum = component.get("preferred_daily_max")
         if maximum:
-            for leaf in audience_leaves(snapshot, component):
+            for leaf, members in audience_leaves(snapshot, component).items():
+                if not members:
+                    continue
                 resource = "student:" + leaf
                 result[resource] = min(maximum, result.get(resource, maximum))
     return result
@@ -338,16 +363,26 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200, prog
     randomizer = random.Random(seed)
     selected = [pool[0] for pool in pools.values() if pool and pool[0].pinned]
     order = sorted(pools, key=lambda identifier: (len(pools[identifier]), identifier))
+    groups = {c["id"]: c["course_group_id"] for c in snapshot["workloads"]}
+    days = defaultdict(set)
+    for c in selected:
+        if not c.cancelled:
+            days[groups[c.component_id], c.day].add(c.slot)
+
+    def choice_cost(candidate):
+        slots = days.get((groups[candidate.component_id], candidate.day), set())
+        delta = 0 if candidate.cancelled else window_count(slots | {candidate.slot}) - window_count(slots)
+        return delta, candidate.preference_cost, candidate.slot, candidate.day, candidate.room_id
+
     for identifier in order:
         if any(c.occurrence_id == identifier for c in selected):
             continue
-        options = sorted(
-            pools[identifier],
-            key=lambda c: (c.preference_cost, c.slot, c.day, c.room_id),
-        )
+        options = sorted(pools[identifier], key=choice_cost)
         candidate = next((c for c in options if compatible(c, selected)), None)
         if candidate:
             selected.append(candidate)
+            if not candidate.cancelled:
+                days[groups[candidate.component_id], candidate.day].add(candidate.slot)
 
     def score(items):
         m = metrics(items, weights, snapshot)
@@ -386,6 +421,22 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200, prog
     return selected, "HEURISTIC", []
 
 
+def gap_terms(model, slots):
+    low, high = min(slots), max(slots)
+    for slot in range(low + 1, high):
+        left = model.new_bool_var("left")
+        right = model.new_bool_var("right")
+        model.add_max_equality(left, [v for k, v in slots.items() if k < slot])
+        model.add_max_equality(right, [v for k, v in slots.items() if k > slot])
+        gap = model.new_bool_var("gap")
+        occupied_here = slots.get(slot, 0)
+        model.add(gap >= left + right - occupied_here - 1)
+        model.add(gap <= left)
+        model.add(gap <= right)
+        model.add(gap <= 1 - occupied_here)
+        yield gap
+
+
 def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
     incumbent, _, _ = greedy_search(
         pools, snapshot, weights, seed, deadline, iterations=0, progress=progress
@@ -395,23 +446,41 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
     incumbent_set = set(incumbent)
     model = cp_model.CpModel()
     options, occupancy, patterns = [], defaultdict(list), {}
+    # A complete incumbent proves maximum coverage. With rooms locked, selecting
+    # a recurring pattern then selects exactly one candidate on each regular date.
+    # Reuse that Boolean across weeks; partial cases retain dated decision variables.
+    common = {}
+    if len(incumbent) == len(pools) and snapshot.get("room_stability", True):
+        for pool in pools.values():
+            if pool and pool[0].pattern is not None:
+                key = pool[0].series
+                choices = {c.pattern for c in pool}
+                common[key] = choices if key not in common else common[key] & choices
     for identifier, pool in pools.items():
         choices = []
         for candidate in pool:
-            variable = model.new_bool_var(f"x{len(options)}")
-            model.add_hint(variable, int(candidate in incumbent_set))
+            key = (candidate.series, candidate.pattern)
+            recurring = candidate.series in common and candidate.pattern is not None
+            if recurring and candidate.pattern not in common[candidate.series]:
+                continue
+            if recurring and key in patterns:
+                variable = patterns[key]
+            else:
+                variable = model.new_bool_var(f"x{len(options)}")
+                model.add_hint(variable, int(candidate in incumbent_set))
+                if recurring:
+                    patterns[key] = variable
             options.append((candidate, variable))
             choices.append(variable)
             for resource in candidate.resources:
                 occupancy[resource, candidate.day, candidate.slot].append(variable)
-            if candidate.pattern is not None:
-                key = (candidate.series, candidate.pattern)
+            if candidate.pattern is not None and not recurring:
                 if key not in patterns:
                     patterns[key] = model.new_bool_var(f"p{len(patterns)}")
                 model.add(variable <= patterns[key])
         if pool and pool[0].pinned:
             model.add(sum(choices) == 1)
-        else:
+        elif pool and (pool[0].pattern is None or pool[0].series not in common):
             model.add(sum(choices) <= 1)
     series = defaultdict(list)
     for (key, pattern), variable in patterns.items():
@@ -426,30 +495,32 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         occupied[key] = flag
     by_day = defaultdict(dict)
     for (resource, day, slot), variable in occupied.items():
-        if not resource.startswith("room:"):
+        if not resource.startswith(("room:", "student:cross:")):
             by_day[resource, day][slot] = variable
-    student_gaps, teacher_gaps, overloads = [], [], []
+    groups = {c["id"]: c["course_group_id"] for c in snapshot["workloads"]}
+    cohort_slots = defaultdict(list)
+    for candidate, variable in options:
+        if not candidate.cancelled:
+            cohort_slots[groups[candidate.component_id], candidate.day, candidate.slot].append(variable)
+    for (group, day, slot), variables in cohort_slots.items():
+        flag = model.new_bool_var("cohort_slot")
+        model.add_max_equality(flag, variables)
+        by_day[f"cohort:{group}", day][slot] = flag
+    student_gaps, teacher_gaps, overloads, late_starts = [], [], [], []
     limits = preferred_limits(snapshot)
     daily_counts = defaultdict(dict)
     for (resource, day), slots in by_day.items():
         low, high = min(slots), max(slots)
-        for slot in range(low + 1, high):
-            left = model.new_bool_var("left")
-            right = model.new_bool_var("right")
-            model.add_max_equality(left, [v for k, v in slots.items() if k < slot])
-            model.add_max_equality(right, [v for k, v in slots.items() if k > slot])
-            gap = model.new_bool_var("gap")
-            occupied_here = slots.get(slot, 0)
-            model.add(gap >= left + right - occupied_here - 1)
-            model.add(gap <= left)
-            model.add(gap <= right)
-            model.add(gap <= 1 - occupied_here)
-            if resource.startswith("student:"):
-                student_gaps.append(
-                    gap * weights.get(resource.removeprefix("student:"), 1)
-                )
-            else:
-                teacher_gaps.append(gap)
+        if resource.startswith("cohort:"):
+            student_gaps.extend(gap_terms(model, slots))
+            active = model.new_bool_var("active_day")
+            model.add_max_equality(active, list(slots.values()))
+            # Empty days use high + 1 as a sentinel and contribute zero to late starts.
+            first = model.new_int_var(low, high + 1, "first_pair")
+            model.add_min_equality(first, [high + 1 - (high + 1 - k) * v for k, v in slots.items()])
+            late_starts.append(first - 1 - high * (1 - active))
+        elif resource.startswith("teacher:"):
+            teacher_gaps.extend(gap_terms(model, slots))
         if resource.startswith("student:"):
             count = model.new_int_var(0, high, "daily")
             model.add(count == sum(slots.values()))
@@ -515,6 +586,7 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         + sum(teacher_gaps) * quality.get("teacher_gaps", 1)
         + sum(overloads) * quality.get("daily_overload", 1)
         + sum(lecture_order_cost) * quality.get("lecture_order", 1)
+        + sum(late_starts) * quality.get("late_start", 1)
     )
     objectives = [
         ("coverage", -count),
@@ -582,6 +654,12 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
             if index == len(objectives) - 1
             else remaining * (0.55 if index == 0 else 0.65)
         )
+        if name != "coverage":
+            # A time-limited phase must never discard a better known incumbent.
+            current = metrics(selected, weights, snapshot)
+            key = {"student_gaps": "student_gaps", "balance": "daily_imbalance",
+                   "preferences": "soft_cost"}[name]
+            model.add(expression <= current[key])
         model.minimize(expression)
         if progress:
             progress(name, objective=name, placed=len(selected), total=len(pools))
@@ -633,8 +711,11 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         model.add(expression == value)
         model.clear_hints()
         selected_set = set(selected)
+        hinted = set()
         for candidate, variable in options:
-            model.add_hint(variable, int(candidate in selected_set))
+            if variable.index not in hinted:
+                model.add_hint(variable, int(candidate in selected_set))
+                hinted.add(variable.index)
     if selected and status_name not in {"MODEL_INVALID", "HEURISTIC_FALLBACK"}:
         proven = {p["objective"] for p in phases if p["status"] == "OPTIMAL"}
         status_name = (

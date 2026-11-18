@@ -275,3 +275,16 @@ def test_template_authorization_and_lossless_projection(schedule):
     assert s.client.get('/schedule/template', params={'version_id': s.version.id}).status_code == 200
     s.client.cookies.clear()
     assert s.client.get('/schedule/template').status_code == 401
+
+
+def test_metrics_measure_saved_cohorts_and_exclude_holiday_cancellations(schedule):
+    from scripts.timetable_metrics import measure_version
+
+    s = schedule
+    cancelled = s.db.scalar(select(m.Assignment).where(m.Assignment.cancelled))
+    cancelled.day = date(2026, 9, 8)
+    s.db.flush()
+    rows = measure_version(s.db, s.version)
+    assert [row["group"] for row in rows] == [g.group_code for g in s.groups]
+    assert all(row["pairs_per_day"] == {1: 1} for row in rows)
+    assert all(row["occupied_days"] == 1 for row in rows)

@@ -43,6 +43,8 @@ jobs:
       - name: Check Python correctness
         run: ruff check backend/app backend/tests backend/alembic
       - name: Run isolated backend tests
+        env:
+          PYTHONPATH: backend
         run: python -m pytest backend/tests -q --junitxml=reports/pytest.xml
       - name: Save test report
         if: ${{ always() }}

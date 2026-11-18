@@ -15,6 +15,7 @@ from sqlalchemy import (
     Unicode,
     UnicodeText,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, synonym
 
@@ -63,9 +64,16 @@ class SmallGroup(Base):
 
 class LabGroup(Base):
     __tablename__ = "LabGroup"
-    __table_args__ = (UniqueConstraint("small_group_id", "label"),)
+    __table_args__ = (
+        CheckConstraint("small_group_id IS NOT NULL OR course_group_id IS NOT NULL", name="ck_lab_parent"),
+        Index("uq_lab_nested_label", "small_group_id", "label", unique=True,
+              sqlite_where=text("small_group_id IS NOT NULL"), mssql_where=text("small_group_id IS NOT NULL")),
+        Index("uq_lab_independent_label", "course_group_id", "label", unique=True,
+              sqlite_where=text("small_group_id IS NULL"), mssql_where=text("small_group_id IS NULL")),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
-    small_group_id: Mapped[int] = mapped_column(ForeignKey("SmallGroup.id"))
+    course_group_id: Mapped[int | None] = mapped_column(ForeignKey("CourseGroup.id"))
+    small_group_id: Mapped[int | None] = mapped_column(ForeignKey("SmallGroup.id"))
     label: Mapped[str] = mapped_column(Unicode(50))
     capacity: Mapped[int]
 
@@ -192,12 +200,15 @@ class CalendarConfig(Base):
     quality_weights: Mapped[dict] = mapped_column(
         JSON,
         default=lambda: {
+            "late_start": 1,
             "teacher_gaps": 1,
             "daily_overload": 1,
             "lecture_order": 1,
             "preferences": 1,
         },
     )
+    cross_partition_overlap: Mapped[str] = mapped_column(String(24), default="assume_overlap",
+                                                         server_default="assume_overlap")
     lecture_order: Mapped[str] = mapped_column(String(20), default="unconfirmed")
 
 

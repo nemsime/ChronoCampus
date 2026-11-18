@@ -74,25 +74,19 @@ python -m scripts.diagnose_template
 python -m scripts.verify_template
 ```
 
-## Phase 2 proposal — no solver changes implemented
+## Generation of recurring series
 
-Introduce a pattern decision per workload series (and parity when needed):
-weekday, slot, and room. Link dated CP-SAT assignment variables to that decision
-for all teaching weeks in the series. Use the existing first-partial-week anchor,
-unchanged parity function and teaching-period calendars; remove holiday dates
-from delivered occurrences while retaining normative cancellation accounting.
-Keep remainder hours as explicit dated variables, identified separately from
-weekly/parity series. Pins and declared exceptions should override only their
-individual dates, with deviations reported rather than silently weakening the
-whole series constraint.
+Generation locks the weekday, pair and room for each weekly or alternating series.
+The advanced generation option `room_stability` defaults to true. Disabling it keeps
+the weekday and pair fixed and allows rooms to vary. Pins and emergency makeups are
+dated exceptions. Holidays retain the existing cancellation and hour accounting.
+The existing dated-change workflow keeps edited versions under manual control.
 
-Apply existing room capacity/equipment, audience, lecturer and external published
-occupancy constraints to every expanded date. If a locked pattern cannot fit,
-report infeasibility and the affected series; do not silently scatter lessons.
-Retain the independent dated validator and add pattern validation and comparative
-fixtures (partial first week, holidays, pins, emergency moves, shared rooms,
-remainder volumes). Benchmark this opt-in mode before changing generation defaults.
-No migration is proposed for the current read-only feature.
+When every date offers the same time but the rooms have no common choice, the
+generation diagnostics identify the series with `room_pattern_unsatisfiable`.
+The draft can retain the lessons that fit. The independent validator still
+requires the full hours ledger for publication. Historical drafts and publications
+continue to use the lossless read-only projection described above.
 
 ## Validation
 

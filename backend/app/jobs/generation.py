@@ -51,6 +51,8 @@ def enqueue_generation(db, identifier, body, actor):
                 "revision": body.revision,
                 "seed": body.seed,
                 "algorithm": body.algorithm,
+                # Retain replay compatibility for existing keys in the default mode.
+                **({} if body.room_stability else {"room_stability": False}),
             },
             sort_keys=True,
         ).encode()
@@ -90,7 +92,7 @@ def enqueue_generation(db, identifier, body, actor):
     job = enqueue_job(
         db,
         "generation",
-        {"enqueue_data_revision": revision},
+        {"enqueue_data_revision": revision, "room_stability": body.room_stability},
         actor_id=actor.id,
         request_id=telemetry.request_id_var.get(),
     )
@@ -210,7 +212,9 @@ def prepare(engine, claim):
             db.commit()
             return None
         if not run.snapshot:
-            run.snapshot = build_snapshot(db, version, materialize=True)
+            snapshot = build_snapshot(db, version, materialize=True)
+            snapshot["room_stability"] = claim.payload.get("room_stability", True)
+            run.snapshot = snapshot
             run.input_hash = snapshot_hash(run.snapshot)
             run.comparison_hash = comparison_hash(run.snapshot)
             run.snapshot_created_at = database_now(db)

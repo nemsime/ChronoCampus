@@ -5,6 +5,7 @@ from app.calendar.rules import (
     as_date,
     audience_size,
     audiences_overlap,
+    cohort_compactness,
     lesson_slot,
     overlaps,
     resource_rule_matches,
@@ -31,6 +32,7 @@ def validation_context(snapshot):
         "slots": {},
         "times": {},
         "external": external,
+        "independent_labs": {lab["id"] for lab in snapshot["lab_groups"] if lab.get("small_group_id") is None},
     }
 
 
@@ -119,7 +121,7 @@ def placement_errors(
                     errors.append("external_teacher_conflict")
                 if other["room_id"] == room["id"]:
                     errors.append("external_room_conflict")
-                if audiences_overlap(component, other):
+                if audiences_overlap(component, other, context["independent_labs"]):
                     errors.append("external_group_conflict")
     return sorted(set(errors))
 
@@ -131,6 +133,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
     groups = {group["id"]: group for group in snapshot["groups"]}
     seen, placed, cancelled = set(), Counter(), Counter()
     issues, effective = [], []
+    cohort_slots = defaultdict(set)
     if not components:
         issues.append({"code": "workload_empty"})
     if not snapshot["term"]["confirmed"] or not snapshot["calendar"]["confirmed"]:
@@ -184,7 +187,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                         other_component["teacher_id"] == component["teacher_id"],
                         "teacher_conflict",
                     ),
-                    (audiences_overlap(component, other_component), "group_conflict"),
+                    (audiences_overlap(component, other_component, context["independent_labs"]), "group_conflict"),
                 ):
                     if condition:
                         issues.append(
@@ -195,6 +198,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                             }
                         )
             effective.append((assignment, component))
+            cohort_slots[component["course_group_id"], as_date(assignment["day"])].add(assignment["slot"])
     lookup = {a["occurrence_id"]: a for a in assignments}
     for pin in snapshot["pins"]:
         candidate = lookup.get(pin["occurrence_id"])
@@ -230,6 +234,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
     complete = not issues and not unplaced and all(row["remaining_hours"] == 0 for row in ledger)
     return {
         "complete": complete,
+        "compactness": cohort_compactness(cohort_slots),
         "issues": issues,
         "hours": ledger,
         "unplaced_occurrences": unplaced,

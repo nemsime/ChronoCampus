@@ -49,6 +49,8 @@ def serialize(row, db):
     result = {
         column.key: getattr(row, column.key) for column in inspect(type(row)).columns
     }
+    if isinstance(row, m.CalendarConfig):
+        result["quality_weights"] = {"late_start": 1, **row.quality_weights}
     if isinstance(row, m.Room):
         result["equipment_ids"] = list(
             db.scalars(
@@ -69,7 +71,7 @@ def require_record(db, model, identifier):
     return row
 
 
-def membership(db, data):
+def membership(db, data, resource):
     group_id, small_id, lab_id = (
         data.get(k) for k in ("course_group_id", "small_group_id", "lab_group_id")
     )
@@ -80,8 +82,19 @@ def membership(db, data):
         and require_record(db, m.SmallGroup, small_id).course_group_id != group_id
     ):
         raise HTTPException(422, "invalid_subgroup")
-    if lab_id and require_record(db, m.LabGroup, lab_id).small_group_id != small_id:
-        raise HTTPException(422, "invalid_lab_group")
+    if lab_id:
+        lab = require_record(db, m.LabGroup, lab_id)
+        if lab.small_group_id is None:
+            if lab.course_group_id != group_id or (resource == "workloads" and small_id):
+                raise HTTPException(422, "invalid_lab_group")
+        elif lab.small_group_id != small_id:
+            raise HTTPException(422, "invalid_lab_group")
+
+
+def lab_capacity(group_id):
+    return (select(func.coalesce(func.sum(m.LabGroup.capacity), 0))
+            .outerjoin(m.SmallGroup, m.LabGroup.small_group_id == m.SmallGroup.id)
+            .where(func.coalesce(m.LabGroup.course_group_id, m.SmallGroup.course_group_id) == group_id))
 
 
 def validate_calendar_workloads(db, resource, data, existing):
@@ -127,7 +140,7 @@ def validate_domain(db, resource, data, existing, actor):
         elif data.get("faculty_id") is not None:
             raise HTTPException(422, "faculty_dean_only")
     if resource in {"users", "workloads", "subgroups"}:
-        membership(db, data)
+        membership(db, data, resource)
     model, _ = resource_type(resource)
     # Check references before persistence, yielding stable errors instead of driver text.
     for column in inspect(model).columns:
@@ -202,12 +215,25 @@ def validate_domain(db, resource, data, existing, actor):
             .limit(1)
         ):
             raise HTTPException(409, "study_form_has_workload")
-    if resource in {"subgroups", "lab-groups"}:
-        parent_model, parent_key = (
-            (m.CourseGroup, "course_group_id")
-            if resource == "subgroups"
-            else (m.SmallGroup, "small_group_id")
-        )
+    if resource == "lab-groups":
+        small_id = data["small_group_id"]
+        if small_id is not None:
+            small = require_record(db, m.SmallGroup, small_id)
+            if data["course_group_id"] not in {None, small.course_group_id}:
+                raise HTTPException(422, "invalid_subgroup")
+            data["course_group_id"] = small.course_group_id
+        group = require_record(db, m.CourseGroup, data["course_group_id"])
+        if existing and (existing.small_group_id != small_id or
+                         existing.course_group_id not in {None, group.id}):
+            raise HTTPException(409, "group_parent_immutable")
+        others = lab_capacity(group.id)
+        if existing:
+            others = others.where(m.LabGroup.id != existing.id)
+        if db.scalar(others) + data["capacity"] > group.capacity:
+            raise HTTPException(422, "subgroup_capacity")
+    if resource == "subgroups" or (resource == "lab-groups" and data["small_group_id"]):
+        parent_model, parent_key = ((m.CourseGroup, "course_group_id") if resource == "subgroups"
+                                    else (m.SmallGroup, "small_group_id"))
         parent = require_record(db, parent_model, data[parent_key])
         siblings = select(func.coalesce(func.sum(model.capacity), 0)).where(
             getattr(model, parent_key) == parent.id
@@ -218,6 +244,8 @@ def validate_domain(db, resource, data, existing, actor):
                 raise HTTPException(409, "group_parent_immutable")
         if data["capacity"] + db.scalar(siblings) > parent.capacity:
             raise HTTPException(422, "subgroup_capacity")
+    if resource == "groups" and existing and db.scalar(lab_capacity(existing.id)) > data["capacity"]:
+        raise HTTPException(422, "subgroup_capacity")
     if resource in {"groups", "subgroups"} and existing:
         child_model, child_key = (
             (m.SmallGroup, "course_group_id")

@@ -85,6 +85,13 @@ def authorized(scope):
             same_small = and_(same_small, or_(W.c.lab_group_id.is_(None),
                                               W.c.lab_group_id == scope["lab_group_id"]))
         predicate = and_(predicate, or_(W.c.small_group_id.is_(None), same_small))
+    if scope["lab_group_id"]:
+        # A direct lab partition has an independent membership, even when the
+        # student has a practical subgroup as well. Retain broad legacy rows.
+        independent = select(LG.c.id).where(
+            LG.c.id == W.c.lab_group_id, LG.c.small_group_id.is_(None)
+        ).correlate(W).exists()
+        predicate = and_(predicate, or_(~independent, W.c.lab_group_id == scope["lab_group_id"]))
     return predicate
 
 

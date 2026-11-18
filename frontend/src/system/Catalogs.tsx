@@ -65,13 +65,15 @@ function FieldInput({
         ? (f.options || []).map((v) => ({ id: v, label: t(v) }))
         : (data[f.resource!] || [])
             .filter((row) => !f.filter || row.role === f.filter)
-            .filter((row) =>
-              f.key === "small_group_id" && draft.course_group_id
-                ? row.course_group_id === Number(draft.course_group_id)
-                : f.key === "lab_group_id" && draft.small_group_id
-                  ? row.small_group_id === Number(draft.small_group_id)
-                  : true,
-            )
+            .filter((row) => {
+              if (f.key === "small_group_id" && draft.course_group_id)
+                return row.course_group_id === Number(draft.course_group_id);
+              if (f.key !== "lab_group_id") return true;
+              if (row.small_group_id == null)
+                return row.course_group_id === Number(draft.course_group_id) &&
+                  (draft.role === "student" || !draft.small_group_id);
+              return row.small_group_id === Number(draft.small_group_id);
+            })
             .map((row) => ({ id: row.id, label: rowLabel(row) }));
     input = (
       <select
@@ -490,9 +492,10 @@ export function Catalogs({ mode = "university", onCreateDraft }: { mode?: Catalo
                         } : {}),
                         ...(field.key === "course_group_id" &&
                         "small_group_id" in draft
-                          ? { small_group_id: null, lab_group_id: null }
+                          ? { small_group_id: null, ...("lab_group_id" in draft ? { lab_group_id: null } : {}) }
                           : field.key === "small_group_id" &&
-                              "lab_group_id" in draft
+                              "lab_group_id" in draft && (draft.role !== "student" ||
+                                data["lab-groups"]?.find(lab => lab.id === draft.lab_group_id)?.small_group_id != null)
                             ? { lab_group_id: null }
                             : {}),
                       })

@@ -37,7 +37,8 @@ class SmallGroupInput(Input):
 
 
 class LabGroupInput(Input):
-    small_group_id: int = Field(gt=0)
+    course_group_id: int | None = Field(default=None, gt=0)
+    small_group_id: int | None = Field(default=None, gt=0)
     label: str = Field(min_length=1, max_length=50)
     capacity: int = Field(gt=0, le=2000)
 
@@ -95,17 +96,21 @@ class CalendarInput(Input):
     confirmed: bool = False
     quality_weights: dict[str, int] = Field(
         default_factory=lambda: {
+            "late_start": 1,
             "teacher_gaps": 1,
             "daily_overload": 1,
             "lecture_order": 1,
             "preferences": 1,
         }
     )
+    cross_partition_overlap: Literal["assume_overlap"] = "assume_overlap"
     lecture_order: Literal["unconfirmed", "same_day", "off"] = "unconfirmed"
 
     @model_validator(mode="after")
     def validate_configuration(self):
+        self.quality_weights.setdefault("late_start", 1)
         if set(self.quality_weights) != {
+            "late_start",
             "teacher_gaps",
             "daily_overload",
             "lecture_order",
