@@ -22,6 +22,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
   const [runInfo, setRunInfo] = useState<Row | null>(null);
   const [algorithm, setAlgorithm] = useState("cp_sat");
   const [seed, setSeed] = useState(1);
+  const [roomStability, setRoomStability] = useState(true);
   const [editing, setEditing] = useState<Row | null>(null);
   const [oneTime, setOneTime] = useState(false);
   const [moveReason, setMoveReason] = useState("");
@@ -263,6 +264,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                     <option value="greedy_local">{t("greedy_local")}</option>
                   </select>
                 </label>
+                <label><input type="checkbox" checked={roomStability} onChange={e => setRoomStability(e.target.checked)} />{t("room_stability")}</label>
                 <label>
                   {t("seed")}
                   <input
@@ -280,7 +282,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                   disabled={busy || searching}
                   onClick={() =>
                     void run(async () => {
-                      const parameters = JSON.stringify([version.id, version.revision, seed, algorithm]);
+                      const parameters = JSON.stringify([version.id, version.revision, seed, algorithm, roomStability]);
                       if (launchIntent.current?.parameters !== parameters) {
                         launchIntent.current = { parameters, key: crypto.randomUUID() };
                       }
@@ -289,7 +291,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                       const result = await api(
                         `/admin/schedule/versions/${version.id}/generate`,
                         "POST",
-                        { revision: version.revision, seed, algorithm, idempotency_key: intent.key },
+                        { revision: version.revision, seed, algorithm, room_stability: roomStability, idempotency_key: intent.key },
                       );
                       if (!result.id) throw new Error(t("runResponseMissing"));
                       if (launchIntent.current === intent) launchIntent.current = null;

@@ -234,3 +234,26 @@ def test_missing_teaching_period_cannot_schedule_exams():
     assert any(
         i["code"] == "teaching_period_required" for i in result["report"]["issues"]
     )
+
+
+@pytest.mark.parametrize("algorithm", ["cp_sat", "greedy_local"])
+def test_alternating_available_rooms_report_series_or_allow_opt_out(algorithm):
+    snapshot = sample_snapshot()
+    snapshot["workloads"] = snapshot["workloads"][:1]
+    snapshot["occurrences"] = snapshot["occurrences"][:2]
+    snapshot["rooms"][1] = dict(snapshot["rooms"][0], id=2)
+    snapshot["availability"] = [
+        dict(room_id=room, teacher_id=None, starts_on=snapshot["term"]["starts_on"],
+             ends_on=snapshot["term"]["ends_on"], parity=parity, weekday=None,
+             from_time="09:00", until_time="19:00", kind="unavailable")
+        for room, parity in [(1, "numerator"), (2, "denominator")]
+    ]
+    locked = generate(snapshot, algorithm, seconds=1)
+    assert len(locked["report"]["unplaced_occurrences"]) == 1
+    assert any(d["code"] == "room_pattern_unsatisfiable" and d["series"] == "1:0"
+               for reasons in locked["diagnostics"].values() for d in reasons)
+
+    snapshot["room_stability"] = False
+    flexible = generate(snapshot, algorithm, seconds=1)
+    assert flexible["report"]["complete"]
+    assert {a["room_id"] for a in flexible["assignments"]} == {1, 2}

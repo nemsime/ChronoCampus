@@ -1,0 +1,603 @@
+{
+  "work_package": 1,
+  "solver": "cp_sat",
+  "concurrent_seed_processes": 3,
+  "inputs": "legacy-demo-inputs.json.gz",
+  "input_sha256": "28efec811926027ab8c4b281601c5c15793c44677a4f8fbd831884b26ac0a47e",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "search_seconds_per_draft": 60,
+  "runs": [
+    {
+      "group": "DEMO-1-26",
+      "seed": 1,
+      "search_seconds": 60,
+      "wall_seconds": 42.789,
+      "preparation_seconds": 1.706,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-1-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 55,
+            "3": 16
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-2-26",
+      "seed": 1,
+      "search_seconds": 60,
+      "wall_seconds": 42.764,
+      "preparation_seconds": 1.715,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-2-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-3-26",
+      "seed": 1,
+      "search_seconds": 60,
+      "wall_seconds": 45.15,
+      "preparation_seconds": 1.239,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-3-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-4-26",
+      "seed": 1,
+      "search_seconds": 60,
+      "wall_seconds": 42.819,
+      "preparation_seconds": 1.302,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-4-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-5-26",
+      "seed": 1,
+      "search_seconds": 60,
+      "wall_seconds": 37.421,
+      "preparation_seconds": 0.734,
+      "solver_status": "FEASIBLE",
+      "occurrences": 120,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-5-26",
+          "occupied_days": 55,
+          "pairs_per_day": {
+            "1": 32,
+            "2": 23
+          },
+          "first_pair_of_day": {
+            "1": 55
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 16,
+            "2": 16,
+            "3": 16,
+            "4": 16
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-1-26",
+      "seed": 2,
+      "search_seconds": 60,
+      "wall_seconds": 43.543,
+      "preparation_seconds": 1.391,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-1-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 55,
+            "3": 16
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-2-26",
+      "seed": 2,
+      "search_seconds": 60,
+      "wall_seconds": 40.819,
+      "preparation_seconds": 1.723,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-2-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-3-26",
+      "seed": 2,
+      "search_seconds": 60,
+      "wall_seconds": 41.674,
+      "preparation_seconds": 1.465,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-3-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-4-26",
+      "seed": 2,
+      "search_seconds": 60,
+      "wall_seconds": 42.146,
+      "preparation_seconds": 1.267,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-4-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-5-26",
+      "seed": 2,
+      "search_seconds": 60,
+      "wall_seconds": 37.199,
+      "preparation_seconds": 1.116,
+      "solver_status": "FEASIBLE",
+      "occurrences": 120,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-5-26",
+          "occupied_days": 55,
+          "pairs_per_day": {
+            "1": 32,
+            "2": 23
+          },
+          "first_pair_of_day": {
+            "1": 55
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 16,
+            "2": 16,
+            "3": 16,
+            "4": 16
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-1-26",
+      "seed": 3,
+      "search_seconds": 60,
+      "wall_seconds": 42.689,
+      "preparation_seconds": 1.631,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-1-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 55,
+            "3": 16
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-2-26",
+      "seed": 3,
+      "search_seconds": 60,
+      "wall_seconds": 42.954,
+      "preparation_seconds": 1.788,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-2-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-3-26",
+      "seed": 3,
+      "search_seconds": 60,
+      "wall_seconds": 43.264,
+      "preparation_seconds": 1.301,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-3-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-4-26",
+      "seed": 3,
+      "search_seconds": 60,
+      "wall_seconds": 43.067,
+      "preparation_seconds": 1.346,
+      "solver_status": "FEASIBLE",
+      "occurrences": 240,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-4-26",
+          "occupied_days": 71,
+          "pairs_per_day": {
+            "2": 48,
+            "3": 23
+          },
+          "first_pair_of_day": {
+            "1": 71
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 21,
+            "1": 40,
+            "2": 40,
+            "3": 32,
+            "4": 32
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    },
+    {
+      "group": "DEMO-5-26",
+      "seed": 3,
+      "search_seconds": 60,
+      "wall_seconds": 38.18,
+      "preparation_seconds": 0.839,
+      "solver_status": "FEASIBLE",
+      "occurrences": 120,
+      "unplaced": 0,
+      "issues": [],
+      "exact_template_roundtrip": true,
+      "metrics": [
+        {
+          "group": "DEMO-5-26",
+          "occupied_days": 55,
+          "pairs_per_day": {
+            "1": 32,
+            "2": 23
+          },
+          "first_pair_of_day": {
+            "1": 55
+          },
+          "window_slots": 0,
+          "days_with_windows": 0,
+          "percent_days_with_windows": 0.0,
+          "weekday_load": {
+            "0": 14,
+            "1": 16,
+            "2": 16,
+            "3": 16,
+            "4": 16
+          },
+          "series_with_room_changes": 0,
+          "series_with_weekday_or_slot_changes": 0,
+          "series_with_any_changes": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "drafts": 15,
+    "occurrences": 3240,
+    "unplaced": 0,
+    "validation_issues": 0,
+    "exact_roundtrips": 15,
+    "varying_room_series": 0,
+    "varying_time_series": 0,
+    "cohort_days": 1017,
+    "days_with_windows": 0,
+    "windows": 0,
+    "first_pair_starts": 1017,
+    "wall_seconds_median": 42.764,
+    "wall_seconds_range": [
+      37.199,
+      45.15
+    ]
+  }
+}

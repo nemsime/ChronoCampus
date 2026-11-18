@@ -285,3 +285,16 @@ def test_expired_exhausted_attempt_releases_guard_atomically(admin_client, campu
     assert db.get(ActiveGeneration, version["id"]) is None
     assert db.scalar(select(JobAttempt)).outcome == "failed"
     assert enqueue(admin_client, version)["id"] != run["id"]
+
+
+def test_room_stability_reaches_worker_and_idempotency_check(admin_client, campus):
+    db = campus["db"]
+    version = draft(admin_client, campus)
+    url = f"/api/admin/schedule/versions/{version['id']}/generate"
+    body = {"revision": version["revision"], "room_stability": False,
+            "idempotency_key": "room-mode-test-00001"}
+    assert admin_client.post(url, json=body).status_code == 202
+    assert admin_client.post(url, json={**body, "room_stability": True}).status_code == 409
+    claim = claim_job(db.bind, "generation", "owner")
+    _, request, _, _, _ = prepare(db.bind, claim)
+    assert request["snapshot"]["room_stability"] is False

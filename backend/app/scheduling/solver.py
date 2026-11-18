@@ -77,6 +77,7 @@ def candidates_for(snapshot):
     pins = {p["occurrence_id"]: p for p in snapshot["pins"]}
     disruptions = {d["occurrence_id"]: d for d in snapshot.get("disruptions", [])}
     holidays = {h["day"] for h in snapshot["holidays"]}
+    room_stability = snapshot.get("room_stability", True)
     for component in snapshot["workloads"]:
         occurrences = sorted(
             (
@@ -105,6 +106,8 @@ def candidates_for(snapshot):
         for series_index, alternatives in enumerate(
             series_weeks(len(occurrences), weeks)
         ):
+            # A pin or makeup has no recurring pattern and only affects its own date.
+            series_patterns = []
             for index in range(len(alternatives[0])):
                 occurrence = occurrences[offset + index]
                 identifier = occurrence["id"]
@@ -151,7 +154,8 @@ def candidates_for(snapshot):
                                 for room in snapshot["rooms"]:
                                     options.append(
                                         (
-                                            (option_index, weekday, slot),
+                                            (option_index, weekday, slot, room["id"])
+                                            if room_stability else (option_index, weekday, slot),
                                             {
                                                 "day": day.isoformat(),
                                                 "slot": slot,
@@ -232,6 +236,16 @@ def candidates_for(snapshot):
                     reasons[identifier] = [
                         {"code": "emergency_extra_permission_required"}
                     ]
+                if room_stability and not pinned and identifier not in disruptions:
+                    series_patterns.append((identifier, {c.pattern for c in found}))
+            # Distinguish a proven local room-pattern failure from a search timeout.
+            if len(series_patterns) > 1:
+                patterns = [p for _, p in series_patterns]
+                shared_times = set.intersection(*[{p[:3] for p in choices} for choices in patterns])
+                if shared_times and not set.intersection(*patterns):
+                    for identifier, _ in series_patterns:
+                        reasons[identifier].insert(0, {"code": "room_pattern_unsatisfiable",
+                                                      "series": f"{component['id']}:{series_index}"})
             offset += len(alternatives[0])
     return by_occurrence, reasons, weights
 
@@ -395,23 +409,41 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
     incumbent_set = set(incumbent)
     model = cp_model.CpModel()
     options, occupancy, patterns = [], defaultdict(list), {}
+    # A complete incumbent proves maximum coverage. With rooms locked, selecting
+    # a recurring pattern then selects exactly one candidate on each regular date.
+    # Reuse that Boolean across weeks; partial cases retain dated decision variables.
+    common = {}
+    if len(incumbent) == len(pools) and snapshot.get("room_stability", True):
+        for pool in pools.values():
+            if pool and pool[0].pattern is not None:
+                key = pool[0].series
+                choices = {c.pattern for c in pool}
+                common[key] = choices if key not in common else common[key] & choices
     for identifier, pool in pools.items():
         choices = []
         for candidate in pool:
-            variable = model.new_bool_var(f"x{len(options)}")
-            model.add_hint(variable, int(candidate in incumbent_set))
+            key = (candidate.series, candidate.pattern)
+            recurring = candidate.series in common and candidate.pattern is not None
+            if recurring and candidate.pattern not in common[candidate.series]:
+                continue
+            if recurring and key in patterns:
+                variable = patterns[key]
+            else:
+                variable = model.new_bool_var(f"x{len(options)}")
+                model.add_hint(variable, int(candidate in incumbent_set))
+                if recurring:
+                    patterns[key] = variable
             options.append((candidate, variable))
             choices.append(variable)
             for resource in candidate.resources:
                 occupancy[resource, candidate.day, candidate.slot].append(variable)
-            if candidate.pattern is not None:
-                key = (candidate.series, candidate.pattern)
+            if candidate.pattern is not None and not recurring:
                 if key not in patterns:
                     patterns[key] = model.new_bool_var(f"p{len(patterns)}")
                 model.add(variable <= patterns[key])
         if pool and pool[0].pinned:
             model.add(sum(choices) == 1)
-        else:
+        elif pool and (pool[0].pattern is None or pool[0].series not in common):
             model.add(sum(choices) <= 1)
     series = defaultdict(list)
     for (key, pattern), variable in patterns.items():
@@ -633,8 +665,11 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         model.add(expression == value)
         model.clear_hints()
         selected_set = set(selected)
+        hinted = set()
         for candidate, variable in options:
-            model.add_hint(variable, int(candidate in selected_set))
+            if variable.index not in hinted:
+                model.add_hint(variable, int(candidate in selected_set))
+                hinted.add(variable.index)
     if selected and status_name not in {"MODEL_INVALID", "HEURISTIC_FALLBACK"}:
         proven = {p["objective"] for p in phases if p["status"] == "OPTIMAL"}
         status_name = (

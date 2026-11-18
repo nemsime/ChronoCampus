@@ -7,7 +7,7 @@ import { Dialog, ErrorBox, LoadingState, useAction } from "./common";
 import { useLanguage } from "./i18n";
 
 export interface DraftIntent { version?: Row; key?: string; uncertain?: boolean }
-export interface DraftSelection { termId: string; groups: number[]; name: string; algorithm: string; seed: number }
+export interface DraftSelection { termId: string; groups: number[]; name: string; algorithm: string; seed: number; roomStability?: boolean }
 
 // Save the server-returned draft before enqueueing. A generation retry must use
 // that same draft, revision and idempotency key, even after a lost response.
@@ -30,7 +30,7 @@ export async function launchDraft(request: typeof api, intent: DraftIntent, valu
   }
   intent.key ??= crypto.randomUUID();
   const result = await request<Row>(`/admin/schedule/versions/${intent.version.id}/generate`, "POST", {
-    revision: intent.version.revision, algorithm: values.algorithm, seed: values.seed, idempotency_key: intent.key,
+    revision: intent.version.revision, algorithm: values.algorithm, seed: values.seed, room_stability: values.roomStability ?? true, idempotency_key: intent.key,
   });
   if (!result.id) throw new Error("runResponseMissing");
   return { version: intent.version, run: result };
@@ -49,6 +49,7 @@ export function DraftWizard({ data, initialTermId = "", onClose, onCreated, onSt
   const [search, setSearch] = useState("");
   const [algorithm, setAlgorithm] = useState("cp_sat");
   const [seed, setSeed] = useState(1);
+  const [roomStability, setRoomStability] = useState(true);
   const [created, setCreated] = useState<Row | null>(null);
   const [uncertain, setUncertain] = useState(false);
   const intent = useRef<DraftIntent>({});
@@ -72,7 +73,7 @@ export function DraftWizard({ data, initialTermId = "", onClose, onCreated, onSt
     {created && !busy && <p className="notice" role="status">{t("draftSavedRetry")}</p>}
     <form onSubmit={event => { event.preventDefault(); if (step < 2) setStep(step + 1); else if (valid && !uncertain) void run(async () => {
       try {
-        const result = await launchDraft(api, intent.current, { termId, groups: selected, name, algorithm, seed }, version => { setCreated(version); onCreated(version); });
+        const result = await launchDraft(api, intent.current, { termId, groups: selected, name, algorithm, seed, roomStability }, version => { setCreated(version); onCreated(version); });
         onStarted(result.version, result.run);
       } finally { setUncertain(!!intent.current.uncertain); }
     }); }}>
@@ -106,6 +107,7 @@ export function DraftWizard({ data, initialTermId = "", onClose, onCreated, onSt
           <details className="draft-advanced"><summary>{t("advancedGeneration")}</summary><div className="form-grid">
             <label>{t("algorithm")}<select value={algorithm} onChange={event => setAlgorithm(event.target.value)}><option value="cp_sat">{t("cp_sat")}</option><option value="greedy_local">{t("greedy_local")}</option></select></label>
             <label>{t("seed")}<input type="number" min={0} max={2147483647} required value={seed} onChange={event => setSeed(Number(event.target.value))} /></label>
+            <label><input type="checkbox" checked={roomStability} onChange={e => setRoomStability(e.target.checked)} />{t("room_stability")}</label>
           </div></details>
         </div>}
       </fieldset>

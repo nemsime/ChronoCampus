@@ -38,6 +38,7 @@ class GenerateInput(BaseModel):
     idempotency_key: str | None = Field(default=None, min_length=16, max_length=80)
     seed: int = Field(default=1, ge=0, le=2**31 - 1)
     algorithm: Literal["cp_sat", "greedy_local"] = "cp_sat"
+    room_stability: bool = True
 
 
 class MoveInput(BaseModel):

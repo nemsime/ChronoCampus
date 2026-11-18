@@ -1,4 +1,6 @@
 export const ruleMessages: Record<string, [string, string, string]> = {
+  room_stability: ["Одна аудитория для всей серии", "Մեկ լսարան դասերի ամբողջ շարքի համար", "Keep one room throughout each series"],
+  room_pattern_unsatisfiable: ["Нет общей аудитории для всех дат серии.", "Շարքի բոլոր ամսաթվերի համար ընդհանուր լսարան չկա։", "No room is available on every date of the series."],
   previous_page: ["Предыдущая страница", "Նախորդ էջ", "Previous page"],
   next_page: ["Следующая страница", "Հաջորդ էջ", "Next page"],
   cohort_identity_has_workload: [
