@@ -257,3 +257,41 @@ def test_alternating_available_rooms_report_series_or_allow_opt_out(algorithm):
     flexible = generate(snapshot, algorithm, seconds=1)
     assert flexible["report"]["complete"]
     assert {a["room_id"] for a in flexible["assignments"]} == {1, 2}
+
+
+@pytest.mark.parametrize("algorithm", ["cp_sat", "greedy_local"])
+def test_cohort_window_beats_maximum_teacher_preference(algorithm):
+    snapshot = sample_snapshot()
+    snapshot["calendar"]["weekdays"] = [0]
+    snapshot["calendar"]["quality_weights"] = {"preferences": 100, "late_start": 100}
+    snapshot["pins"] = [
+        dict(occurrence_id=i, day=day, slot=1, starts_at="09:30", ends_at="10:50",
+             room_id=1, cancelled=False)
+        for i, day in [(1, "2026-09-07"), (2, "2026-09-14")]
+    ]
+    snapshot["availability"] = [dict(
+        teacher_id=1, room_id=None, starts_on="2026-09-07", ends_on="2026-09-18",
+        weekday=None, parity="every", from_time="12:50", until_time="14:10", kind="preferred")]
+    result = generate(snapshot, algorithm, seconds=2)
+    assert result["report"]["complete"]
+    assert result["metrics"]["cohort_windows"] == 0
+    assert {r["slot"] for r in result["assignments"] if r["occurrence_id"] > 2} == {2}
+    assert result["metrics"]["preference_cost"] > 0
+    assert result["report"]["compactness"]["cohort_late_starts"] == 0
+
+
+def test_compactness_counts_union_of_subgroups_and_ignores_empty_days():
+    snapshot = sample_snapshot()
+    snapshot["subgroups"] = [{"id": i, "course_group_id": 1, "capacity": 10} for i in (1, 2)]
+    for i, component in enumerate(snapshot["workloads"], 1):
+        component["small_group_id"] = i
+    placements = []
+    for occurrence, slot, room in [(1, 2, 1), (2, 4, 1), (3, 3, 2)]:
+        start, end = lesson_slot(snapshot["calendar"], slot)
+        placements.append(dict(occurrence_id=occurrence, day="2026-09-07", slot=slot,
+                               room_id=room, starts_at=start, ends_at=end))
+    report = validate(snapshot, placements)
+    assert report["compactness"]["cohort_windows"] == 0
+    assert report["compactness"]["cohort_late_starts"] == 1
+    assert report["compactness"]["occupied_cohort_days"] == 1
+    assert validate(snapshot, placements[:2])["compactness"]["cohort_window_day_percent"] == 100

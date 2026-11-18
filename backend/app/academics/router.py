@@ -49,6 +49,8 @@ def serialize(row, db):
     result = {
         column.key: getattr(row, column.key) for column in inspect(type(row)).columns
     }
+    if isinstance(row, m.CalendarConfig):
+        result["quality_weights"] = {"late_start": 1, **row.quality_weights}
     if isinstance(row, m.Room):
         result["equipment_ids"] = list(
             db.scalars(

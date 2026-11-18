@@ -95,6 +95,7 @@ class CalendarInput(Input):
     confirmed: bool = False
     quality_weights: dict[str, int] = Field(
         default_factory=lambda: {
+            "late_start": 1,
             "teacher_gaps": 1,
             "daily_overload": 1,
             "lecture_order": 1,
@@ -105,7 +106,9 @@ class CalendarInput(Input):
 
     @model_validator(mode="after")
     def validate_configuration(self):
+        self.quality_weights.setdefault("late_start", 1)
         if set(self.quality_weights) != {
+            "late_start",
             "teacher_gaps",
             "daily_overload",
             "lecture_order",

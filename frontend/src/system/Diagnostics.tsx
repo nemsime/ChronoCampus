@@ -164,7 +164,7 @@ export function RunCard({ run }: { run: Row }) {
       ? Math.max(0, (now - new Date(run.created_at + "Z").getTime()) / 1000)
       : run.queue_seconds;
   const metrics = Object.entries(result.metrics || {}).filter(
-    ([, v]) => typeof v === "number",
+    ([key, v]) => typeof v === "number" && (key !== "student_gaps" || result.metrics.cohort_windows == null),
   );
   const reasonGroups: [string, Record<string, number>][] = [
     ["reasons", summary.reason_counts || {}],

@@ -181,3 +181,20 @@ def required_pairs(hours: int, units: int | None) -> int:
     if hours <= 0 or hours % units:
         raise ValueError("indivisible_workload")
     return hours // units
+
+
+def window_count(slots) -> int:
+    return max(slots) - min(slots) + 1 - len(slots) if slots else 0
+
+
+def cohort_compactness(occupied) -> dict:
+    """Summarize the union of delivered slots per occupied (cohort, date)."""
+    gaps = [window_count(slots) for slots in occupied.values()]
+    with_windows = sum(gap > 0 for gap in gaps)
+    return {
+        "occupied_cohort_days": len(gaps),
+        "cohort_windows": sum(gaps),
+        "cohort_days_with_windows": with_windows,
+        "cohort_window_day_percent": round(100 * with_windows / len(gaps), 2) if gaps else 0,
+        "cohort_late_starts": sum(min(slots) - 1 for slots in occupied.values()),
+    }

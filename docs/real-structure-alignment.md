@@ -27,3 +27,11 @@ The solver locks a room per series by default. When the constructive schedule pl
 The 15 demo runs again placed 3,240 occurrences, with 15 exact roundtrips and zero conflicts, windows or varying series. Median wall time fell from 61.555 to 42.764 seconds (range 37.199–45.150). Alternating room closures in isolated tests produce the series diagnostic in both solvers. Full backend suite 252 passed, 22 skipped. Frontend types, all four test files and production build passed. No migration.
 
 [WP-1 per-cohort results](benchmarks/wp-1-metrics.json)
+
+## WP-2 compactness
+
+Both solver objectives use the union of delivered subgroup slots on a cohort-date. The independent validator recomputes this metric from dated assignments. The generation report includes window slots, affected days, percentage and total skipped slots before the first lesson. The final preferences phase includes the editable calendar weight `late_start`, default 1, preserving coverage, windows and balance as higher priorities. Calendar reads and writes supply that default for older weight dictionaries. The previous weighted subgroup metric remains available as `student_leaf_gaps`. Publication eligibility and hard slot limits retain their prior rules.
+
+All 15 legacy drafts matched baseline coverage, compactness, stability and reconstruction. Median wall time was 60.358 seconds (58.422–63.793). The 60-second setting governs search time. Candidate preparation is additional. Full backend suite 255 passed, 22 skipped. Frontend types, all four test files and production build passed. No migration.
+
+[WP-2 per-cohort results](benchmarks/wp-2-metrics.json)

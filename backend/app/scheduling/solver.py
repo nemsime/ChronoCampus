@@ -13,11 +13,13 @@ from app.calendar.rules import (
     as_date,
     audience_leaves,
     audiences_overlap,
+    cohort_compactness,
     lesson_slot,
     minutes,
     resource_rule_matches,
     teaching_dates,
     week_index,
+    window_count,
 )
 from app.scheduling.validation import placement_errors, validate, validation_context
 
@@ -252,7 +254,11 @@ def candidates_for(snapshot):
 
 def metrics(selected, weights, snapshot):
     occupied = defaultdict(set)
+    cohort_slots = defaultdict(set)
+    components = {c["id"]: c for c in snapshot["workloads"]}
     for candidate in selected:
+        if not candidate.cancelled:
+            cohort_slots[components[candidate.component_id]["course_group_id"], candidate.day].add(candidate.slot)
         for resource in candidate.resources:
             occupied[resource, candidate.day].add(candidate.slot)
     student_gaps, teacher_gaps, balance = 0, 0, 0
@@ -278,7 +284,7 @@ def metrics(selected, weights, snapshot):
         for (resource, day), slots in occupied.items()
         if resource in limits
     )
-    components = {c["id"]: c for c in snapshot["workloads"]}
+    compactness = cohort_compactness(cohort_slots)
     inverted = 0
     if snapshot["calendar"].get("lecture_order") == "same_day":
         for first in selected:
@@ -302,10 +308,13 @@ def metrics(selected, weights, snapshot):
         + quality.get("preferences", 1) * preference
         + quality.get("daily_overload", 1) * overload
         + quality.get("lecture_order", 1) * inverted
+        + quality.get("late_start", 1) * compactness["cohort_late_starts"]
     )
     return {
         "placed": len(selected),
-        "student_gaps": student_gaps,
+        **compactness,
+        "student_gaps": compactness["cohort_windows"],
+        "student_leaf_gaps": student_gaps,
         "daily_imbalance": balance,
         "teacher_gaps": teacher_gaps,
         "preference_cost": preference,
@@ -352,16 +361,26 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200, prog
     randomizer = random.Random(seed)
     selected = [pool[0] for pool in pools.values() if pool and pool[0].pinned]
     order = sorted(pools, key=lambda identifier: (len(pools[identifier]), identifier))
+    groups = {c["id"]: c["course_group_id"] for c in snapshot["workloads"]}
+    days = defaultdict(set)
+    for c in selected:
+        if not c.cancelled:
+            days[groups[c.component_id], c.day].add(c.slot)
+
+    def choice_cost(candidate):
+        slots = days.get((groups[candidate.component_id], candidate.day), set())
+        delta = 0 if candidate.cancelled else window_count(slots | {candidate.slot}) - window_count(slots)
+        return delta, candidate.preference_cost, candidate.slot, candidate.day, candidate.room_id
+
     for identifier in order:
         if any(c.occurrence_id == identifier for c in selected):
             continue
-        options = sorted(
-            pools[identifier],
-            key=lambda c: (c.preference_cost, c.slot, c.day, c.room_id),
-        )
+        options = sorted(pools[identifier], key=choice_cost)
         candidate = next((c for c in options if compatible(c, selected)), None)
         if candidate:
             selected.append(candidate)
+            if not candidate.cancelled:
+                days[groups[candidate.component_id], candidate.day].add(candidate.slot)
 
     def score(items):
         m = metrics(items, weights, snapshot)
@@ -398,6 +417,22 @@ def greedy_search(pools, snapshot, weights, seed, deadline, iterations=200, prog
             if progress:
                 progress("improving", placed=len(selected), total=len(pools))
     return selected, "HEURISTIC", []
+
+
+def gap_terms(model, slots):
+    low, high = min(slots), max(slots)
+    for slot in range(low + 1, high):
+        left = model.new_bool_var("left")
+        right = model.new_bool_var("right")
+        model.add_max_equality(left, [v for k, v in slots.items() if k < slot])
+        model.add_max_equality(right, [v for k, v in slots.items() if k > slot])
+        gap = model.new_bool_var("gap")
+        occupied_here = slots.get(slot, 0)
+        model.add(gap >= left + right - occupied_here - 1)
+        model.add(gap <= left)
+        model.add(gap <= right)
+        model.add(gap <= 1 - occupied_here)
+        yield gap
 
 
 def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
@@ -460,28 +495,30 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
     for (resource, day, slot), variable in occupied.items():
         if not resource.startswith("room:"):
             by_day[resource, day][slot] = variable
-    student_gaps, teacher_gaps, overloads = [], [], []
+    groups = {c["id"]: c["course_group_id"] for c in snapshot["workloads"]}
+    cohort_slots = defaultdict(list)
+    for candidate, variable in options:
+        if not candidate.cancelled:
+            cohort_slots[groups[candidate.component_id], candidate.day, candidate.slot].append(variable)
+    for (group, day, slot), variables in cohort_slots.items():
+        flag = model.new_bool_var("cohort_slot")
+        model.add_max_equality(flag, variables)
+        by_day[f"cohort:{group}", day][slot] = flag
+    student_gaps, teacher_gaps, overloads, late_starts = [], [], [], []
     limits = preferred_limits(snapshot)
     daily_counts = defaultdict(dict)
     for (resource, day), slots in by_day.items():
         low, high = min(slots), max(slots)
-        for slot in range(low + 1, high):
-            left = model.new_bool_var("left")
-            right = model.new_bool_var("right")
-            model.add_max_equality(left, [v for k, v in slots.items() if k < slot])
-            model.add_max_equality(right, [v for k, v in slots.items() if k > slot])
-            gap = model.new_bool_var("gap")
-            occupied_here = slots.get(slot, 0)
-            model.add(gap >= left + right - occupied_here - 1)
-            model.add(gap <= left)
-            model.add(gap <= right)
-            model.add(gap <= 1 - occupied_here)
-            if resource.startswith("student:"):
-                student_gaps.append(
-                    gap * weights.get(resource.removeprefix("student:"), 1)
-                )
-            else:
-                teacher_gaps.append(gap)
+        if resource.startswith("cohort:"):
+            student_gaps.extend(gap_terms(model, slots))
+            active = model.new_bool_var("active_day")
+            model.add_max_equality(active, list(slots.values()))
+            # Empty days use high + 1 as a sentinel and contribute zero to late starts.
+            first = model.new_int_var(low, high + 1, "first_pair")
+            model.add_min_equality(first, [high + 1 - (high + 1 - k) * v for k, v in slots.items()])
+            late_starts.append(first - 1 - high * (1 - active))
+        elif resource.startswith("teacher:"):
+            teacher_gaps.extend(gap_terms(model, slots))
         if resource.startswith("student:"):
             count = model.new_int_var(0, high, "daily")
             model.add(count == sum(slots.values()))
@@ -547,6 +584,7 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
         + sum(teacher_gaps) * quality.get("teacher_gaps", 1)
         + sum(overloads) * quality.get("daily_overload", 1)
         + sum(lecture_order_cost) * quality.get("lecture_order", 1)
+        + sum(late_starts) * quality.get("late_start", 1)
     )
     objectives = [
         ("coverage", -count),
@@ -614,6 +652,12 @@ def constraint_search(pools, snapshot, weights, seed, deadline, progress=None):
             if index == len(objectives) - 1
             else remaining * (0.55 if index == 0 else 0.65)
         )
+        if name != "coverage":
+            # A time-limited phase must never discard a better known incumbent.
+            current = metrics(selected, weights, snapshot)
+            key = {"student_gaps": "student_gaps", "balance": "daily_imbalance",
+                   "preferences": "soft_cost"}[name]
+            model.add(expression <= current[key])
         model.minimize(expression)
         if progress:
             progress(name, objective=name, placed=len(selected), total=len(pools))

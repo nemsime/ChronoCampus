@@ -192,6 +192,7 @@ class CalendarConfig(Base):
     quality_weights: Mapped[dict] = mapped_column(
         JSON,
         default=lambda: {
+            "late_start": 1,
             "teacher_gaps": 1,
             "daily_overload": 1,
             "lecture_order": 1,

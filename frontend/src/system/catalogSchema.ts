@@ -133,6 +133,7 @@ export const catalogSchema: Record<string, Field[]> = {
       key: "quality_weights",
       type: "weights",
       initial: {
+        late_start: 1,
         teacher_gaps: 1,
         daily_overload: 1,
         lecture_order: 1,
