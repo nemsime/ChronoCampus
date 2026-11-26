@@ -30,6 +30,13 @@ export function SemesterTimetable({ filters, reload, versionId }: { filters: Rec
   </>;
 }
 
+const compactKinds: Record<string, string> = {
+  lecture: "compactLecture",
+  practical: "compactPractical",
+  lab: "compactLab",
+  pe: "compact_pe",
+};
+
 export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
   const { t, lang } = useLanguage();
   const tableId = useId();
@@ -37,21 +44,21 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
   const [selectedLesson, setSelectedLesson] = useState<Row | null>(null);
   const [activeChanges, setActiveChanges] = useState<Row[] | null>(null);
   const compactLesson = (row: Row) => {
-    const kind = t(row.lesson_type === "lab" ? "compactLab" : row.lesson_type === "lecture" ? "compactLecture" : "compactPractical");
+    const kind = t(compactKinds[row.lesson_type] ?? row.lesson_type);
     const audience = row.lesson_type === "lab" ? row.lab_group : row.small_group;
-    const full = [row.subject, t(row.lesson_type), row.teacher, `${t("room_id")} ${row.room}`, row.group, row.small_group ? `${t("small_group_id")} ${row.small_group}` : "", row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : ""].filter(Boolean).join(" · ");
+    const full = [row.subject, t(row.lesson_type), row.teacher, row.room && `${t("room_id")} ${row.room}`, row.group, row.small_group ? `${t("small_group_id")} ${row.small_group}` : "", row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : ""].filter(Boolean).join(" · ");
     return <button type="button" className={`semester-compact-lesson semester-lesson-${row.lesson_type}`} aria-label={full} onClick={() => setSelectedLesson(row)}>
       <strong>{shortSubject(row.subject || "")}</strong>
       <span className="compact-kind">{kind}{audience ? ` ${audience}` : ""}</span>
-      <span className="compact-teacher">{shortLecturer(row.teacher || "")}</span>
-      <span className="compact-room">{row.room}{row.lesson_type === "lab" && row.small_group ? ` · ${t("compactGroup")}${row.small_group}` : ""}</span>
+      {row.teacher && <span className="compact-teacher">{shortLecturer(row.teacher)}</span>}
+      {row.room && <span className="compact-room">{row.room}{row.lesson_type === "lab" && row.small_group ? ` · ${t("compactGroup")}${row.small_group}` : ""}</span>}
     </button>;
   };
   const lesson = (row: Row, showGroup = true) => <div className={`semester-lesson semester-lesson-${row.lesson_type}`}>
     <span className="semester-type">{t(row.lesson_type)}</span>
     <strong>{row.subject}</strong>
-    <span className="semester-person"><UserRound size={12} aria-hidden="true" />{row.teacher}</span>
-    <span className="semester-room"><MapPin size={12} aria-hidden="true" />{row.room}</span>
+    {row.teacher && <span className="semester-person"><UserRound size={12} aria-hidden="true" />{row.teacher}</span>}
+    {row.room && <span className="semester-room"><MapPin size={12} aria-hidden="true" />{row.room}</span>}
     {(showGroup || row.small_group || row.lab_group) && <span className="semester-audience">{[showGroup ? row.group : null, row.small_group ? `${t("small_group_id")} ${row.small_group}` : null, row.lab_group ? `${t("lab_group_id")} ${row.lab_group}` : null].filter(Boolean).join(" · ")}</span>}
   </div>;
   return <div className="semester-timetable">
@@ -105,9 +112,9 @@ export function SemesterTemplateContent({ semesters }: { semesters: Row[] }) {
     })}
     {selectedLesson && <Dialog labelledBy={`${tableId}-lesson`} onClose={() => setSelectedLesson(null)}>
       <h2 id={`${tableId}-lesson`}>{selectedLesson.subject}</h2>
-      <p>{t(selectedLesson.lesson_type)} · {selectedLesson.teacher}</p>
+      <p>{t(selectedLesson.lesson_type)}{selectedLesson.teacher && ` · ${selectedLesson.teacher}`}</p>
       <p>{t(`semesterWeekday${selectedLesson.weekday}`)} · {t("pair")} {selectedLesson.slot * 2 - 1}–{selectedLesson.slot * 2} · {t(selectedLesson.parity)}</p>
-      <p>{t("room_id")} {selectedLesson.room} · {selectedLesson.group}</p>
+      <p>{selectedLesson.room && `${t("room_id")} ${selectedLesson.room} · `}{selectedLesson.group}</p>
       {selectedLesson.small_group && <p>{t("small_group_id")} {selectedLesson.small_group}</p>}
       {selectedLesson.lab_group && <p>{t("lab_group_id")} {selectedLesson.lab_group}</p>}
     </Dialog>}

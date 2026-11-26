@@ -274,14 +274,29 @@ class Availability(Base):
 
 class Workload(Base):
     __tablename__ = "CurriculumComponent"
-    __table_args__ = (CheckConstraint("semester_hours > 0", name="ck_load_hours"),)
+    __table_args__ = (
+        CheckConstraint("semester_hours > 0", name="ck_load_hours"),
+        CheckConstraint(
+            "(lesson_type = 'pe' AND teacher_id IS NULL AND small_group_id IS NULL "
+            "AND lab_group_id IS NULL) OR (lesson_type <> 'pe' AND teacher_id IS NOT NULL)",
+            name="ck_load_pe_resources",
+        ),
+        Index(
+            "uq_load_pe_cohort",
+            "term_id",
+            "course_group_id",
+            unique=True,
+            sqlite_where=text("lesson_type = 'pe'"),
+            mssql_where=text("lesson_type = 'pe'"),
+        ),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     term_id: Mapped[int] = mapped_column(ForeignKey("AcademicTerm.id"))
     course_group_id: Mapped[int] = mapped_column(ForeignKey("CourseGroup.id"))
     small_group_id: Mapped[int | None] = mapped_column(ForeignKey("SmallGroup.id"))
     lab_group_id: Mapped[int | None] = mapped_column(ForeignKey("LabGroup.id"))
     subject_id: Mapped[int] = mapped_column(ForeignKey("Subject.id"))
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("User.id"))
+    teacher_id: Mapped[int | None] = mapped_column(ForeignKey("User.id"))
     lesson_type: Mapped[str] = mapped_column(String(20))
     semester_hours: Mapped[int]
     assessment: Mapped[str] = mapped_column(String(20), default="none")
@@ -321,7 +336,7 @@ class Assignment(Base):
     slot: Mapped[int]
     starts_at: Mapped[time] = mapped_column(Time)
     ends_at: Mapped[time] = mapped_column(Time)
-    room_id: Mapped[int] = mapped_column(ForeignKey("Room.id"))
+    room_id: Mapped[int | None] = mapped_column(ForeignKey("Room.id"))
     pinned: Mapped[bool] = mapped_column(default=False)
     cancelled: Mapped[bool] = mapped_column(default=False)
 

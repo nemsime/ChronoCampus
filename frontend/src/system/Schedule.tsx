@@ -103,7 +103,7 @@ export function LessonList({
               <option value="">{t("all")}</option>
               {Array.from(
                 new Map(
-                  rows.map((row) => [
+                  rows.filter((row) => row[key] != null).map((row) => [
                     String(row[key]),
                     labels[key] ? row[labels[key]] : t(String(row[key])),
                   ]),
@@ -151,10 +151,10 @@ export function LessonList({
                 )}
               </div>
               <h4>{row.subject}</h4>
-              <div className="lesson-details">
-                <span><UserRound size={14} aria-hidden="true" />{row.teacher}</span>
-                <span><MapPin size={14} aria-hidden="true" />{t("room_id")} {row.room}</span>
-              </div>
+              {(row.teacher || row.room) && <div className="lesson-details">
+                {row.teacher && <span><UserRound size={14} aria-hidden="true" />{row.teacher}</span>}
+                {row.room && <span><MapPin size={14} aria-hidden="true" />{t("room_id")} {row.room}</span>}
+              </div>}
               <small className="lesson-audience"><Users size={13} aria-hidden="true" />
                 {row.group}
                 {row.small_group_id
@@ -388,7 +388,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
         <Dialog labelledBy="note-title" closeDisabled={busy} onClose={() => setSelected(null)}>
           <h2 id="note-title">{t("note")}</h2>
           <p>{selected.subject} · {selected.day} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)}</p>
-          <p>{selected.teacher} · {t("room_id")} {selected.room} · {selected.group}</p>
+          <p>{[selected.teacher, selected.room && `${t("room_id")} ${selected.room}`, selected.group].filter(Boolean).join(" · ")}</p>
           {account.role === "lecturer" && <LecturerRequestForm key={selected.occurrence_id} lesson={selected} slots={facets?.grid[String(selected.term_id)]?.slots || []} onSaved={() => setReload(v => v + 1)} />}
           <form
             onSubmit={(e) => {

@@ -330,6 +330,7 @@ const words: Record<string, [string, string, string]> = {
   lesson_type: ["Вид занятия", "Դասի տեսակ", "Lesson type"],
   lecture: ["Лекция", "Դասախոսություն", "Lecture"],
   practical: ["Практическое", "Գործնական", "Practical"],
+  pe: ["Физкультура", "Ֆիզիկական դաստիարակություն", "Physical Education"],
   semester_hours: ["Часов за семестр", "Ժամեր կիսամյակում", "Semester hours"],
   assessment: ["Форма контроля", "Ստուգման ձև", "Assessment"],
   exam: ["Экзамен", "Քննություն", "Exam"],
@@ -387,6 +388,7 @@ const words: Record<string, [string, string, string]> = {
     "Ամրագրել ժամը և լսարանը",
     "Pin time and room",
   ],
+  pinTime: ["Закрепить время", "Ամրագրել ժամը", "Pin time"],
   slot: ["Номер пары", "Դասի համար", "Lesson number"],
   emergency: [
     "Экстренная отмена с отработкой",

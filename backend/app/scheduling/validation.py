@@ -8,7 +8,9 @@ from app.calendar.rules import (
     cohort_compactness,
     lesson_slot,
     overlaps,
+    pe_workload_errors,
     resource_rule_matches,
+    rule_applies_to_resource,
     teaching_dates,
     week_index,
 )
@@ -73,22 +75,28 @@ def placement_errors(
             errors.append("slot_time_mismatch")
     except ValueError as error:
         errors.append(str(error))
-    room = context["rooms"].get(assignment["room_id"])
-    if not room:
-        return errors + ["room_not_found"]
-    if room["capacity"] < context["sizes"][component["id"]]:
-        errors.append("room_capacity")
-    suitable_types = {
-        "lecture": {"lecture_hall", "classroom"},
-        "practical": {"classroom", "lab", "language_lab"},
-        "lab": {"lab", "language_lab"},
-    }
-    if room["room_type"] not in suitable_types[component["lesson_type"]]:
-        errors.append("room_type")
-    if not set(component["equipment_ids"]).issubset(room["equipment_ids"]):
-        errors.append("room_equipment")
-    if component["teacher_id"] not in context["teachers"]:
-        errors.append("lecturer_required")
+    teacher_id = component["teacher_id"]
+    room_id = assignment["room_id"]
+    if component["lesson_type"] == "pe":
+        if room_id is not None:
+            errors.append("pe_room_not_permitted")
+    else:
+        room = context["rooms"].get(room_id)
+        if not room:
+            return errors + ["room_not_found"]
+        if room["capacity"] < context["sizes"][component["id"]]:
+            errors.append("room_capacity")
+        suitable_types = {
+            "lecture": {"lecture_hall", "classroom"},
+            "practical": {"classroom", "lab", "language_lab"},
+            "lab": {"lab", "language_lab"},
+        }
+        if room["room_type"] not in suitable_types[component["lesson_type"]]:
+            errors.append("room_type")
+        if not set(component["equipment_ids"]).issubset(room["equipment_ids"]):
+            errors.append("room_equipment")
+        if teacher_id not in context["teachers"]:
+            errors.append("lecturer_required")
     holiday = day in context["holidays"]
     cancelled = assignment.get("cancelled", False)
     if holiday and not cancelled:
@@ -99,10 +107,7 @@ def placement_errors(
         for rule in snapshot["availability"]:
             if rule["kind"] != "unavailable":
                 continue
-            if (
-                rule["teacher_id"] != component["teacher_id"]
-                and rule["room_id"] != room["id"]
-            ):
+            if not rule_applies_to_resource(rule, teacher_id, room_id):
                 continue
             if resource_rule_matches(
                 rule, snapshot, day, assignment["starts_at"], assignment["ends_at"]
@@ -117,9 +122,9 @@ def placement_errors(
                 other["starts_at"],
                 other["ends_at"],
             ):
-                if other["teacher_id"] == component["teacher_id"]:
+                if teacher_id is not None and other["teacher_id"] == teacher_id:
                     errors.append("external_teacher_conflict")
-                if other["room_id"] == room["id"]:
+                if room_id is not None and other["room_id"] == room_id:
                     errors.append("external_room_conflict")
                 if audiences_overlap(component, other, context["independent_labs"]):
                     errors.append("external_group_conflict")
@@ -134,6 +139,7 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
     seen, placed, cancelled = set(), Counter(), Counter()
     issues, effective = [], []
     cohort_slots = defaultdict(set)
+    pe_days, pe_weeks = Counter(), Counter()
     if not components:
         issues.append({"code": "workload_empty"})
     if not snapshot["term"]["confirmed"] or not snapshot["calendar"]["confirmed"]:
@@ -156,6 +162,13 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                 issues.append({"code": "teaching_week_count_mismatch",
                                "course_group_id": group_id,
                                "configured": configured, "actual": len(weeks)})
+    for component in components.values():
+        if component["lesson_type"] == "pe":
+            codes = pe_workload_errors(
+                component, groups[component["course_group_id"]],
+                snapshot["term"], snapshot["calendar"],
+            )
+            issues.extend({"component_id": component["id"], "code": code} for code in codes)
     required_makeup = {o["occurrence_id"] for o in snapshot.get("overrides", [])}
     for assignment in assignments:
         identifier = assignment["occurrence_id"]
@@ -167,6 +180,16 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
             issues.append({"occurrence_id": identifier, "code": "makeup_required"})
         component = components[occurrences[identifier]["component_id"]]
         errors = placement_errors(snapshot, assignment, component, context)
+        if component["lesson_type"] == "pe" and not errors:
+            day = as_date(assignment["day"])
+            daily = component["id"], day
+            weekly = component["id"], week_index(snapshot["term"]["starts_on"], day)
+            pe_days[daily] += 1
+            pe_weeks[weekly] += 1
+            if pe_days[daily] > 1:
+                errors.append("pe_same_day")
+            if pe_weeks[weekly] > 2:
+                errors.append("pe_weekly_frequency")
         issues.extend({"occurrence_id": identifier, "code": code} for code in errors)
         if not errors:
             (cancelled if assignment.get("cancelled") else placed)[component["id"]] += 1
@@ -182,9 +205,13 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
                 ):
                     continue
                 for condition, code in (
-                    (other["room_id"] == assignment["room_id"], "room_conflict"),
                     (
-                        other_component["teacher_id"] == component["teacher_id"],
+                        assignment["room_id"] is not None and other["room_id"] == assignment["room_id"],
+                        "room_conflict",
+                    ),
+                    (
+                        component["teacher_id"] is not None
+                        and other_component["teacher_id"] == component["teacher_id"],
                         "teacher_conflict",
                     ),
                     (audiences_overlap(component, other_component, context["independent_labs"]), "group_conflict"),

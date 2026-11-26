@@ -186,7 +186,13 @@ def check(identifier: int, version_id: int = Query(..., ge=1),
     slot = suggestion.proposed_slot if suggestion.kind == "move" else assignment.slot
     room = suggestion.proposed_room_id or (assignment.room_id if assignment else None)
     if room is None:
-        raise HTTPException(422, "invalid_proposal", headers=q.PRIVATE)
+        lesson_type = db.scalar(
+            select(m.Workload.lesson_type)
+            .join(m.Occurrence, m.Occurrence.component_id == m.Workload.id)
+            .where(m.Occurrence.id == suggestion.occurrence_id)
+        )
+        if lesson_type != "pe":
+            raise HTTPException(422, "invalid_proposal", headers=q.PRIVATE)
     body = MoveInput(revision=version.revision, day=day, slot=slot,
                      room_id=room, pinned=assignment.pinned if assignment else False)
     try:

@@ -24,6 +24,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
   const [seed, setSeed] = useState(1);
   const [roomStability, setRoomStability] = useState(true);
   const [editing, setEditing] = useState<Row | null>(null);
+  const roomlessEdit = editing?.lesson_type === "pe";
   const [oneTime, setOneTime] = useState(false);
   const [moveReason, setMoveReason] = useState("");
   const [inspecting, setInspecting] = useState<Row | null>(null);
@@ -104,8 +105,9 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
     const calendar = version.configuration.calendar;
     setSlotOptions(await api(`/admin/calendar/${calendar.id}/slots?count=12`));
   }
+  const workloadFor = (id: number) => (detail?.workloads || []).find((row: Row) => row.id === id);
   const workloadLabel = (id: number) => {
-    const c = (detail?.workloads || []).find((row: Row) => row.id === id);
+    const c = workloadFor(id);
     return c
       ? `${rowLabel((data.subjects || []).find((r) => r.id === c.subject_id) || { id: c.subject_id })} · ${t(c.lesson_type)} · ${rowLabel((data.groups || []).find((r) => r.id === c.course_group_id) || { id: c.course_group_id })}${c.small_group_id ? ` / ${c.small_group_id}` : ""}${c.lab_group_id ? ` / ${c.lab_group_id}` : ""}`
       : `#${id}`;
@@ -227,7 +229,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
             )}
         {detail && (
           <>
-            <AdminDatedChanges version={version} groups={data.groups || []} disabled={busy || searching} onChanged={() => open(version.id)} onEdit={o => void run(() => edit({ occurrence_id: o.occurrence_id, day: "", slot: o.original.slot, room_id: o.original.room_id, pinned: false, subject: o.reason }))} />
+            <AdminDatedChanges version={version} groups={data.groups || []} disabled={busy || searching} onChanged={() => open(version.id)} onEdit={o => void run(() => edit({ occurrence_id: o.occurrence_id, day: "", slot: o.original.slot, room_id: o.original.room_id, lesson_type: o.original.room_id === null ? "pe" : undefined, pinned: false, subject: o.reason }))} />
             <section id="planner-lessons" className="section-target" tabIndex={-1} aria-label={t("schedule")}>
             <h2 className="section-title">{t("schedule")}</h2>
             <PlannerTimetable key={version.id} detail={detail} disabled={busy || searching}
@@ -387,6 +389,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                                   day: "",
                                   slot: 1,
                                   room_id: "",
+                                  lesson_type: workloadFor(occurrence?.component_id)?.lesson_type,
                                   pinned: false,
                                   subject: workloadLabel(
                                     occurrence?.component_id,
@@ -415,7 +418,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
         <h2 id="planner-lesson-title">{t("lessonDetails")}</h2>
         <h3>{inspecting.subject}</h3>
         <p>{inspecting.day} · {String(inspecting.starts_at).slice(0, 5)}–{String(inspecting.ends_at).slice(0, 5)} · {t(inspecting.lesson_type)}</p>
-        <p>{inspecting.teacher} · {inspecting.group} · {t("room_id")} {inspecting.room}</p>
+        <p>{[inspecting.teacher, inspecting.group, inspecting.room && `${t("room_id")} ${inspecting.room}`].filter(Boolean).join(" · ")}</p>
         {inspecting.cancelled && <p className="notice warning">{t("cancelled")}</p>}
       </Dialog>}
       {create && !loading && <DraftWizard data={data} initialTermId={initialTermId} onOpenSetup={onOpenSetup}
@@ -446,7 +449,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                     ...(oneTime ? { reason: moveReason } : {}),
                     day: editing.day,
                     slot: Number(editing.slot),
-                    room_id: Number(editing.room_id),
+                    room_id: roomlessEdit ? null : Number(editing.room_id),
                     pinned: editing.pinned,
                   },
                 );
@@ -481,7 +484,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                 ))}
               </select>
             </label>
-            <label>
+            {!roomlessEdit && <label>
               {t("room_id")}
               <select
                 required
@@ -497,7 +500,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                   </option>
                 ))}
               </select>
-            </label>
+            </label>}
             <label className="check">
               <input
                 type="checkbox"
@@ -506,7 +509,7 @@ export function Planner({ initialVersionId = null, createOnOpen = false, initial
                   setEditing({ ...editing, pinned: e.target.checked })
                 }
               />
-              {t("pin")}
+              {t(roomlessEdit ? "pinTime" : "pin")}
             </label>
             <ErrorBox error={error} />
             <div className="actions">
@@ -577,7 +580,7 @@ function PlannerTimetable({ detail, disabled, onSelect }: { detail: Row; disable
   const [filter, setFilter] = useState("");
   const field = perspective === "group" ? "course_group_id" : perspective === "lecturer" ? "teacher_id" : "room_id";
   const label = perspective === "group" ? "group" : perspective === "lecturer" ? "teacher" : "room";
-  const choices = Array.from(new Map(assignments.map((row) => [String(row[field]), row[label]])).entries());
+  const choices = Array.from(new Map(assignments.filter((row) => row[field] != null).map((row) => [String(row[field]), row[label]])).entries());
   const rows = assignments.filter((row) => row.day >= monday && row.day <= addDays(monday, 6) && (!filter || String(row[field]) === filter));
   // The server computes the frozen version's calendar, including empty slots.
   const grid: GridConfiguration | undefined = detail.grid?.slots ? detail.grid : detail.grid?.[String(detail.version.term_id)];

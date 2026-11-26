@@ -32,6 +32,14 @@ def as_date(value) -> date:
     return value if isinstance(value, date) else date.fromisoformat(value)
 
 
+def academic_start_year(academic_year, starts_on) -> int:
+    label = (academic_year or "")[:4]
+    if label.isdigit():
+        return int(label)
+    start = as_date(starts_on)
+    return start.year - (start.month < 9)
+
+
 def week_index(start, day) -> int:
     first = as_date(start)
     monday = first - timedelta(days=first.weekday())
@@ -105,6 +113,14 @@ def allowed_slots(snapshot: dict, group_id: int, day) -> list[int]:
 
 def overlaps(start_a, end_a, start_b, end_b) -> bool:
     return minutes(start_a) < minutes(end_b) and minutes(start_b) < minutes(end_a)
+
+
+def rule_applies_to_resource(rule: dict, teacher_id, room_id) -> bool:
+    return (
+        teacher_id is not None and rule["teacher_id"] == teacher_id
+    ) or (
+        room_id is not None and rule["room_id"] == room_id
+    )
 
 
 def resource_rule_matches(rule: dict, snapshot: dict, day, start, end) -> bool:
@@ -199,6 +215,23 @@ def required_pairs(hours: int, units: int | None) -> int:
     if hours <= 0 or hours % units:
         raise ValueError("indivisible_workload")
     return hours // units
+
+
+def pe_workload_errors(component, group, term, calendar) -> list[str]:
+    errors = []
+    year = academic_start_year(term.get("academic_year"), term["starts_on"])
+    if group["admission_year"] not in {year, year - 1}:
+        errors.append("pe_year_ineligible")
+    units = calendar["academic_hours_per_lesson"]
+    if not units or component["semester_hours"] != 2 * calendar["teaching_weeks"] * units:
+        errors.append("pe_weekly_hours")
+    if component["small_group_id"] is not None or component["lab_group_id"] is not None:
+        errors.append("pe_whole_cohort_required")
+    if component["teacher_id"] is not None:
+        errors.append("pe_teacher_not_permitted")
+    if component["equipment_ids"]:
+        errors.append("pe_equipment_not_permitted")
+    return errors
 
 
 def window_count(slots) -> int:

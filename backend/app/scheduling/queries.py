@@ -108,8 +108,10 @@ def source(scope, version_id=None):
                                      V.c.id == version_id,
                                      W.c.term_id == V.c.term_id))
     return (joined.join(T, T.c.id == V.c.term_id)
-            .join(S, S.c.id == W.c.subject_id).join(U, U.c.id == W.c.teacher_id)
-            .join(G, G.c.id == W.c.course_group_id).join(R, R.c.id == A.c.room_id)
+            .join(S, S.c.id == W.c.subject_id)
+            .outerjoin(U, U.c.id == W.c.teacher_id)
+            .join(G, G.c.id == W.c.course_group_id)
+            .outerjoin(R, R.c.id == A.c.room_id)
             .outerjoin(SG, SG.c.id == W.c.small_group_id)
             .outerjoin(LG, LG.c.id == W.c.lab_group_id))
 
@@ -272,7 +274,7 @@ def facets(db, scope, version_id=None):
     ):
         ordering = (label,) if label is identifier else (label, identifier)
         statement = (select(identifier.label("id"), label.label("label"))
-                     .select_from(joined).where(allowed).distinct()
+                     .select_from(joined).where(allowed, identifier.is_not(None)).distinct()
                      .order_by(*ordering))
         choices[key] = [dict(row) for row in db.execute(statement).mappings()]
     bounds = db.execute(select(func.min(A.c.day), func.max(A.c.day))

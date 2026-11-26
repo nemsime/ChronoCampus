@@ -102,3 +102,17 @@ test("compact lab labels use local lab numbers and preserve full accessible deta
     assert.match(html, /Lilit Davtyan/);
   } finally {delete globalThis.localStorage;}
 });
+
+
+test("the semester sheet labels Physical Education and omits its unassigned room and lecturer", () => {
+  const pe = { subject: "Ֆիզիկական դաստիարակություն", teacher: null, room: null, lesson_type: "pe", group: "Group A", weekday: 0, slot: 1, parity: "every" };
+  const semester = { term_id: 1, version_id: 1, term: "Autumn", grid: { weekdays: [0, 1, 2, 3, 4], slots: [] }, template_rows: [pe], exceptions: [], irregular: [] };
+  globalThis.localStorage = { getItem: () => "en" };
+  try {
+    const html = renderToStaticMarkup(React.createElement(LanguageProvider, null,
+      React.createElement(SemesterTemplateContent, { semesters: [semester] })));
+    assert.match(html, /aria-label="Ֆիզիկական դաստիարակություն · Physical Education · Group A"/);
+    assert.match(html, /class="compact-kind">PE<\/span>/);
+    assert.doesNotMatch(html, /compact-room|compact-teacher|Room null/);
+  } finally { delete globalThis.localStorage; }
+});

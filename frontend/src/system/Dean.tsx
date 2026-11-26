@@ -173,7 +173,7 @@ export function DeanTimetables() {
     </>}
     {(selected || suggesting) && version && facets && <Dialog labelledBy="dean-lesson-title" onClose={() => { setSelected(null); setSuggesting(false); }}>
       <h2 id="dean-lesson-title">{t(suggesting ? "suggestChange" : "suggestionLessonDetails")}</h2>
-      {selected && <div className="dean-lesson-details"><h3>{selected.subject}</h3><p>{selected.group} · {selected.teacher}</p><p>{dateLabel(selected.day, lang)} · {t("slot")} {selected.slot} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)} · {selected.room}</p><span className={`badge ${selected.lesson_type}`}>{t(selected.lesson_type)}</span>{selected.cancelled && <span className="badge warn">{t("cancelled")}</span>}{badges(selected)}</div>}
+      {selected && <div className="dean-lesson-details"><h3>{selected.subject}</h3><p>{selected.group}{selected.teacher && ` · ${selected.teacher}`}</p><p>{dateLabel(selected.day, lang)} · {t("slot")} {selected.slot} · {String(selected.starts_at).slice(0, 5)}–{String(selected.ends_at).slice(0, 5)}{selected.room && ` · ${selected.room}`}</p><span className={`badge ${selected.lesson_type}`}>{t(selected.lesson_type)}</span>{selected.cancelled && <span className="badge warn">{t("cancelled")}</span>}{badges(selected)}</div>}
       {suggesting ? <SuggestionForm version={version} lesson={selected} facets={facets} onCancel={() => setSuggesting(false)} onSaved={() => { setSelected(null); setSuggesting(false); setSent(true); }} /> : selected && !selected._removed && <button onClick={() => { setSuggesting(true); setSent(false); }}><Lightbulb size={16} aria-hidden="true" />{t("suggestChange")}</button>}
     </Dialog>}
   </>;

@@ -9,12 +9,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { outputFiles } = buildSync({
-  stdin: { contents: `export { adminAreas, catalogScope, eligibleDraftGroups, draftInputs } from './src/system/adminFlow'; export { launchDraft, DraftWizard } from './src/system/DraftWizard'; export { Catalogs } from './src/system/Catalogs'; export { ApiError } from './src/system/api'; export { RunCard } from './src/system/Diagnostics'; export { adminWords } from './src/system/adminWords'; export { resourceNames } from './src/system/catalogSchema'; export { navigationForRole, pageForRole } from './src/system/Application'; export { LanguageProvider } from './src/system/i18n';`, resolveDir: root, loader: 'tsx' },
+  stdin: { contents: `export { adminAreas, catalogScope, eligibleDraftGroups, draftInputs } from './src/system/adminFlow'; export { launchDraft, DraftWizard } from './src/system/DraftWizard'; export { Catalogs } from './src/system/Catalogs'; export { ApiError } from './src/system/api'; export { RunCard } from './src/system/Diagnostics'; export { adminWords } from './src/system/adminWords'; export { catalogSchema, isCatalogFieldVisible, resourceNames } from './src/system/catalogSchema'; export { navigationForRole, pageForRole } from './src/system/Application'; export { LanguageProvider } from './src/system/i18n';`, resolveDir: root, loader: 'tsx' },
   loader: { '.css': 'empty' }, bundle: true, write: false, platform: 'node', format: 'cjs', jsx: 'automatic', external: ['react', 'react-dom', 'lucide-react'],
 });
 const compiled = { exports: {} };
 new Function('require', 'module', 'exports', outputFiles[0].text)(createRequire(import.meta.url), compiled, compiled.exports);
-const { adminAreas, catalogScope, eligibleDraftGroups, draftInputs, launchDraft, DraftWizard, Catalogs, ApiError, RunCard, adminWords, resourceNames, navigationForRole, pageForRole, LanguageProvider } = compiled.exports;
+const { adminAreas, catalogScope, eligibleDraftGroups, draftInputs, launchDraft, DraftWizard, Catalogs, ApiError, RunCard, adminWords, catalogSchema, isCatalogFieldVisible, resourceNames, navigationForRole, pageForRole, LanguageProvider } = compiled.exports;
 const data = {
   terms: [{ id: 1, name: 'Autumn', calendar_id: 4, starts_on: '2026-09-01', ends_on: '2026-12-18', confirmed: true }, { id: 2, name: 'Spring', calendar_id: 5 }],
   calendars: [{ id: 4, name: 'Day classes', study_form: 'present', confirmed: true, academic_hours_per_lesson: 2 }],
@@ -130,4 +130,19 @@ test('a finished generation is not labelled as a complete timetable when lessons
   const html = render(RunCard, { run: { id: 1, status: 'complete', algorithm: 'cp_sat', seed: 1, summary: { placed: 1, total: 2 }, result: {}, progress: {} } }, 'en');
   assert.match(html, /Generation finished/);
   assert.doesNotMatch(html, /All lessons placed/);
+});
+
+
+test('Physical Education workload has a cohort but no lecturer, subgroup or equipment controls', () => {
+  const fields = catalogSchema.workloads;
+  const pe = { lesson_type: 'pe' };
+  const practical = { lesson_type: 'practical' };
+  assert.ok(fields.find(field => field.key === 'lesson_type').options.includes('pe'));
+  for (const key of ['small_group_id', 'lab_group_id', 'teacher_id', 'equipment_ids']) {
+    const field = fields.find(field => field.key === key);
+    assert.equal(isCatalogFieldVisible(field, pe), false, key);
+    assert.equal(isCatalogFieldVisible(field, practical), true, key);
+  }
+  assert.equal(isCatalogFieldVisible(fields.find(field => field.key === 'course_group_id'), pe), true);
+  assert.equal(fields.find(field => field.key === 'teacher_id').optional, false);
 });
