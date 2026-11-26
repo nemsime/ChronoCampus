@@ -45,7 +45,7 @@ class MoveInput(BaseModel):
     revision: int
     day: date
     slot: int = Field(ge=1)
-    room_id: int
+    room_id: int | None
     pinned: bool = False
 
 
@@ -84,7 +84,7 @@ def assignment_model(version_id, item):
 
 def assignment_view(db, assignment, component):
     subject, teacher, group, room = (
-        db.get(model, identifier)
+        db.get(model, identifier) if identifier is not None else None
         for model, identifier in (
             (m.Subject, component.subject_id),
             (m.Account, component.teacher_id),
@@ -111,15 +111,15 @@ def assignment_view(db, assignment, component):
         "term": term.name,
         "subject_id": subject.id,
         "subject": subject.name,
-        "teacher_id": teacher.id,
-        "teacher": teacher.display_name,
+        "teacher_id": component.teacher_id,
+        "teacher": teacher.display_name if teacher else None,
         "course_group_id": group.id,
         "group": group.group_code,
         "small_group_id": component.small_group_id,
         "lab_group_id": component.lab_group_id,
         "small_group": small.label if small else None,
         "lab_group": lab.label if lab else None,
-        "room": room.room_number,
+        "room": room.room_number if room else None,
         "lesson_type": component.lesson_type,
         "parity": parity(start, assignment.day),
     }

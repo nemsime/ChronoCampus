@@ -86,6 +86,7 @@ logs/
 /.runtime/
 /monitoring/secrets/
 /backend/.demo-credentials.json
+/backend/.synthetic-demo-credentials.json
 
 # Editor and operating-system files
 .vscode/

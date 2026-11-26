@@ -21,7 +21,13 @@ export interface Field {
   min?: number;
   max?: number;
   filter?: string;
-  visibleWhen?: { key: string; value: string };
+  visibleWhen?: { key: string; value: string; negated?: boolean };
+}
+export function isCatalogFieldVisible(field: Field, values: Record<string, unknown>): boolean {
+  if (!field.visibleWhen) return true;
+  const { key, value, negated } = field.visibleWhen;
+  const matches = values[key] === value;
+  return negated ? !matches : matches;
 }
 const text = (key: string, optional = false): Field => ({ key, optional });
 const num = (
@@ -60,11 +66,13 @@ const equipment: Field = {
   resource: "equipment",
   initial: [],
 };
-const membership = [
-  ref("course_group_id", "groups"),
+const courseGroup = ref("course_group_id", "groups");
+const subgroupMembership = [
   ref("small_group_id", "subgroups", true),
   ref("lab_group_id", "lab-groups", true),
 ];
+const membership = [courseGroup, ...subgroupMembership];
+const exceptPhysicalEducation = { key: "lesson_type", value: "pe", negated: true };
 const range = [date("starts_on"), date("ends_on")];
 const weekday: Field = {
   key: "weekday",
@@ -182,13 +190,14 @@ export const catalogSchema: Record<string, Field[]> = {
   ],
   workloads: [
     ref("term_id", "terms"),
-    ...membership,
+    courseGroup,
+    ...subgroupMembership.map((field) => ({ ...field, visibleWhen: exceptPhysicalEducation })),
     ref("subject_id", "subjects"),
-    ref("teacher_id", "users", false, "lecturer"),
-    choice("lesson_type", ["lecture", "practical", "lab"]),
+    { ...ref("teacher_id", "users", false, "lecturer"), visibleWhen: exceptPhysicalEducation },
+    choice("lesson_type", ["lecture", "practical", "lab", "pe"]),
     num("semester_hours"),
     choice("assessment", ["none", "exam", "credit"]),
-    equipment,
+    { ...equipment, visibleWhen: exceptPhysicalEducation },
     num("preferred_daily_max", undefined, true),
   ],
 };

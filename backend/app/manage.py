@@ -26,6 +26,15 @@ def main():
         "seed-demo-deans",
         help="Add missing demo deans to existing demo groups; preserve all existing passwords and schedules",
     )
+    synthetic = commands.add_parser(
+        "seed-demo-synthetic",
+        help="Install the Armenian synthetic timetable dataset in the development DB",
+    )
+    synthetic.add_argument(
+        "--inputs-only",
+        action="store_true",
+        help="Load demo catalogs and workloads without publishing the bundled timetable",
+    )
     admin = commands.add_parser(
         "create-admin",
         help="Create a local administrator without changing existing accounts",
@@ -43,6 +52,11 @@ def main():
                 )
             )
         )
+    elif args.command == "seed-demo-synthetic":
+        from app.demo_synthetic import seed_synthetic_demo
+
+        credentials = Path(__file__).resolve().parents[1] / ".synthetic-demo-credentials.json"
+        print(json.dumps(seed_synthetic_demo(credentials, inputs_only=args.inputs_only)))
     else:
         email = EmailInput(email=args.email).email
         password = getpass("Password (12+ characters): ")

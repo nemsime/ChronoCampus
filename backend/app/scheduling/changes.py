@@ -19,6 +19,13 @@ def require_schema(db):
         raise HTTPException(503, "dated_changes_migration_required")
 
 
+def _original_room_label(db, room_id):
+    if room_id is None:
+        return None
+    room = db.get(m.Room, room_id)
+    return room.room_number if room else str(room_id)
+
+
 def metadata(db, version_id):
     if not available(db):
         return [], []
@@ -36,8 +43,7 @@ def metadata(db, version_id):
     ):
         event = by_id[o.event_id]
         original = dict(o.original)
-        room = db.get(m.Room, original["room_id"])
-        original["room"] = room.room_number if room else str(original["room_id"])
+        original["room"] = _original_room_label(db, original["room_id"])
         overrides.append(
             dict(
                 occurrence_id=o.occurrence_id,
@@ -128,7 +134,7 @@ def missing_template_rows(db, scope, values, version_id):
         .join(q.V, q.V.c.id == o.c.version_id)
         .join(q.T, q.T.c.id == q.W.c.term_id)
         .join(q.S, q.S.c.id == q.W.c.subject_id)
-        .join(q.U, q.U.c.id == q.W.c.teacher_id)
+        .outerjoin(q.U, q.U.c.id == q.W.c.teacher_id)
         .join(q.G, q.G.c.id == q.W.c.course_group_id)
         .outerjoin(q.SG, q.SG.c.id == q.W.c.small_group_id)
         .outerjoin(q.LG, q.LG.c.id == q.W.c.lab_group_id)
@@ -182,7 +188,6 @@ def missing_template_rows(db, scope, values, version_id):
         original = row.pop("original")
         row.update({k: v for k, v in original.items() if k not in {"version_id"}})
         row["_unresolved"] = True
-        room = db.get(m.Room, original["room_id"])
-        row["room"] = room.room_number if room else str(original["room_id"])
+        row["room"] = _original_room_label(db, original["room_id"])
         results.append(row)
     return results

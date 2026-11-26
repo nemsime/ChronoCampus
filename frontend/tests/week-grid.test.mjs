@@ -217,3 +217,21 @@ test("cohort overview has translated captions and does not invent enrollment cou
     assert.match(html, /<th scope="row">T1<\/th>/);
   }
 });
+
+
+test("roomless Physical Education stays visible in the grid and timeline without empty filters", () => {
+  const pe = { ...lesson, subject: "Ֆիզիկական դաստիարակություն", lesson_type: "pe", teacher: null, teacher_id: null, room: null, room_id: null };
+  for (const [language, label, compact] of [["en", "Physical Education", "PE"], ["ru", "Физкультура", "Физ-ра"], ["hy", "Ֆիզիկական դաստիարակություն", "Ֆիզ. դաստ."]]) {
+    const regular = render([pe], language);
+    const overview = render([pe], language, { layout: "overview" });
+    assert.ok(regular.includes(`>${label}</span>`), language);
+    assert.ok(overview.includes(`>${compact}</span>`), language);
+    assert.doesNotMatch(regular, /lucide-map-pin|lucide-user-round/);
+  }
+  globalThis.localStorage = { getItem: () => "en" };
+  try {
+    const timeline = renderToStaticMarkup(React.createElement(LanguageProvider, null, React.createElement(LessonList, { rows: [pe] })));
+    assert.match(timeline, /<option value="pe">Physical Education<\/option>/);
+    assert.doesNotMatch(timeline, /<option value="(?:null|undefined)"|lucide-map-pin|lucide-user-round/);
+  } finally { delete globalThis.localStorage; }
+});

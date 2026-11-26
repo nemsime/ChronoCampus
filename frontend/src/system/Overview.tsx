@@ -136,8 +136,8 @@ export function Overview({ account, onNavigate }: {
             <div className="overview-panel-heading"><div><h2>{t("overviewUpcoming")}</h2><p>{t("overviewUpcomingHelp")}</p></div><button className="link panel-action" onClick={() => onNavigate(schedulePage)}>{t("viewAll")}<ArrowUpRight size={16} aria-hidden="true" /></button></div>
             {current.upcoming.length ? <div className="upcoming-list">{current.upcoming.map(lesson => <article className={`upcoming-lesson ${lesson.lesson_type}`} key={lesson.occurrence_id}>
               <div className="upcoming-time"><strong>{String(lesson.starts_at).slice(0, 5)}</strong><span>{String(lesson.ends_at).slice(0, 5)}</span></div>
-              <div className="upcoming-description"><span className={`badge ${lesson.lesson_type}`}>{t(lesson.lesson_type)}</span><h3>{lesson.subject}</h3><p>{lesson.teacher}</p></div>
-              <div className="upcoming-place"><span><CalendarDays size={13} aria-hidden="true" />{dateLabel(lesson.day, lang)}</span><span><MapPin size={13} aria-hidden="true" />{lesson.room}</span></div>
+              <div className="upcoming-description"><span className={`badge ${lesson.lesson_type}`}>{t(lesson.lesson_type)}</span><h3>{lesson.subject}</h3>{lesson.teacher && <p>{lesson.teacher}</p>}</div>
+              <div className="upcoming-place"><span><CalendarDays size={13} aria-hidden="true" />{dateLabel(lesson.day, lang)}</span>{lesson.room && <span><MapPin size={13} aria-hidden="true" />{lesson.room}</span>}</div>
             </article>)}</div> : <EmptyState icon={CalendarDays} title={t("overviewNoLessons")} description={t("overviewNoLessonsHelp")}><button className="secondary" onClick={() => onNavigate(schedulePage)}>{t("overviewViewSchedule")}</button></EmptyState>}
           </section>
           {admin && <section className="panel activity-panel"><div className="overview-panel-heading"><h2>{t("overviewActivity")}</h2><button className="link panel-action" onClick={() => onNavigate("diagnostics")}>{t("viewAll")}<ArrowUpRight size={16} aria-hidden="true" /></button></div>

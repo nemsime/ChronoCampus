@@ -112,6 +112,45 @@ passwords are in the same ignored credentials file.
 
 Demo teaching dates and academic-hour settings are illustrative. Real university calendars remain unconfirmed until an administrator enters the missing facts. See [data provenance](docs/demo-data.md).
 
+### Armenian synthetic timetable dataset
+
+Run these commands from **backend** on each team member's machine with the
+local **ChronoCampus_Development** database configured.
+
+Windows (PowerShell)
+
+```powershell
+.venv/Scripts/python.exe -m alembic upgrade head
+.venv/Scripts/python.exe -m app.manage seed-demo-synthetic
+```
+
+Linux
+
+```bash
+.venv/bin/python -m alembic upgrade head
+.venv/bin/python -m app.manage seed-demo-synthetic
+```
+
+Sign in to the local app as **synthetic-admin-523@example.invalid**. Use the
+password from that machine's ignored **backend/.synthetic-demo-credentials.json**.
+Every installation gets the same 524 fictional Armenian-named accounts,
+13 cohorts, 23 rooms, and two published timetables with 2,464 dated lessons.
+The notification bell shows the same calendar cancellations. Passwords are
+generated locally. Rerunning the seed keeps existing passwords. The seed
+reports a conflict if a demo cohort already has a different publication.
+
+Physical Education is a whole-cohort class for years 1 and 2, with two
+distinct weekdays per teaching week and no assigned lecturer or room.
+Practicals and labs use independent student groups, share a lecturer for the
+same subject and cohort, and are spread across teaching days.
+
+To test generation from scratch, use **seed-demo-synthetic --inputs-only**
+on a fresh development database. In **Planner**, create and generate a draft
+for **Synthetic autumn 2026 · present** and another for
+**Synthetic autumn 2026 · remote**. The default seed imports the fixed
+publication so that each member's localhost starts with identical placements.
+Changes made after seeding stay in that member's local database.
+
 ## Prepare and publish a semester
 
 1. In **University**, manage People, Academic structure, Rooms & equipment and Subjects through their searchable tabs.

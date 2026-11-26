@@ -1,8 +1,10 @@
 import { useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, FlaskConical, LayoutGrid, List, MapPin, Pin, Users, UserRound } from "lucide-react";
+import { BookOpen, CalendarDays, ChevronLeft, ChevronRight, Dumbbell, FlaskConical, LayoutGrid, List, MapPin, Pin, Users, UserRound } from "lucide-react";
 import { type Row } from "./api";
 import { addDays, dateLabel, localDay, weekStart as mondayOf } from "./common";
 import { useLanguage } from "./i18n";
+
+const lessonIcons: Record<string, typeof BookOpen> = { lab: FlaskConical, practical: Users, pe: Dumbbell };
 
 export interface GridConfiguration {
   weekdays: number[];
@@ -116,14 +118,14 @@ export function WeekGrid({ weekStart, lessons, grid, perspective, layout = "grid
   }
   function card(row: Row) {
     const extra = decorations?.(row);
-    const Icon = row.lesson_type === "lab" ? FlaskConical : row.lesson_type === "practical" ? Users : BookOpen;
+    const Icon = lessonIcons[row.lesson_type] ?? BookOpen;
     return <button type="button" key={`${row.version_id ?? ""}:${row.occurrence_id}:${row.id ?? ""}`}
       className={`grid-lesson grid-lesson-${row.lesson_type}${row.cancelled ? " cancelled" : ""}${extra?.className ? ` ${extra.className}` : ""}`}
       disabled={disabled} onClick={() => onSelect(row)}>
       <span className="grid-lesson-line grid-lesson-kind"><Icon size={14} aria-hidden="true" /><span className="grid-lesson-text">{overview ? t(`compact_${row.lesson_type}`) : t(row.lesson_type)}</span></span>
       <strong>{row.subject}</strong>
-      {(overview || perspective !== "lecturer" || severalTeachers) && <span className="grid-lesson-line"><UserRound size={13} aria-hidden="true" /><span className="grid-lesson-text">{row.teacher}</span></span>}
-      {(overview || perspective !== "room" || severalRooms) && <span className="grid-lesson-line"><MapPin size={13} aria-hidden="true" /><span className="grid-lesson-text">{t("room_id")} {row.room}</span></span>}
+      {row.teacher && (overview || perspective !== "lecturer" || severalTeachers) && <span className="grid-lesson-line"><UserRound size={13} aria-hidden="true" /><span className="grid-lesson-text">{row.teacher}</span></span>}
+      {row.room && (overview || perspective !== "room" || severalRooms) && <span className="grid-lesson-line"><MapPin size={13} aria-hidden="true" /><span className="grid-lesson-text">{t("room_id")} {row.room}</span></span>}
       {(!overview && (perspective !== "group" || severalGroups)) && <span className="grid-lesson-line"><Users size={13} aria-hidden="true" /><span className="grid-lesson-text">{row.group}</span></span>}
       {(row.small_group_id || row.lab_group_id) && <small>{[
         row.small_group_id ? `${t("small_group_id")} ${row.small_group ?? row.small_group_id}` : "",

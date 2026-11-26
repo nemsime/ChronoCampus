@@ -8,6 +8,7 @@ from app.academics import schemas as s
 from app.accounts.dependencies import administrator, public_account
 from app.accounts.roles import ADMIN, DEAN, LECTURER, STUDENT
 from app.accounts.router import EmailInput, revoke_sessions
+from app.calendar.rules import academic_start_year, pe_workload_errors
 from app.core.security import password_hash
 from app.db import models as m
 from app.db.session import get_db, lock_revision
@@ -107,12 +108,14 @@ def validate_calendar_workloads(db, resource, data, existing):
         )
         form, units = data["study_form"], data["academic_hours_per_lesson"]
         old_units = existing.academic_hours_per_lesson
+        weeks = data["teaching_weeks"]
     else:
         calendar = require_record(db, m.CalendarConfig, data["calendar_id"])
         previous = require_record(db, m.CalendarConfig, existing.calendar_id)
         scope = m.Workload.term_id == existing.id
         form, units = calendar.study_form, calendar.academic_hours_per_lesson
         old_units = previous.academic_hours_per_lesson
+        weeks = calendar.teaching_weeks
     if db.scalar(
         select(m.Workload.id)
         .join(m.CourseGroup, m.CourseGroup.id == m.Workload.course_group_id)
@@ -130,6 +133,22 @@ def validate_calendar_workloads(db, resource, data, existing):
         select(m.Workload.id).where(scope, m.Workload.semester_hours % units != 0).limit(1)
     ):
         raise HTTPException(422, "indivisible_workload")
+    pe = (scope, m.Workload.lesson_type == "pe")
+    if db.scalar(
+        select(m.Workload.id)
+        .where(*pe, m.Workload.semester_hours != 2 * weeks * (units or 0))
+        .limit(1)
+    ):
+        raise HTTPException(422, "pe_weekly_hours")
+    if resource == "terms":
+        year = academic_start_year(data["academic_year"], data["starts_on"])
+        if db.scalar(
+            select(m.Workload.id)
+            .join(m.CourseGroup, m.CourseGroup.id == m.Workload.course_group_id)
+            .where(*pe, m.CourseGroup.admission_year.not_in({year, year - 1}))
+            .limit(1)
+        ):
+            raise HTTPException(422, "pe_year_ineligible")
 
 
 def validate_domain(db, resource, data, existing, actor):
@@ -277,9 +296,27 @@ def validate_domain(db, resource, data, existing, actor):
         major = require_record(db, m.Major, group.major_id)
         if major.study_form != calendar.study_form:
             raise HTTPException(422, "study_form_mismatch")
-        teacher = require_record(db, m.Account, data["teacher_id"])
-        if teacher.role != LECTURER or not teacher.is_active:
-            raise HTTPException(422, "lecturer_required")
+        if data["lesson_type"] == "pe":
+            errors = pe_workload_errors(
+                data, serialize(group, db), serialize(term, db), serialize(calendar, db)
+            )
+            if errors:
+                raise HTTPException(422, errors[0])
+            duplicate = select(m.Workload.id).where(
+                m.Workload.term_id == term.id,
+                m.Workload.course_group_id == group.id,
+                m.Workload.lesson_type == "pe",
+            )
+            if existing:
+                duplicate = duplicate.where(m.Workload.id != existing.id)
+            if db.scalar(duplicate.limit(1)):
+                raise HTTPException(422, "pe_already_exists")
+        else:
+            if data["teacher_id"] is None:
+                raise HTTPException(422, "lecturer_required")
+            teacher = require_record(db, m.Account, data["teacher_id"])
+            if teacher.role != LECTURER or not teacher.is_active:
+                raise HTTPException(422, "lecturer_required")
         units = calendar.academic_hours_per_lesson
         if units and data["semester_hours"] % units:
             raise HTTPException(422, "indivisible_workload")

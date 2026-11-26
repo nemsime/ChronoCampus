@@ -7,6 +7,7 @@ export const scheduleWords: Record<string, [string, string, string]> = {
   compact_lecture: ["Лек.", "Դաս", "Lec."],
   compact_practical: ["Практ.", "Գործ", "Prac."],
   compact_lab: ["Лаб.", "Լաբ", "Lab"],
+  compact_pe: ["Физ-ра", "Ֆիզ. դաստ.", "PE"],
   lecturerScheduleIntro: ["Ваше опубликованное расписание. Здесь показаны только занятия, назначенные вам.", "Ձեր հրապարակված դասացուցակը։ Այստեղ ցուցադրվում են միայն ձեզ նշանակված դասերը։", "Your published timetable. Only lessons assigned to you are shown."],
   scheduleView: ["Вид расписания", "Դասացուցակի տեսք", "Timetable view"],
   gridView: ["Сетка", "Ցանց", "Grid"],

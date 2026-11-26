@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { BookOpen, Building2, CalendarDays, CalendarPlus, CalendarRange, Clock3, Database, DoorOpen, FlaskConical, GraduationCap, Landmark, Layers3, ListChecks, Monitor, Pencil, Plus, RefreshCw, Save, Search, SlidersHorizontal, Sun, Trash2, UserRound, Users, X, type LucideIcon } from "lucide-react";
 import { api, Row } from "./api";
-import { catalogSchema, Field, resourceNames } from "./catalogSchema";
+import { catalogSchema, Field, isCatalogFieldVisible, resourceNames } from "./catalogSchema";
 import { Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, PasswordInput, useAction } from "./common";
 import { useLanguage } from "./i18n";
 import { adminAreas, catalogScope, type CatalogMode } from "./adminFlow";
@@ -290,11 +290,12 @@ export function Catalogs({ mode = "university", onCreateDraft }: { mode?: Catalo
   }
   function save(e: FormEvent) {
     e.preventDefault();
+    if (!draft) return;
     void run(async () => {
       const body = { ...draft };
       for (const field of catalogSchema[resource]) {
-        if (field.visibleWhen && body[field.visibleWhen.key] !== field.visibleWhen.value)
-          body[field.key] = null;
+        if (!isCatalogFieldVisible(field, draft))
+          body[field.key] = field.initial ?? null;
         if (field.type === "numbers")
           body[field.key] = Array.isArray(body[field.key])
             ? body[field.key]
@@ -475,7 +476,7 @@ export function Catalogs({ mode = "university", onCreateDraft }: { mode?: Catalo
                 <p className="notice">{t("unavailableCalendar")}</p>
               )}
               <div className="form-grid">
-                {catalogSchema[resource].filter((field) => !field.visibleWhen || draft[field.visibleWhen.key] === field.visibleWhen.value).map((field) => (
+                {catalogSchema[resource].filter((field) => isCatalogFieldVisible(field, draft)).map((field) => (
                   <FieldInput
                     key={field.key}
                     field={field}

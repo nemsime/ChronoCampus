@@ -208,8 +208,8 @@ class WorkloadInput(Input):
     small_group_id: int | None = None
     lab_group_id: int | None = None
     subject_id: int = Field(gt=0)
-    teacher_id: int = Field(gt=0)
-    lesson_type: Literal["lecture", "practical", "lab"]
+    teacher_id: int | None = Field(default=None, gt=0)
+    lesson_type: Literal["lecture", "practical", "lab", "pe"]
     semester_hours: int = Field(gt=0, le=1000)
     assessment: Literal["none", "exam", "credit"] = "none"
     equipment_ids: list[int] = Field(default_factory=list, max_length=100)

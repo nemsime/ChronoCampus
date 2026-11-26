@@ -34,6 +34,7 @@ export function SuggestionForm({ version, lesson, facets, onSaved, onCancel }: {
   const [group, setGroup] = useState(String(lesson?.course_group_id || ""));
   const { busy, error, run } = useAction();
   const grid = facets.grid?.[String(version.term_id)];
+  const roomless = lesson?.lesson_type === "pe";
   function submit(event: FormEvent) {
     event.preventDefault();
     void run(async () => {
@@ -53,7 +54,7 @@ export function SuggestionForm({ version, lesson, facets, onSaved, onCancel }: {
     <ErrorBox error={error} />
     <fieldset disabled={busy}>
       <label htmlFor={`${id}-kind`}>{t("suggestionKind")}<select id={`${id}-kind`} value={kind} onChange={event => setKind(event.target.value)}>
-        {(lesson ? ["move", "room", "cancel", "other"] : ["other"]).map(value => <option value={value} key={value}>{t(`suggestionKind_${value}`)}</option>)}
+        {(lesson ? ["move", ...(roomless ? [] : ["room"]), "cancel", "other"] : ["other"]).map(value => <option value={value} key={value}>{t(`suggestionKind_${value}`)}</option>)}
       </select></label>
       {kind === "other" && <label htmlFor={`${id}-group`}>{t("course_group_id")}<select id={`${id}-group`} value={group} onChange={event => setGroup(event.target.value)}>
         <option value="">{t("all")}</option>{(facets.filters.course_group_id || []).map(choice => <option key={choice.id} value={choice.id}>{choice.label}</option>)}
@@ -64,7 +65,7 @@ export function SuggestionForm({ version, lesson, facets, onSaved, onCancel }: {
           <option value="">{t("select")}</option>{(grid?.slots || []).map(value => <option key={value.slot} value={value.slot}>{value.slot} · {value.starts_at.slice(0, 5)}–{value.ends_at.slice(0, 5)}</option>)}
         </select></label>
       </div>}
-      {(kind === "move" || kind === "room") && <label htmlFor={`${id}-room`}>{t("proposedRoom")}<select id={`${id}-room`} required={kind === "room"} value={room} onChange={event => setRoom(event.target.value)}>
+      {!roomless && (kind === "move" || kind === "room") && <label htmlFor={`${id}-room`}>{t("proposedRoom")}<select id={`${id}-room`} required={kind === "room"} value={room} onChange={event => setRoom(event.target.value)}>
         <option value="">{t(kind === "room" ? "select" : "keepRoom")}</option>{(facets.filters.room_id || []).map(choice => <option key={choice.id} value={choice.id}>{choice.label}</option>)}
       </select></label>}
       <label htmlFor={`${id}-title`}>{t("suggestionTitle")}<input id={`${id}-title`} required maxLength={150} value={title} onChange={event => setTitle(event.target.value)} /><small className="field-counter">{title.length}/150</small></label>
@@ -127,8 +128,8 @@ function SuggestionDetail({ id, mode, versions, onClose, onChanged, onNavigate }
       {detail.outdated && <p className="notice warning">{t("outdatedSuggestion")}</p>}
       <dl className="suggestion-facts">
         <div><dt>{t("reviewVersion")}</dt><dd>{detail.version_name || `#${detail.version_id}`}</dd></div>
-        {detail.lesson && <div><dt>{t("schedule")}</dt><dd>{detail.lesson.subject} · {detail.lesson.group} · {detail.lesson.day} · {t("slot")} {detail.lesson.slot} · {detail.lesson.room}</dd></div>}
-        {detail.anchor?.day && <div><dt>{t("suggestionOriginalLesson")}</dt><dd>{dateLabel(detail.anchor.day, lang)} · {t("slot")} {detail.anchor.slot} · {t("room_id")} #{detail.anchor.room_id}</dd></div>}
+        {detail.lesson && <div><dt>{t("schedule")}</dt><dd>{detail.lesson.subject} · {detail.lesson.group} · {detail.lesson.day} · {t("slot")} {detail.lesson.slot}{detail.lesson.room && ` · ${detail.lesson.room}`}</dd></div>}
+        {detail.anchor?.day && <div><dt>{t("suggestionOriginalLesson")}</dt><dd>{dateLabel(detail.anchor.day, lang)} · {t("slot")} {detail.anchor.slot}{detail.anchor.room_id != null && ` · ${t("room_id")} #${detail.anchor.room_id}`}</dd></div>}
         {detail.proposed_day && <div><dt>{t("proposedDay")}</dt><dd>{dateLabel(detail.proposed_day, lang)}</dd></div>}
         {detail.proposed_slot && <div><dt>{t("proposedSlot")}</dt><dd>{detail.proposed_slot}</dd></div>}
         {detail.proposed_room_id && <div><dt>{t("proposedRoom")}</dt><dd>#{detail.proposed_room_id}</dd></div>}
