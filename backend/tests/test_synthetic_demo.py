@@ -14,7 +14,7 @@ from app.scheduling.router import execute_run
 
 @pytest.fixture
 def fast_demo_credentials(monkeypatch):
-    # Reuse the suite's valid test password so hashing 524 demo users does not
+    # Reuse the suite's valid test password so hashing demo users does not
     # dominate this round trip. Sign-in still uses the emitted seed credentials.
     monkeypatch.setattr(demo, "secrets", SimpleNamespace(token_urlsafe=lambda _: PASSWORD))
     monkeypatch.setattr(demo, "password_hash", lambda _: HASH)
@@ -26,9 +26,9 @@ def test_synthetic_demo_generates_both_timetables(client, database, fast_demo_cr
     summary = populate_synthetic_demo(database, fixture, credentials)
     database.commit()
 
-    assert summary["created_accounts"] == 524
+    assert summary["created_accounts"] == 870
     assert Counter(row["role"] for row in credentials.values()) == {
-        "student": 494, "lecturer": 26, "dean": 2, "admin": 2,
+        "student": 840, "lecturer": 26, "dean": 2, "admin": 2,
     }
     assert {row["name"] for row in credentials.values()} == {
         row["display_name"] for row in fixture["users"]
@@ -41,7 +41,7 @@ def test_synthetic_demo_generates_both_timetables(client, database, fast_demo_cr
     database.commit()
     assert again["created_accounts"] == 0
     assert credentials == first_passwords
-    assert database.scalar(select(func.count()).select_from(m.Account)) == 525
+    assert database.scalar(select(func.count()).select_from(m.Account)) == 871
 
     email = next(email for email, record in credentials.items() if record["role"] == "admin")
     password = credentials[email]["password"]
@@ -154,6 +154,54 @@ def test_synthetic_demo_generates_both_timetables(client, database, fast_demo_cr
 
 
     assert total_assignments == 2464
+
+
+def test_reseeding_expands_existing_demo_without_replacing_publications(
+    database, fast_demo_credentials,
+):
+    legacy = load_fixture()
+    legacy["users"] = [row for row in legacy["users"] if row["id"] <= 524]
+    members = [row for row in legacy["users"] if row["role"] == "student"]
+    for table, membership in (
+        ("groups", "course_group_id"), ("subgroups", "small_group_id"), ("lab_groups", "lab_group_id"),
+    ):
+        sizes = Counter(row[membership] for row in members)
+        for row in legacy[table]:
+            row["capacity"] = sizes[row["id"]]
+    legacy["rooms"][0]["capacity"] = 16
+
+    credentials = {}
+    first = populate_synthetic_demo(database, legacy, credentials, publish_reference=True)
+    database.commit()
+    original_credentials = credentials.copy()
+    assert first["created_accounts"] == 524
+    assert len(first["published_versions"]) == 2
+
+    expanded = populate_synthetic_demo(database, load_fixture(), credentials, publish_reference=True)
+    database.commit()
+    assert expanded["created_accounts"] == 346
+    assert expanded["published_versions"] == first["published_versions"]
+    assert all(credentials[email] == value for email, value in original_credentials.items())
+    assert database.scalar(select(func.count()).select_from(m.Assignment)) == 2464
+
+    assert database.scalar(select(m.CourseGroup.capacity).where(m.CourseGroup.group_code == "SYN-CS-Y1")) == 112
+    for model, membership in (
+        (m.CourseGroup, m.Account.course_group_id),
+        (m.SmallGroup, m.Account.small_group_id),
+        (m.LabGroup, m.Account.lab_group_id),
+    ):
+        capacity_and_enrollment = database.execute(
+            select(model.capacity, func.count(m.Account.id)).join(
+                m.Account, (membership == model.id) & (m.Account.role == "student")
+            ).group_by(model.id, model.capacity)
+        ).all()
+        assert sum(enrolled for _, enrolled in capacity_and_enrollment) == 840
+        assert all(capacity == enrolled for capacity, enrolled in capacity_and_enrollment)
+    room_capacity, equipment_count = database.execute(
+        select(m.Room.capacity, m.RoomEquipment.quantity)
+        .join(m.RoomEquipment).where(m.Room.room_number == "SYN-R01")
+    ).one()
+    assert room_capacity == equipment_count == 28
 
 
 @pytest.mark.parametrize("preexisting_rooms", [0, 1, 2])

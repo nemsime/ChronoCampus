@@ -133,11 +133,14 @@ Linux
 
 Sign in to the local app as **synthetic-admin-523@example.invalid**. Use the
 password from that machine's ignored **backend/.synthetic-demo-credentials.json**.
-Every installation gets the same 524 fictional Armenian-named accounts,
-13 cohorts, 23 rooms, and two published timetables with 2,464 dated lessons.
-The notification bell shows the same calendar cancellations. Passwords are
-generated locally. Rerunning the seed keeps existing passwords. The seed
-reports a conflict if a demo cohort already has a different publication.
+Every installation gets the same 840 fictional Armenian-named students,
+26 lecturers, two deans, and two administrators. The demo has 13 cohorts,
+23 rooms, and two published timetables with 2,464 dated lessons. The
+notification bell shows the same calendar cancellations. Passwords are
+generated locally. Rerun the seed to add the new students and increase demo
+capacity in an existing installation while keeping its passwords and published
+timetables. The seed reports a conflict if a demo cohort already has a different
+publication.
 
 Physical Education is a whole-cohort class for years 1 and 2, with two
 distinct weekdays per teaching week and no assigned lecturer or room.

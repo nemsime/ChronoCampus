@@ -84,6 +84,12 @@ def _seed_terms(db, fixture):
     return terms
 
 
+def _ensure_capacity(db, model, lookup, *, capacity, **values):
+    row = ensure(db, model, lookup, capacity=capacity, **values)
+    row.capacity = max(row.capacity, capacity)
+    return row
+
+
 def populate_synthetic_demo(db, fixture, credentials, *, publish_reference=False):
     """Install catalogs and workloads. The caller owns the database transaction."""
     lock_revision(db)
@@ -100,18 +106,18 @@ def populate_synthetic_demo(db, fixture, credentials, *, publish_reference=False
             name=row["program"], faculty_id=faculties[faculty_index].id,
             duration_yrs=5 if form == "remote" else 4,
         )
-        groups[row["id"]] = ensure(
+        groups[row["id"]] = _ensure_capacity(
             db, m.CourseGroup, {"group_code": row["group_code"]},
             major_id=major.id, admission_year=row["admission_year"], capacity=row["capacity"],
         ).id
     practicals = {
-        row["id"]: ensure(db, m.SmallGroup, {
+        row["id"]: _ensure_capacity(db, m.SmallGroup, {
             "course_group_id": groups[row["course_group_id"]], "label": row["label"],
         }, capacity=row["capacity"]).id
         for row in fixture["subgroups"]
     }
     labs = {
-        row["id"]: ensure(db, m.LabGroup, {
+        row["id"]: _ensure_capacity(db, m.LabGroup, {
             "course_group_id": groups[row["course_group_id"]],
             "small_group_id": practicals.get(row["small_group_id"]), "label": row["label"],
         }, capacity=row["capacity"]).id
@@ -125,16 +131,17 @@ def populate_synthetic_demo(db, fixture, credentials, *, publish_reference=False
     rooms = {}
     for index, row in enumerate(fixture["rooms"], start=1):
         floor, room_on_floor = divmod(index - 1, 10)
-        room = ensure(
+        room = _ensure_capacity(
             db, m.Room, {"room_number": row["room_number"]},
             building_id=building.id, floor_number=floor + 1, room_on_floor=room_on_floor + 1,
             capacity=row["capacity"], room_type=row["room_type"],
         )
         rooms[row["id"]] = room.id
         for fixture_id in row["equipment_ids"]:
-            ensure(db, m.RoomEquipment, {
+            installed = ensure(db, m.RoomEquipment, {
                 "room_id": room.id, "equipment_type_id": equipment[fixture_id],
             }, quantity=row["capacity"])
+            installed.quantity = max(installed.quantity, row["capacity"])
     subjects = {
         row["id"]: ensure(db, m.Subject, {"name": row["name"], "lesson_type_id": None}).id
         for row in fixture["subjects"]
