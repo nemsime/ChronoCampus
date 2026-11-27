@@ -492,6 +492,11 @@ const words: Record<string, [string, string, string]> = {
     "Տարբերակը փոխվել է։ Թարմացրեք էջը։",
     "Version changed. Refresh this page.",
   ],
+  draft_based_on_outdated_publication: [
+    "Черновик устарел. Создайте новый черновик на основе текущей публикации.",
+    "Սևագիրը հնացել է։ Ստեղծեք նոր սևագիր ներկայիս հրապարակված տարբերակի հիման վրա։",
+    "This draft is outdated. Create a new draft from the current published schedule.",
+  ],
 };
 type Context = {
   lang: Language;

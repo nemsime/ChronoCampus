@@ -131,6 +131,21 @@ def readable(account, component, db):
     ).limit(1)) is not None
 
 
+def publication_pointers(
+    db: Session, term_id: int, cohort_ids: list[int]
+) -> dict[int, m.PublishedGroup | None]:
+    rows = db.scalars(
+        select(m.PublishedGroup)
+        .where(
+            m.PublishedGroup.term_id == term_id,
+            m.PublishedGroup.course_group_id.in_(cohort_ids),
+        )
+        .execution_options(populate_existing=True)
+    )
+    pointers = {row.course_group_id: row for row in rows}
+    return {group_id: pointers.get(group_id) for group_id in cohort_ids}
+
+
 @router.get("/admin/schedule/versions", dependencies=[Depends(administrator)])
 def versions(db: Session = Depends(get_db)):
     return [
@@ -151,7 +166,16 @@ def create_draft(body: DraftInput, db: Session = Depends(get_db), actor: m.Accou
     groups = sorted(set(body.cohort_ids))
     if any(not db.get(m.CourseGroup, identifier) for identifier in groups):
         raise HTTPException(422, "invalid_reference")
-    version = m.ScheduleVersion(term_id=body.term_id, name=body.name, cohort_ids=groups)
+    pointers = publication_pointers(db, body.term_id, groups)
+    version = m.ScheduleVersion(
+        term_id=body.term_id,
+        name=body.name,
+        cohort_ids=groups,
+        base_versions={
+            str(group_id): pointer.version_id if pointer else None
+            for group_id, pointer in pointers.items()
+        },
+    )
     db.add(version)
     db.flush()
     snapshot = build_snapshot(db, version, materialize=True)
@@ -329,6 +353,18 @@ def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db),
             actor: m.Account = Depends(administrator)):
     lock_revision(db)
     version = require_draft(db, identifier, body.revision)
+    pointers = publication_pointers(db, version.term_id, version.cohort_ids)
+    # A missing key is an unknown base, unlike null for a group with no publication.
+    base = version.base_versions or {}
+    stale_groups = [
+        group_id
+        for group_id, pointer in pointers.items()
+        if str(group_id) not in base or base[str(group_id)] != (pointer.version_id if pointer else None)
+    ]
+    if not base or stale_groups:
+        raise HTTPException(
+            409, {"code": "draft_based_on_outdated_publication", "cohort_ids": stale_groups}
+        )
     snapshot = build_snapshot(db, version)
     assignments = [
         record(a)
@@ -356,8 +392,7 @@ def publish(identifier: int, body: RevisionInput, db: Session = Depends(get_db),
                     or (suggestion.proposed_room_id is not None and replacement.room_id != suggestion.proposed_room_id)):
                 raise HTTPException(409, "request_placement_changed")
             transition(db, suggestion, actor, "accepted", "implemented", version_id=identifier)
-    for group_id in version.cohort_ids:
-        pointer = db.get(m.PublishedGroup, (version.term_id, group_id))
+    for group_id, pointer in pointers.items():
         if not pointer:
             pointer = m.PublishedGroup(
                 term_id=version.term_id, course_group_id=group_id, version_id=version.id

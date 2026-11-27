@@ -146,6 +146,7 @@ def test_concurrent_publications_serialize_conflicts(monkeypatch, tmp_path):
                 term_id=term.id,
                 name=marker,
                 cohort_ids=[group.id],
+                base_versions={str(group.id): None},
                 configuration={},
             )
             add(

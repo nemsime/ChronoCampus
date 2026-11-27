@@ -320,6 +320,7 @@ class ScheduleVersion(Base):
     status: Mapped[str] = mapped_column(String(20), default="draft")
     revision: Mapped[int] = mapped_column(default=1)
     cohort_ids: Mapped[list] = mapped_column(JSON)
+    base_versions: Mapped[dict[str, int | None] | None] = mapped_column(JSON(none_as_null=True))
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
     published_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     report: Mapped[dict] = mapped_column(JSON, default=dict)
