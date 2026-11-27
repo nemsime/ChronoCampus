@@ -35,6 +35,13 @@ export function draftInputs(data: Record<string, Row[]>, termId: string, groups:
   const term = data.terms?.find(row => String(row.id) === termId);
   const calendar = data.calendars?.find(row => row.id === term?.calendar_id);
   const workloads = (data.workloads || []).filter(row => row.term_id === term?.id && groups.includes(row.course_group_id));
-  return { term, calendar, workloads, hours: workloads.reduce((sum, row) => sum + row.semester_hours, 0),
+  const yearLabel = String(term?.academic_year ?? "").slice(0, 4);
+  const [startYear, startMonth] = (term?.starts_on ?? "").split("-").map(Number);
+  const academicStart = /^\d{4}$/.test(yearLabel) ? Number(yearLabel) : startYear - Number(startMonth < 9);
+  const peCohorts = new Set(workloads.filter(row => row.lesson_type === "pe").map(row => row.course_group_id));
+  const missingPeGroups = (data.groups || []).filter(group =>
+    groups.includes(group.id) && (group.admission_year === academicStart || group.admission_year === academicStart - 1) && !peCohorts.has(group.id)
+  );
+  return { term, calendar, workloads, missingPeGroups, hours: workloads.reduce((sum, row) => sum + row.semester_hours, 0),
     unconfirmed: !term?.confirmed || !calendar?.confirmed || !calendar?.academic_hours_per_lesson };
 }

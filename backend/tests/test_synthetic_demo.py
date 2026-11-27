@@ -156,6 +156,73 @@ def test_synthetic_demo_generates_both_timetables(client, database, fast_demo_cr
     assert total_assignments == 2464
 
 
+@pytest.mark.parametrize(("form", "year", "stage"), [
+    ("present", 1, "draft"),
+    ("remote", 2, "draft"),
+    ("present", 1, "publication"),
+])
+def test_synthetic_demo_reports_missing_pe(
+    admin_client, database, fast_demo_credentials, form, year, stage,
+):
+    fixture = load_fixture()
+    summary = populate_synthetic_demo(database, fixture, {})
+    group_code = next(
+        group["group_code"] for group in fixture["groups"]
+        if group["study_form"] == form and group["year"] == year
+    )
+    group = database.scalars(select(m.CourseGroup).where(
+        m.CourseGroup.group_code == group_code
+    )).one()
+    group_id = group.id
+    admission_year = group.admission_year
+    term_id = summary["terms"][form]
+    pe = database.scalars(select(m.Workload).where(
+        m.Workload.term_id == term_id,
+        m.Workload.course_group_id == group_id,
+        m.Workload.lesson_type == "pe",
+    )).one()
+    database.delete(pe)
+    database.get(m.Term, term_id).search_seconds = 6
+    database.commit()
+
+    response = admin_client.post("/api/admin/schedule/versions", json={
+        "name": "Synthetic cohort with missing Physical Education",
+        "term_id": term_id,
+        "cohort_ids": [group_id],
+    })
+    assert response.status_code == 201, response.text
+    version = response.json()
+    path = f"/api/admin/schedule/versions/{version['id']}"
+    expected_issue = {"code": "pe_missing", "course_group_id": group_id}
+    if stage == "draft":
+        response = admin_client.get(path)
+        assert response.status_code == 200, response.text
+        assert expected_issue in response.json()["report"]["issues"]
+        return
+
+    # Generate under an older cohort year to reproduce an otherwise complete draft
+    # that becomes ineligible for publication when the catalog year is corrected.
+    group.admission_year = admission_year - 2
+    database.commit()
+    response = admin_client.post(f"{path}/generate", json={
+        "revision": version["revision"], "algorithm": "greedy_local",
+    })
+    assert response.status_code == 202, response.text
+    execute_run(database.get_bind(), response.json()["id"])
+    group.admission_year = admission_year
+    database.commit()
+
+    response = admin_client.get(path)
+    assert response.status_code == 200, response.text
+    report = response.json()["report"]
+    assert report["unplaced_occurrences"] == [], report
+    response = admin_client.post(f"{path}/publish", json={
+        "revision": response.json()["version"]["revision"],
+    })
+    assert response.status_code == 409, response.text
+    assert response.json()["detail"]["report"]["issues"] == [expected_issue]
+
+
 def test_reseeding_expands_existing_demo_without_replacing_publications(
     database, fast_demo_credentials,
 ):

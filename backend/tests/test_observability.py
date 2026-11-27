@@ -110,7 +110,7 @@ def test_audit_is_atomic_and_excludes_personal_fields(admin_client, campus):
         json={
             "major_id": campus["major"].id,
             "group_code": "T1",
-            "admission_year": 2026,
+            "admission_year": campus["group"].admission_year,
             "capacity": 30,
         },
     )

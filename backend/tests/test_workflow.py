@@ -31,7 +31,7 @@ def campus(database, monkeypatch):
         m.CourseGroup,
         major_id=major.id,
         group_code="T1",
-        admission_year=2026,
+        admission_year=2024,
         capacity=20,
     )
     small = add(m.SmallGroup, course_group_id=group.id, label="A", capacity=20)

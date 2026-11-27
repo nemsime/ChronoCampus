@@ -104,6 +104,9 @@ export function DraftWizard({ data, initialTermId = "", onClose, onCreated, onSt
           <dl className="draft-input-summary"><dt>{t("term_id")}</dt><dd>{inputs.term?.name}</dd><dt>{t("name")}</dt><dd>{name}</dd><dt>{t("groups")}</dt><dd>{eligible.filter(group => selected.includes(group.id)).map(rowLabel).join(", ")}</dd><dt>{t("calendar_id")}</dt><dd>{inputs.calendar?.name}</dd><dt>{t("workloads")}</dt><dd>{inputs.workloads.length}</dd><dt>{t("semester_hours")}</dt><dd>{inputs.hours}</dd></dl>
           <p className="notice">{t("draftValidationHelp")}</p>
           {(inputs.unconfirmed || !inputs.workloads.length) && <p className="notice warning">{t(inputs.unconfirmed ? "draftUnconfirmedInputs" : "draftNoWorkload")}</p>}
+          {!!inputs.missingPeGroups.length && <p className="notice warning" role="status">
+            {t("pe_missing")} {inputs.missingPeGroups.map(rowLabel).join(", ")}
+          </p>}
           <details className="draft-advanced"><summary>{t("advancedGeneration")}</summary><div className="form-grid">
             <label>{t("algorithm")}<select value={algorithm} onChange={event => setAlgorithm(event.target.value)}><option value="cp_sat">{t("cp_sat")}</option><option value="greedy_local">{t("greedy_local")}</option></select></label>
             <label>{t("seed")}<input type="number" min={0} max={2147483647} required value={seed} onChange={event => setSeed(Number(event.target.value))} /></label>

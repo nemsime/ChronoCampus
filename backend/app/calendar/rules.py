@@ -217,10 +217,14 @@ def required_pairs(hours: int, units: int | None) -> int:
     return hours // units
 
 
+def requires_pe(group, term) -> bool:
+    academic_year = academic_start_year(term.get("academic_year"), term["starts_on"])
+    return group.get("admission_year") in {academic_year, academic_year - 1}
+
+
 def pe_workload_errors(component, group, term, calendar) -> list[str]:
     errors = []
-    year = academic_start_year(term.get("academic_year"), term["starts_on"])
-    if group["admission_year"] not in {year, year - 1}:
+    if not requires_pe(group, term):
         errors.append("pe_year_ineligible")
     units = calendar["academic_hours_per_lesson"]
     if not units or component["semester_hours"] != 2 * calendar["teaching_weeks"] * units:

@@ -127,7 +127,7 @@ def test_concurrent_publications_serialize_conflicts(monkeypatch, tmp_path):
                 m.CourseGroup,
                 major_id=major.id,
                 group_code=f"{marker}-{index}",
-                admission_year=2026,
+                admission_year=2024,
                 capacity=20,
             )
             component = add(

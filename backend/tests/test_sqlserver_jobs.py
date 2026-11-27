@@ -145,7 +145,7 @@ def seed_campus(engine):
         faculty = add(m.Faculty, name=marker, code=marker)
         major = add(m.Major, faculty_id=faculty.id, name=marker, major_code=int(marker[:6], 16),
                     study_form="present", duration_yrs=4)
-        group = add(m.CourseGroup, major_id=major.id, group_code=marker, admission_year=2026, capacity=20)
+        group = add(m.CourseGroup, major_id=major.id, group_code=marker, admission_year=2024, capacity=20)
         building = add(m.Building, building_number=int(marker[:6], 16))
         add(m.Room, building_id=building.id, room_number=marker, floor_number=1, room_on_floor=1,
             capacity=20, room_type="classroom")

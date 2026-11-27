@@ -69,6 +69,21 @@ def test_pe_occupies_the_cohort_twice_a_week_on_separate_days_without_resources(
     assert times_by_group[0] & times_by_group[1]
 
 
+def test_pe_missing_applies_only_to_selected_cohorts_even_without_workloads():
+    snapshot = pe_snapshot()
+    snapshot["cohort_ids"] = [1]
+    snapshot["workloads"] = []
+    snapshot["occurrences"] = []
+
+    report = validate(snapshot, [])
+
+    assert not report["complete"]
+    assert report["issues"] == [
+        {"code": "workload_empty"},
+        {"code": "pe_missing", "course_group_id": 1},
+    ]
+
+
 def test_pe_without_a_room_or_teacher_conflicts_only_when_audience_overlaps():
     snapshot = pe_snapshot()
     placement = {
