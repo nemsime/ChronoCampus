@@ -7,6 +7,7 @@ import {
 import { Account, api, Row } from "./api";
 import { dateLabel, EmptyState, ErrorBox, localDay, timestampLabel } from "./common";
 import { useLanguage } from "./i18n";
+import { StudentGroupingStatus } from "./StudentGrouping";
 
 interface OverviewData {
   date: string;
@@ -34,8 +35,8 @@ function Metric({ icon: Icon, label, value, tone }: {
   </article>;
 }
 
-export function Overview({ account, onNavigate }: {
-  account: Account; onNavigate: (page: string, versionId?: number) => void;
+export function Overview({ account, onNavigate, strictStudentGroups = false }: {
+  account: Account; onNavigate: (page: string, versionId?: number) => void; strictStudentGroups?: boolean;
 }) {
   const { t, lang } = useLanguage();
   const [day, setDay] = useState(() => localDay());
@@ -105,6 +106,7 @@ export function Overview({ account, onNavigate }: {
       <div><p className="eyebrow">{t("academicWorkspace")}</p><h1>{greeting}, {firstName}<span className="heading-period">.</span></h1><p>{t("overviewIntro")}</p></div>
       <button className="secondary overview-refresh" disabled={loading} onClick={() => setReload(value => value + 1)}><RefreshCw size={16} className={loading ? "spin" : ""} aria-hidden="true" />{t("refresh")}</button>
     </header>
+    {strictStudentGroups && account.role === "student" && <StudentGroupingStatus refreshSignal={reload} />}
     <ErrorBox error={error} />
     {!!error && current && <p className="notice warning" role="status">{t("overviewStale")}</p>}
     {!current ? loading ? <div className="overview-skeleton" aria-busy="true" aria-label={t("loading")}>

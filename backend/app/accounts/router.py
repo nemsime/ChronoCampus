@@ -22,6 +22,7 @@ from app.accounts.dependencies import (
 from app.accounts.mail import MailError, enqueue_reset, validate_configuration
 from app.accounts.recovery import GENERIC_NOTICE, consume_reset, request_reset
 from app.accounts.roles import ROLES, STUDENT
+from app.accounts.roster import confirm_enrollment, stage_enrollment
 from app.core.config import get_settings
 from app.core.security import (
     csrf_token,
@@ -69,14 +70,24 @@ class LoginInput(EmailInput):
 
 class RegistrationInput(EmailInput):
     course_group_id: int | None = Field(default=None, gt=0)
-    display_name: str = Field(min_length=1, max_length=150)
+    display_name: str | None = Field(default=None, min_length=1, max_length=150)
+    surname: str | None = Field(default=None, max_length=100)
+    given_name: str | None = Field(default=None, max_length=100)
+    patronymic: str | None = Field(default=None, max_length=100)
 
     @field_validator("display_name")
     @classmethod
     def normalize_name(cls, value):
+        if value is None:
+            return None
         if not value.strip():
             raise ValueError("invalid_name")
         return value.strip()
+
+    @field_validator("surname", "given_name", "patronymic")
+    @classmethod
+    def normalize_roster_name(cls, value):
+        return " ".join((value or "").split()) or None
 
 
 class PasswordInput(BaseModel):
@@ -276,16 +287,34 @@ def registration_groups(db: Session = Depends(get_db)):
     ).mappings()]
 
 
+@router.get("/registration-config")
+def registration_config(response: Response):
+    response.headers["Cache-Control"] = "no-store"
+    return {"strict_student_groups": get_settings().strict_student_groups}
+
+
 @router.post("/register", status_code=202)
 def register(body: RegistrationInput, request: Request, db: Session = Depends(get_db)):
     check_origin(request)
+    settings = get_settings()
+    if settings.strict_student_groups:
+        if not body.surname or not body.given_name:
+            raise HTTPException(422, "student_name_required")
+        if body.course_group_id is None:
+            raise HTTPException(422, "invalid_course_group")
+        display_name = " ".join(filter(None, (body.surname, body.given_name, body.patronymic)))
+        if len(display_name) > 150:
+            raise HTTPException(422, "invalid_name")
+    else:
+        if body.display_name is None:
+            raise HTTPException(422, "invalid_name")
+        display_name = body.display_name
     throttle(db, "register-email:" + body.email, limit=5)
     throttle(
         db,
         "register-ip:" + (request.client.host if request.client else "unknown"),
         limit=30,
     )
-    settings = get_settings()
     if body.email.rsplit("@", 1)[-1] not in settings.university_email_domains:
         raise HTTPException(400, "university_email_required")
     try:
@@ -300,15 +329,20 @@ def register(body: RegistrationInput, request: Request, db: Session = Depends(ge
         # The mailbox owner chooses the real password only AFTER opening the link.
         account = Account(
             email=body.email,
-            display_name=body.display_name,
+            display_name=display_name,
             password_hash=password_hash(new_token()),
             role=STUDENT,
-            course_group_id=body.course_group_id,
+            course_group_id=None if settings.strict_student_groups else body.course_group_id,
             email_verified=False,
             must_change_password=False,
         )
         db.add(account)
         db.flush()
+        if settings.strict_student_groups:
+            stage_enrollment(
+                db, account, course_group_id=body.course_group_id, surname=body.surname,
+                given_name=body.given_name, patronymic=body.patronymic,
+            )
     if not account.email_verified and account.is_active:
         raw = new_token()
         verification = ResetToken(
@@ -353,6 +387,8 @@ def verify_email(
     account.password_hash = password_hash(body.password)
     account.email_verified = True
     account.must_change_password = False
+    if account.role == STUDENT and get_settings().strict_student_groups:
+        confirm_enrollment(db, account)
     revoke_sessions(db, account.id)
     record_audit(db, account, "account.email_verified", "users", account.id)
     db.commit()

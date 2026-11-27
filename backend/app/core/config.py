@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     )
     reset_minutes: int = Field(default=30, ge=5, le=120)
     university_email_domains: list[str] = []
+    strict_student_groups: bool = False
+    student_subgroup_max_size: int = Field(default=20, ge=1)
     mail_mode: str = "disabled"
     mail_directory: Path = Path(__file__).resolve().parents[2] / ".mail"
     smtp_host: str = ""

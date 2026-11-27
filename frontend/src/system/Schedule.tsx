@@ -3,6 +3,7 @@ import { BookOpen, CalendarDays, MapPin, RefreshCw, SlidersHorizontal, StickyNot
 import { Account, api, ApiError, Row } from "./api";
 import { addDays, dateLabel, Dialog, EmptyState, ErrorBox, ListPagination, LoadingState, localDay, useAction, weekStart } from "./common";
 import { useLanguage } from "./i18n";
+import { StudentGroupingStatus } from "./StudentGrouping";
 import { LecturerRequestForm, LecturerRequests } from "./DatedChanges";
 import { SemesterTimetable } from "./SemesterTimetable";
 import { GridConfiguration, ScheduleViewToggle, useScheduleView, WeekGrid, WeekSelector } from "./WeekGrid";
@@ -195,7 +196,7 @@ export function ScheduleFilters({ role, choices, values, onChange }: {
   </div>;
 }
 
-export function PersonalSchedule({ account }: { account: Account }) {
+export function PersonalSchedule({ account, strictStudentGroups = false }: { account: Account; strictStudentGroups?: boolean }) {
   const { t } = useLanguage();
   const [rows, setRows] = useState<Row[]>([]);
   const [notes, setNotes] = useState<Row[]>([]);
@@ -318,6 +319,7 @@ export function PersonalSchedule({ account }: { account: Account }) {
           {t("refresh")}
         </button>
       </div>
+      {strictStudentGroups && account.role === "student" && <StudentGroupingStatus refreshSignal={reload} />}
       {view !== "semester" && <dl className="summary-strip schedule-summary">
         {[
           { icon: CalendarDays, label: "lessonsOnPage", value: shownRows.length },

@@ -6,12 +6,14 @@ import json
 from datetime import date, time
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from sqlalchemy import and_, false, func, or_, select, true
+from sqlalchemy import and_, case, false, func, or_, select, true
 from sqlalchemy.orm import Session
 
 from app.accounts.dependencies import COOKIE
 from app.accounts.roles import ADMIN, DEAN, LECTURER, ROLES, STUDENT
+from app.accounts.roster_models import StudentEnrollment
 from app.calendar.rules import lesson_slot, parity
+from app.core.config import get_settings
 from app.core.security import token_hash
 from app.db import models as m
 from app.db.session import get_db
@@ -29,10 +31,26 @@ SG, LG = m.SmallGroup.__table__, m.LabGroup.__table__
 M, C = m.Major.__table__, m.CalendarConfig.__table__
 
 
-def account_scope(account):
-    return {key: getattr(account, key, None) for key in (
+def student_group_confirmed():
+    confirmed = select(StudentEnrollment.account_id).where(
+        StudentEnrollment.account_id == U.c.id,
+        StudentEnrollment.course_group_id == U.c.course_group_id,
+        StudentEnrollment.confirmed == true(),
+    ).correlate(U).exists()
+    return case((confirmed, 1), else_=0).label("student_group_confirmed")
+
+
+def account_scope(account, db):
+    scope = {key: getattr(account, key, None) for key in (
         "id", "role", "course_group_id", "small_group_id", "lab_group_id", "faculty_id"
     )}
+    if account.role == STUDENT and get_settings().strict_student_groups:
+        # Reload membership after the write caller takes the schedule lock.
+        scope.update(db.execute(select(
+            U.c.course_group_id, U.c.small_group_id, U.c.lab_group_id,
+            student_group_confirmed(),
+        ).where(U.c.id == account.id)).mappings().one())
+    return scope
 
 
 def fresh_scope(db, request):
@@ -40,7 +58,7 @@ def fresh_scope(db, request):
     # not revalidate against its original snapshot. These endpoints never write.
     db.rollback()
     sessions = m.UserSession.__table__
-    row = db.execute(
+    statement = (
         select(U.c.id, U.c.role, U.c.course_group_id, U.c.small_group_id,
                U.c.lab_group_id, U.c.faculty_id, U.c.must_change_password,
                select(m.DataRevision.revision).where(m.DataRevision.id == 1)
@@ -50,7 +68,10 @@ def fresh_scope(db, request):
                sessions.c.is_revoked == false(), sessions.c.expires_at > utc_now(),
                U.c.is_active == true(), U.c.email_verified == true(),
                U.c.role.in_(ROLES))
-    ).mappings().first()
+    )
+    if get_settings().strict_student_groups:
+        statement = statement.add_columns(student_group_confirmed())
+    row = db.execute(statement).mappings().first()
     if row is None:
         raise HTTPException(401, "authentication_required", headers=PRIVATE)
     if row["must_change_password"]:
@@ -79,6 +100,16 @@ def authorized(scope):
     if scope["role"] != STUDENT or not scope["course_group_id"]:
         return false()
     predicate = W.c.course_group_id == scope["course_group_id"]
+    if "student_group_confirmed" in scope:
+        if not scope["student_group_confirmed"]:
+            return false()
+        practical = W.c.small_group_id.is_(None)
+        lab = W.c.lab_group_id.is_(None)
+        if scope["small_group_id"] is not None:
+            practical = or_(practical, W.c.small_group_id == scope["small_group_id"])
+            if scope["lab_group_id"] is not None:
+                lab = or_(lab, W.c.lab_group_id == scope["lab_group_id"])
+        return and_(predicate, practical, lab)
     if scope["small_group_id"]:
         same_small = W.c.small_group_id == scope["small_group_id"]
         if scope["lab_group_id"]:

@@ -41,7 +41,7 @@ def save_note(
     if account.role == DEAN:
         raise HTTPException(404, "lesson_not_found")
     lock_revision(db, changed=False)
-    scope = q.account_scope(account)
+    scope = q.account_scope(account, db)
     # Bounded authorization and existing note lookup share a single SELECT.
     row = db.execute(
         select(literal(1), m.Note)

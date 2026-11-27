@@ -127,7 +127,7 @@ def assignment_view(db, assignment, component):
 
 def readable(account, component, db):
     return db.scalar(select(1).select_from(q.W).where(
-        q.W.c.id == component.id, q.authorized(q.account_scope(account))
+        q.W.c.id == component.id, q.authorized(q.account_scope(account, db))
     ).limit(1)) is not None
 
 

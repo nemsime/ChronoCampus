@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.academics.router import router as academics_router
+from app.accounts.roster_api import router as roster_router
 from app.accounts.router import router as accounts_router
 from app.api.groups import router as groups_router
 from app.core.config import get_settings
@@ -53,6 +54,7 @@ app.add_middleware(telemetry.RequestTelemetry)
 app.include_router(change_router, prefix="/api")
 app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
+app.include_router(roster_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")
 app.include_router(schedule_queries_router, prefix="/api")
 app.include_router(workspace_router, prefix="/api")
