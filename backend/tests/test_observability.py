@@ -1,8 +1,12 @@
 import json
+from pathlib import Path
 
+import pytest
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from test_workflow import campus as campus
 from test_workflow import detail, draft, generate, login, queued_run
 
@@ -10,6 +14,18 @@ from app.db import models as m
 from app.jobs.queue import recover_expired
 from app.observability import telemetry as t
 from app.scheduling.router import execute_run
+
+
+@pytest.fixture
+def alembic_head():
+    config = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+    return ScriptDirectory.from_config(config).get_current_head()
+
+
+def stamp_revision(database, revision):
+    database.execute(text("CREATE TABLE alembic_version (version_num VARCHAR(32) PRIMARY KEY)"))
+    database.execute(text("INSERT INTO alembic_version VALUES (:revision)"), {"revision": revision})
+    database.commit()
 
 
 def test_unhandled_exception_is_correlated_and_secret_free():
@@ -177,9 +193,10 @@ def test_logging_failure_does_not_fail_request(admin_client, monkeypatch):
     assert t.request_metrics()["write_failures"] > before
 
 
-def test_metrics_token_is_scoped_and_histograms_valid(client, monkeypatch):
+def test_metrics_token_is_scoped_and_histograms_valid(client, database, alembic_head, monkeypatch):
     from app.core.config import Settings
 
+    stamp_revision(database, alembic_head)
     monkeypatch.setattr(
         "app.observability.router.get_settings",
         lambda: Settings(_env_file=None, metrics_token="test-metric-secret"),
@@ -244,14 +261,61 @@ def test_frontend_report_is_bounded_and_payload_free(admin_client):
     )
 
 
-def test_readiness_checks_schema_not_only_connection(admin_client, campus):
-    assert admin_client.get("/api/ready").status_code == 200
-    campus["db"].execute(m.AuditEvent.__table__.delete())
-    campus["db"].commit()
-    m.AuditEvent.__table__.drop(campus["db"].get_bind())
+@pytest.mark.parametrize(
+    ("installed", "status_code", "status"),
+    [
+        ("0007_dean_suggestions", 503, "unavailable"),
+        ("head", 200, "ready"),
+        (None, 503, "unavailable"),
+    ],
+)
+def test_readiness_requires_alembic_head(
+    admin_client, database, alembic_head, installed, status_code, status
+):
+    actual = alembic_head if installed == "head" else installed
+    if actual:
+        stamp_revision(database, actual)
+
     assert admin_client.get("/api/health").json() == {"status": "ok"}
     response = admin_client.get("/api/ready")
-    assert response.status_code == 503 and response.json() == {"status": "unavailable"}
+    assert response.status_code == status_code
+    assert response.json() == {"status": status}
+
+    probe = admin_client.get("/api/admin/diagnostics/system").json()["database"]
+    assert probe["schema"] == actual
+    assert probe["expected_schema"] == alembic_head
+    assert probe["ready"] is (status == "ready")
+
+
+def test_readiness_discovers_and_caches_an_added_migration(client, database, monkeypatch, tmp_path):
+    from app.observability.router import expected_schema_revision
+
+    config_path = tmp_path / "alembic.ini"
+    config_path.write_text("[alembic]\nscript_location = %(here)s/alembic\n", encoding="utf-8")
+    versions = tmp_path / "alembic" / "versions"
+    versions.mkdir(parents=True)
+    (versions / "prior.py").write_text("revision = 'prior'\ndown_revision = None\n", encoding="utf-8")
+    (versions / "next.py").write_text("revision = 'next'\ndown_revision = 'prior'\n", encoding="utf-8")
+    calls = []
+
+    def config_for_new_migration(_):
+        calls.append(config_path)
+        return Config(str(config_path))
+
+    monkeypatch.setattr("app.observability.router.Config", config_for_new_migration)
+    stamp_revision(database, "prior")
+
+    expected_schema_revision.cache_clear()
+    try:
+        with TestClient(client.app) as next_client:
+            assert calls == [config_path]
+            assert next_client.get("/api/ready").status_code == 503
+            database.execute(text("UPDATE alembic_version SET version_num = 'next'"))
+            database.commit()
+            assert next_client.get("/api/ready").status_code == 200
+            assert calls == [config_path]
+    finally:
+        expected_schema_revision.cache_clear()
 
 
 def test_progress_storage_failure_preserves_solver_result(

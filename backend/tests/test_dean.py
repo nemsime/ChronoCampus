@@ -18,7 +18,6 @@ from app import demo
 from app.db import models as m
 from app.main import app
 from app.notes.router import NoteInput, save_note
-from app.observability.router import database_probe
 from app.observability.telemetry import ERROR_CODES
 
 
@@ -179,8 +178,7 @@ def test_dean_overview_has_real_scoped_counts_and_no_admin_fields(admin_client, 
     assert admin_client.get("/api/workspace/overview", params={"day": "2026-09-07"}).json()["stats"]["open_suggestions"] == 1
 
 
-def test_probe_and_error_allowlist(database):
-    assert database_probe(database)["schema"] == "0007_dean_suggestions"
+def test_error_allowlist():
     assert {"dean_required", "forbidden", "suggestion_not_found", "suggestion_closed",
             "suggestion_state_changed", "suggestion_limit", "invalid_proposal",
             "outside_faculty_scope", "faculty_required_for_scope", "faculty_dean_only"} <= ERROR_CODES

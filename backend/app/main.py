@@ -18,7 +18,11 @@ from app.db.session import get_engine
 from app.feedback.router import router as feedback_router
 from app.notes.router import router as notes_router
 from app.observability import telemetry
-from app.observability.router import client_router, database_probe
+from app.observability.router import (
+    client_router,
+    database_probe,
+    expected_schema_revision,
+)
 from app.observability.router import router as diagnostics_router
 from app.review.router import router as review_router
 from app.scheduling.change_api import router as change_router
@@ -30,6 +34,7 @@ from app.workspace.router import router as workspace_router
 @asynccontextmanager
 async def lifespan(app):
     telemetry.configure(get_settings())
+    expected_schema_revision()
     telemetry.emit("application.started")
     yield
     telemetry.emit("application.stopped")
