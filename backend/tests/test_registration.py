@@ -5,6 +5,8 @@ from email.parser import BytesParser
 
 from conftest import PASSWORD
 from sqlalchemy import select
+from test_workflow import campus as campus
+from test_workflow import login
 
 from app.accounts import router as auth
 from app.accounts.mail import decrypt_payload
@@ -210,3 +212,72 @@ def test_registration_assigns_selected_group_and_preserves_existing_account(clie
     assert client.post("/api/auth/login", json={
         "email": account.email, "password": PASSWORD}).status_code == 200
     assert client.get("/api/auth/me").json()["user"]["course_group_id"] == group.id
+
+
+def test_strict_registration_does_not_grant_requested_memberships(client, database):
+    from app.db.models import CourseGroup, Faculty, Major
+
+    config = client.get("/api/auth/registration-config")
+    assert config.json() == {"strict_student_groups": False}
+    assert config.headers["cache-control"] == "no-store"
+    auth.get_settings().strict_student_groups = True
+    assert client.get("/api/auth/registration-config").json() == {"strict_student_groups": True}
+
+    faculty = Faculty(name="Roster faculty", code="ROSTER")
+    database.add(faculty)
+    database.flush()
+    major = Major(faculty_id=faculty.id, name="Roster major", major_code=456,
+                  study_form="full", duration_yrs=4)
+    database.add(major)
+    database.flush()
+    group = CourseGroup(major_id=major.id, admission_year=2026,
+                        group_code="ROSTER-26", capacity=40)
+    database.add(group)
+    database.commit()
+
+    email = "ani@example.invalid"
+    body = {"email": email, "course_group_id": group.id, "small_group_id": 999}
+    response = client.post("/api/auth/register", json=body)
+    assert response.status_code == 422
+    assert response.json()["detail"] == "student_name_required"
+    body.update(surname="  Սարգսյան  ", given_name="Անի")
+    response = client.post("/api/auth/register", json=body)
+    assert response.status_code == 202, response.text
+    account = database.scalar(select(Account).where(Account.email == email))
+    assert account.display_name == "Սարգսյան Անի"
+    assert account.course_group_id is None and account.small_group_id is None
+
+    assert client.post("/api/auth/verify-email", json={
+        "token": raw_token(database), "password": PASSWORD}).status_code == 204
+    assert client.post("/api/auth/login", json={
+        "email": email, "password": PASSWORD}).status_code == 200
+    assert client.get("/api/auth/me").json()["user"]["course_group_id"] is None
+
+
+def test_strict_registration_assigns_matching_roster_only_after_verification(client, campus):
+    auth.get_settings().strict_student_groups = True
+    term, group, small = (campus[key] for key in ("term", "group", "small"))
+    email = "armen@example.invalid"
+    login(client, "admin@example.invalid")
+    imported = client.post("/api/student-roster/import", json={
+        "term_id": term.id,
+        "csv": "group_code,surname,given_name,email\n"
+        f"{group.group_code},Семёнов,Армен,{email}\n",
+    })
+    assert imported.status_code == 200 and imported.json()["imported"] == 1, imported.text
+
+    response = client.post("/api/auth/register", json={
+        "email": email, "course_group_id": group.id, "surname": "   СЕМЕНОВ  ",
+        "given_name": "армен", "patronymic": "Гагикович",
+    })
+    assert response.status_code == 202, response.text
+    db = campus["db"]
+    student = db.scalar(select(Account).where(Account.email == email))
+    assert student.course_group_id is None and student.small_group_id is None
+    assert client.post("/api/auth/verify-email", json={
+        "token": raw_token(db), "password": PASSWORD,
+    }).status_code == 204
+    login(client, email)
+    profile = client.get("/api/auth/me").json()["user"]
+    assert profile["course_group_id"] == group.id
+    assert profile["small_group_id"] == small.id

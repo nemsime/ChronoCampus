@@ -14,6 +14,7 @@ import { uiWords } from "./uiWords";
 import { designWords } from "./designWords";
 import { deanWords } from "./deanWords";
 import { adminWords } from "./adminWords";
+import { rosterWords } from "./rosterWords";
 export type Language = "ru" | "hy" | "en";
 const words: Record<string, [string, string, string]> = {
   template_scope_too_large: ["Выберите одну группу или семестр.", "Ընտրեք մեկ խումբ կամ կիսամյակ։", "Choose one group or semester."],
@@ -43,6 +44,7 @@ const words: Record<string, [string, string, string]> = {
   ...designWords,
   ...deanWords,
   ...adminWords,
+  ...rosterWords,
   register: ["Создать аккаунт", "Ստեղծել հաշիվ", "Create account"],
   registrationNoGroups: ["Учебные группы ещё не добавлены. Обратитесь к администратору.", "Ուսումնական խմբեր դեռ չկան։ Դիմեք ադմինիստրատորին։", "No academic groups are available yet. Contact an administrator."],
   registrationGroupPrompt: ["Выберите учебную группу", "Ընտրեք ուսումնական խումբը", "Choose your academic group"],
@@ -491,6 +493,11 @@ const words: Record<string, [string, string, string]> = {
     "Версия изменена. Обновите страницу.",
     "Տարբերակը փոխվել է։ Թարմացրեք էջը։",
     "Version changed. Refresh this page.",
+  ],
+  draft_based_on_outdated_publication: [
+    "Черновик устарел. Создайте новый черновик на основе текущей публикации.",
+    "Սևագիրը հնացել է։ Ստեղծեք նոր սևագիր ներկայիս հրապարակված տարբերակի հիման վրա։",
+    "This draft is outdated. Create a new draft from the current published schedule.",
   ],
 };
 type Context = {

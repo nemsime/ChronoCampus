@@ -18,6 +18,7 @@ def test_manual_move_accepts_explicitly_absent_room():
 
 
 def add_pe(campus):
+    campus["group"].admission_year = campus["term"].starts_on.year
     subject = campus["add"](m.Subject, name="Physical Education")
     component = campus["add"](
         m.Workload,
@@ -30,6 +31,20 @@ def add_pe(campus):
     )
     campus["db"].commit()
     return component
+
+
+def test_generation_reports_missing_pe(admin_client, campus):
+    campus["group"].admission_year = campus["term"].starts_on.year
+    campus["db"].commit()
+    version = draft(admin_client, campus)
+
+    run = generate(admin_client, version, campus)
+
+    assert run["status"] == "rejected", run
+    assert run["result"]["report"]["issues"] == [
+        {"code": "pe_missing", "course_group_id": campus["group"].id}
+    ]
+    assert detail(admin_client, version)["assignments"] == []
 
 
 def test_resource_free_pe_survives_generation_moves_and_publication(admin_client, campus):

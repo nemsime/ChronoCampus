@@ -80,6 +80,7 @@ def build_snapshot(
     snapshot = {
         "term": record(term),
         "calendar": record(calendar),
+        "cohort_ids": version.cohort_ids,
         "workloads": [record(w) for w in workloads],
     }
     for key, model in (

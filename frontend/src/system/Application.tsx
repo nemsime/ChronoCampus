@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Lightbulb,
+  UsersRound,
 } from "lucide-react";
 import {
   Account,
@@ -33,6 +34,7 @@ import { Catalogs } from "./Catalogs";
 import { Planner } from "./Planner";
 import { PersonalSchedule } from "./Schedule";
 import { Overview } from "./Overview";
+import { StudentGroups, StudentRoster } from "./StudentGrouping";
 import { DeanTimetables } from "./Dean";
 import { Suggestions } from "./Suggestions";
 import { Feedback } from "./Feedback";
@@ -44,11 +46,12 @@ import "./dean.css";
 import "./adminWorkspace.css";
 import "./theme.css";
 
-export function navigationForRole(role: Account["role"]) {
+export function navigationForRole(role: Account["role"], strictStudentGroups = false) {
   return [
     { id: "overview", icon: LayoutDashboard, group: "navigationMain" },
     { id: role === "dean" ? "timetables" : "schedule", icon: CalendarDays, group: "navigationMain" },
     ...(role === "dean" ? [{ id: "suggestions", icon: Lightbulb, group: "navigationMain" }] : []),
+    ...(strictStudentGroups && role === "dean" ? [{ id: "studentRoster", icon: UsersRound, group: "navigationMain" }] : []),
     ...(role === "admin" ? [
       { id: "planner", icon: Settings, group: "navigationMain" },
       { id: "university", icon: Landmark, group: "navigationAdmin" },
@@ -56,13 +59,15 @@ export function navigationForRole(role: Account["role"]) {
       { id: "diagnostics", icon: Activity, group: "navigationAdmin" },
       { id: "suggestions", icon: Lightbulb, group: "navigationAdmin" },
     ] : []),
+    ...(strictStudentGroups && role === "admin" ? [{ id: "studentRoster", icon: UsersRound, group: "navigationAdmin" }] : []),
+    ...(strictStudentGroups && role === "student" ? [{ id: "studentGroups", icon: UsersRound, group: "navigationPersonal" }] : []),
     { id: "feedback", icon: MessageSquare, group: "navigationPersonal" },
     { id: "account", icon: UserRound, group: "navigationPersonal" },
   ];
 }
-export function pageForRole(page: string, role: Account["role"]) {
+export function pageForRole(page: string, role: Account["role"], strictStudentGroups = false) {
   if (page === "catalogs" && role === "admin") return "university";
-  return navigationForRole(role).some(item => item.id === page) ? page : "overview";
+  return navigationForRole(role, strictStudentGroups).some(item => item.id === page) ? page : "overview";
 }
 
 export function defaultPageForRole(role: Account["role"]) {
@@ -75,6 +80,7 @@ function Workspace() {
   const [account, setAccount] = useState<Account | null>(null);
   const [ready, setReady] = useState(false);
   const [openSuggestions, setOpenSuggestions] = useState(0);
+  const [strictStudentGroups, setStrictStudentGroups] = useState(false);
   const [page, setPage] = useState("overview");
   const [plannerVersion, setPlannerVersion] = useState<number | null>(null);
   const [plannerStart, setPlannerStart] = useState({ createDraft: false, termId: "" });
@@ -87,7 +93,7 @@ function Workspace() {
   const menuButton = useRef<HTMLButtonElement>(null);
   const main = useRef<HTMLElement>(null);
   const { busy, error, run } = useAction();
-  const activePage = account?.must_change_password ? "account" : account ? pageForRole(page, account.role) : "overview";
+  const activePage = account?.must_change_password ? "account" : account ? pageForRole(page, account.role, strictStudentGroups) : "overview";
   useEffect(() => {
     try { localStorage.setItem("chronocampus.sidebarCollapsed", String(sidebarCollapsed)); }
     catch { /* Navigation still works when browser storage is unavailable. */ }
@@ -164,6 +170,15 @@ function Workspace() {
     window.addEventListener("suggestions-updated", load);
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("suggestions-updated", load); };
   }, [account]);
+  useEffect(() => {
+    setStrictStudentGroups(false);
+    if (!account || account.must_change_password || account.role === "lecturer") return;
+    let active = true;
+    void api<{ strict_student_groups: boolean }>("/auth/registration-config")
+      .then(config => { if (active) setStrictStudentGroups(config.strict_student_groups); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [account]);
   if (!ready)
     return <div className="loading-screen"><span className="brand">ChronoCampus</span><LoadingState /></div>;
   if (!account || authLink.token)
@@ -178,7 +193,7 @@ function Workspace() {
         }}
       />
     );
-  const navigation = navigationForRole(account.role);
+  const navigation = navigationForRole(account.role, strictStudentGroups);
   return (
     <div className={`workspace${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <a className="skip-link" href="#main-content">{t("skipContent")}</a>
@@ -312,10 +327,14 @@ function Workspace() {
               <Suggestions mode={account.role} onNavigate={navigate} />
             ) : activePage === "feedback" ? (
               <Feedback account={account} />
+            ) : activePage === "studentGroups" && account.role === "student" ? (
+              <StudentGroups />
+            ) : activePage === "studentRoster" && (account.role === "admin" || account.role === "dean") ? (
+              <StudentRoster role={account.role} />
             ) : activePage === "schedule" && account.role !== "dean" ? (
-              <PersonalSchedule account={account} />
+              <PersonalSchedule account={account} strictStudentGroups={strictStudentGroups} />
             ) : (
-              <Overview account={account} onNavigate={navigate} />
+              <Overview account={account} onNavigate={navigate} strictStudentGroups={strictStudentGroups} />
             )}
           </DiagnosticBoundary>
         </main>

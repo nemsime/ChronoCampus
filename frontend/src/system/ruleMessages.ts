@@ -21,6 +21,7 @@ export const ruleMessages: Record<string, [string, string, string]> = {
     "Դասը չի կարելի տեղափոխել տոնական օր և հաշվառել որպես չեղարկված։ Ընտրեք ուսումնական օր։",
     "A manual move cannot turn a lesson into a holiday exemption. Choose a teaching day.",
   ],
+  pe_missing: ["Добавьте в нагрузку группы физкультуру дважды в учебную неделю.", "Խմբի ուսումնական բեռնվածության մեջ ավելացրեք ֆիզիկական դաստիարակության երկու դաս յուրաքանչյուր ուսումնական շաբաթվա համար։", "Add two Physical Education lessons per teaching week to the cohort workload."],
   pe_year_ineligible: ["Физкультура доступна для первого и второго курсов.", "Ֆիզիկական դաստիարակությունը նախատեսված է առաջին և երկրորդ կուրսերի համար։", "Physical Education is available for first- and second-year cohorts."],
   pe_weekly_hours: ["Укажите часы для двух занятий физкультурой в неделю.", "Նշեք ֆիզիկական դաստիարակության շաբաթական երկու դասին համապատասխանող ժամերի քանակը։", "Enter the hours for two Physical Education lessons per teaching week."],
   pe_already_exists: ["У этой группы уже есть нагрузка по физкультуре в этом семестре.", "Այս հոսքն արդեն ունի ֆիզիկական դաստիարակության ծանրաբեռնվածություն այս կիսամյակում։", "This cohort already has a Physical Education workload for the semester."],

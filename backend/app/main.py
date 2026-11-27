@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.academics.router import router as academics_router
+from app.accounts.roster_api import router as roster_router
 from app.accounts.router import router as accounts_router
 from app.api.groups import router as groups_router
 from app.core.config import get_settings
@@ -18,7 +19,11 @@ from app.db.session import get_engine
 from app.feedback.router import router as feedback_router
 from app.notes.router import router as notes_router
 from app.observability import telemetry
-from app.observability.router import client_router, database_probe
+from app.observability.router import (
+    client_router,
+    database_probe,
+    expected_schema_revision,
+)
 from app.observability.router import router as diagnostics_router
 from app.review.router import router as review_router
 from app.scheduling.change_api import router as change_router
@@ -30,6 +35,7 @@ from app.workspace.router import router as workspace_router
 @asynccontextmanager
 async def lifespan(app):
     telemetry.configure(get_settings())
+    expected_schema_revision()
     telemetry.emit("application.started")
     yield
     telemetry.emit("application.stopped")
@@ -48,6 +54,7 @@ app.add_middleware(telemetry.RequestTelemetry)
 app.include_router(change_router, prefix="/api")
 app.include_router(groups_router, prefix="/api")
 app.include_router(accounts_router, prefix="/api")
+app.include_router(roster_router, prefix="/api")
 app.include_router(academics_router, prefix="/api")
 app.include_router(schedule_queries_router, prefix="/api")
 app.include_router(workspace_router, prefix="/api")

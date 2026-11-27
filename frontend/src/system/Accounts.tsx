@@ -108,6 +108,20 @@ export function PasswordForm({
     </form>
   );
 }
+export function registrationPayload(form: FormData, strict: boolean) {
+  const email = String(form.get("email") ?? "");
+  const course_group_id = Number(form.get("course_group_id"));
+  if (!strict) return { email, display_name: form.get("display_name"), course_group_id };
+  const patronymic = String(form.get("patronymic") ?? "").trim();
+  return {
+    email,
+    course_group_id,
+    surname: String(form.get("surname") ?? "").trim(),
+    given_name: String(form.get("given_name") ?? "").trim(),
+    ...(patronymic ? { patronymic } : {}),
+  };
+}
+
 export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Account) => void; onSessionEnded: () => void; authLink: { token: string; verification: boolean } }) {
   const { t } = useLanguage();
   const passwordId = useId();
@@ -117,12 +131,21 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
   const [message, setMessage] = useState("");
   const [groups, setGroups] = useState<{ id: number; group_code: string }[]>([]);
   const [groupsLoading, setGroupsLoading] = useState(false);
+  const [strictStudentGroups, setStrictStudentGroups] = useState<boolean | null>(null);
   useEffect(() => {
     if (mode !== "register") return;
     let active = true;
     setGroupsLoading(true);
-    void api<{ id: number; group_code: string }[]>("/auth/registration-groups")
-      .then(items => { if (active) setGroups(items); })
+    void Promise.all([
+      api<{ id: number; group_code: string }[]>("/auth/registration-groups"),
+      api<{ strict_student_groups: boolean }>("/auth/registration-config"),
+    ])
+      .then(([items, config]) => {
+        if (active) {
+          setGroups(items);
+          setStrictStudentGroups(config.strict_student_groups);
+        }
+      })
       .catch(failure => { if (active) setError(failure); })
       .finally(() => { if (active) setGroupsLoading(false); });
     return () => { active = false; };
@@ -143,6 +166,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
     setLoginFieldsEditable(false);
     clearAuthLink();
     setMode(next);
+    if (next === "register") setStrictStudentGroups(null);
     setMessage("");
     setError(null);
   }
@@ -156,7 +180,8 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
         submittedForm.reset();
         setMessage("reset_requested");
       } else if (mode === "register") {
-        await api("/auth/register", "POST", { email: f.get("email"), display_name: f.get("display_name"), course_group_id: Number(f.get("course_group_id")) });
+        if (strictStudentGroups === null) return;
+        await api("/auth/register", "POST", registrationPayload(f, strictStudentGroups));
         submittedForm.reset();
         setMessage("registration_requested");
       } else {
@@ -200,7 +225,9 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                   ? verification ? "verificationDescription" : "authNewPasswordDescription"
                   : mode === "login"
                     ? "authSignInDescription"
-                    : mode === "register" ? "registrationDescription" : "authResetDescription",
+                    : mode === "register"
+                      ? strictStudentGroups ? "rosterRegistrationDescription" : "registrationDescription"
+                      : "authResetDescription",
               )}
             </p>
           </header>
@@ -226,14 +253,19 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
             </div>
           ) : (
             <form key={mode} ref={form} onSubmit={submit} className="form-stack" aria-busy={busy} autoComplete="off">
-              {mode === "register" && <label>{t("registrationName")}<input name="display_name" autoComplete="off" required maxLength={150} /></label>}
-              {mode === "register" && <label>{t("course_group_id")}
-                <select name="course_group_id" required defaultValue="" disabled={groupsLoading}>
-                  <option value="" disabled>{t("registrationGroupPrompt")}</option>
+              {mode === "register" && strictStudentGroups === false && <label>{t("registrationName")}<input name="display_name" autoComplete="off" required maxLength={150} /></label>}
+              {mode === "register" && strictStudentGroups && <>
+                <label>{t("rosterSurname")}<input name="surname" autoComplete="family-name" required maxLength={100} /></label>
+                <label>{t("rosterGivenName")}<input name="given_name" autoComplete="given-name" required maxLength={100} /></label>
+                <label>{t("rosterPatronymic")}<input name="patronymic" autoComplete="additional-name" maxLength={100} /></label>
+              </>}
+              {mode === "register" && <label>{t(strictStudentGroups ? "rosterIntake" : "course_group_id")}
+                <select name="course_group_id" required defaultValue="" disabled={groupsLoading || strictStudentGroups === null}>
+                  <option value="" disabled>{t(strictStudentGroups ? "rosterSelectIntake" : "registrationGroupPrompt")}</option>
                   {groups.map(group => <option key={group.id} value={group.id}>{group.group_code}</option>)}
                 </select>
               </label>}
-              {mode === "register" && !groupsLoading && groups.length === 0 && <p role="status">{t("registrationNoGroups")}</p>}
+              {mode === "register" && !groupsLoading && strictStudentGroups !== null && groups.length === 0 && <p role="status">{t("registrationNoGroups")}</p>}
               <label>
                 {t("email")}
                 <input
@@ -263,7 +295,7 @@ export function SignIn({ onLogin, onSessionEnded, authLink }: { onLogin: (a: Acc
                 </div>
               )}
               <ErrorBox error={error} />
-              <button disabled={busy || (mode === "register" && (groupsLoading || groups.length === 0))}>
+              <button disabled={busy || (mode === "register" && (groupsLoading || strictStudentGroups === null || groups.length === 0))}>
                 {t(
                   busy
                     ? mode === "login" ? "authSigningIn" : "authSendingReset"

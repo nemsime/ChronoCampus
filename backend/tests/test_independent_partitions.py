@@ -76,7 +76,7 @@ def test_independent_partitions_catalog_generation_capacity_and_student_projecti
         "groups",
         dict(
             major_id=campus["major"].id,
-            admission_year=2025,
+            admission_year=campus["group"].admission_year,
             group_code="QA-3P5L",
             capacity=60,
         ),

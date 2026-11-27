@@ -71,6 +71,26 @@ test('draft review uses compatible groups and the selected term workload only', 
   assert.equal(draftInputs(data, '2', [10]).unconfirmed, true);
 });
 
+test('draft review identifies missing PE in the selected term and study form', () => {
+  const reviewData = {
+    terms: [{ id: 1, calendar_id: 1, starts_on: '2027-02-08', confirmed: true }],
+    calendars: [{ id: 1, study_form: 'remote', confirmed: true, academic_hours_per_lesson: 2 }],
+    majors: [{ id: 1, study_form: 'remote' }],
+    groups: [
+      { id: 10, major_id: 1, admission_year: 2026 },
+      { id: 11, major_id: 1, admission_year: 2025 },
+      { id: 12, major_id: 1, admission_year: 2024 },
+      { id: 13, major_id: 1, admission_year: 2026 },
+    ],
+    workloads: [
+      { term_id: 1, course_group_id: 10, semester_hours: 64, lesson_type: 'pe' },
+      { term_id: 2, course_group_id: 11, semester_hours: 64, lesson_type: 'pe' },
+    ],
+  };
+  const review = draftInputs(reviewData, '1', [10, 11, 12]);
+  assert.deepEqual(review.missingPeGroups.map(group => group.id), [11]);
+});
+
 test('lost generation response retries the same saved draft and idempotency key without publishing', async () => {
   const intent = {}, calls = [], created = [];
   const request = async (url, method, body) => {

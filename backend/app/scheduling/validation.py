@@ -9,6 +9,7 @@ from app.calendar.rules import (
     lesson_slot,
     overlaps,
     pe_workload_errors,
+    requires_pe,
     resource_rule_matches,
     rule_applies_to_resource,
     teaching_dates,
@@ -144,7 +145,15 @@ def validate(snapshot: dict, assignments: list[dict]) -> dict:
         issues.append({"code": "workload_empty"})
     if not snapshot["term"]["confirmed"] or not snapshot["calendar"]["confirmed"]:
         issues.append({"code": "configuration_unconfirmed"})
-    for group_id in {c["course_group_id"] for c in components.values()}:
+    pe_groups = {
+        c["course_group_id"] for c in components.values() if c["lesson_type"] == "pe"
+    }
+    workload_groups = {c["course_group_id"] for c in components.values()}
+    selected_groups = set(snapshot.get("cohort_ids", workload_groups))
+    for group_id in sorted(selected_groups - pe_groups):
+        if requires_pe(groups[group_id], snapshot["term"]):
+            issues.append({"code": "pe_missing", "course_group_id": group_id})
+    for group_id in workload_groups:
         form = groups[group_id].get("study_form")
         if form is not None and form != snapshot["calendar"]["study_form"]:
             issues.append({"code": "study_form_mismatch", "course_group_id": group_id})

@@ -6,7 +6,7 @@ University timetable generation with manual corrections and explicit publication
 
 Includes local accounts and roles, administrative catalogs, configurable calendars, semester workloads, automatic generation, pins, conflict checking, publication, personal dated notes, and private feedback. Interface languages: Russian, Armenian, English. Full-time and part-time calendars are independent.
 
-Roles are administrator, lecturer, student and dean. Deans review published timetables and drafts within an optional faculty scope and submit non-binding suggestions; administrators triage and apply changes manually. All roles have a shared weekly grid alongside the list view. Schema `0007_dean_suggestions` is required for these features; apply Alembic migrations before starting the updated backend.
+Roles are administrator, lecturer, student and dean. Deans review published timetables and drafts within an optional faculty scope and submit non-binding suggestions. Administrators triage and apply changes manually. All roles have a shared weekly grid alongside the list view. Before starting the updated backend, apply Alembic migrations through `head`.
 
 ## Documentation for the team
 
@@ -20,6 +20,7 @@ Roles are administrator, lecturer, student and dean. Deans review published time
 | [Diagnostics / Диагностика](docs/observability.md) | Find errors, inspect generation history and audit, and configure optional Grafana/Prometheus. |
 | [Demo data provenance](docs/demo-data.md) | Understand which data came from Word structure and which are fictional. |
 | [Verification record](docs/verification.md) | Find actual test results, acceptance evidence, and remaining limitations. |
+| [Production readiness](docs/production-readiness.md) | See the remaining work and acceptance checks for a real university rollout. |
 | [Full manual checking guide](docs/manual-checking-guide.md) | Prepare test data and check every current feature, permissions, publication, recovery, and mobile/language behavior. |
 | [Manual merge checklist](docs/manual-merge-check.md) | Recheck the fixes and end-to-end behavior before merging. |
 | [Contribution workflow](skills/repo-workflow/SKILL.md) | Work on a branch, verify integration, and prepare authorized remote publication. |

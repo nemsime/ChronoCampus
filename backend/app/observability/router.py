@@ -3,8 +3,12 @@ import os
 import threading
 import time
 from collections import OrderedDict
+from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
@@ -25,52 +29,30 @@ _client_reports = OrderedDict()
 _client_lock = threading.Lock()
 
 
-def database_probe(db):
-    begin = time.perf_counter()
-    try:
-        db.execute(text("SELECT 1"))
-        db.execute(
-            select(
-                m.GenerationRun.progress,
-                m.GenerationRun.request_id,
-                m.GenerationRun.actor_id,
-                m.GenerationRun.started_at,
-                m.GenerationRun.updated_at,
-                m.GenerationRun.comparison_hash,
-            ).limit(1)
-        )
-        db.execute(select(m.AuditEvent).limit(1))
-        db.execute(select(m.Account.email_verified, m.Account.faculty_id).limit(1))
-        db.execute(select(m.ScheduleSuggestion.status).limit(1))
-        db.execute(select(m.SuggestionComment.id).limit(1))
-        db.execute(select(m.ResetToken.purpose, m.ResetToken.token_hash).limit(1))
-        from app.jobs.models import (
-            BackgroundJob,
-            JobAttempt,
-            MailOutbox,
-            QueueAdmission,
-            WorkerHeartbeat,
-        )
+@lru_cache(maxsize=1)
+def expected_schema_revision() -> str:
+    config = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
+    head = ScriptDirectory.from_config(config).get_current_head()
+    if head is None:
+        raise RuntimeError("Alembic migration head is missing")
+    return head
 
-        db.execute(select(m.GenerationRun.job_id).limit(1))
-        db.execute(select(BackgroundJob.protocol_version, BackgroundJob.lease_generation).limit(1))
-        db.execute(select(JobAttempt.attempt_number).limit(1))
-        db.execute(select(MailOutbox.key_id).limit(1))
-        db.execute(select(WorkerHeartbeat.last_seen_at).limit(1))
-        revision = db.get(m.DataRevision, 1)
-        admission = db.scalar(select(QueueAdmission.id).where(QueueAdmission.name == "generation"))
-        return {
-            "ready": revision is not None and admission is not None,
-            "schema": "0007_dean_suggestions",
-            "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
-        }
+
+def database_probe(db: Session):
+    expected = expected_schema_revision()
+    begin = time.perf_counter()
+    actual = None
+    try:
+        actual = db.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
     except Exception as error:
         db.rollback()
         t.exception_event("database.readiness_failed", error)
-        return {
-            "ready": False,
-            "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
-        }
+    return {
+        "ready": actual == expected,
+        "schema": actual,
+        "expected_schema": expected,
+        "latency_ms": round((time.perf_counter() - begin) * 1000, 2),
+    }
 
 
 @router.get("/system", dependencies=[Depends(administrator)])
